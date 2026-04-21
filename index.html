@@ -1,0 +1,3463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wonderful Citrus · PickTrace 3.0 Migration Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   Design tokens — warm, editorial, Wonderful-inspired
+   ========================================================== */
+:root {
+  --bg: #F7F3EC;
+  --bg-2: #FBF8F3;
+  --bg-3: #F1ECE2;
+  --surface: #FFFFFF;
+  --ink: #1A1D23;
+  --ink-2: #3D4148;
+  --ink-3: #6B6860;
+  --muted: #9A948A;
+  --line: #E9E3D6;
+  --line-2: #D6CFC2;
+  --citrus: #E8763A;
+  --citrus-deep: #C95D26;
+  --citrus-soft: #FBE8D8;
+  --citrus-glow: rgba(232,118,58,0.14);
+  --leaf: #4A7C59;
+  --leaf-soft: #E1EBE3;
+  --sun: #D97706;
+  --sun-soft: #FCEBD3;
+  --danger: #B23A48;
+  --danger-soft: #F8DFE2;
+  --blocked: #735785;
+  --blocked-soft: #EADFF0;
+  --info: #3E6F9A;
+  --info-soft: #E5EEF5;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(26,29,35,0.04);
+  --shadow-md: 0 4px 14px rgba(26,29,35,0.07);
+  --shadow-lg: 0 16px 40px rgba(26,29,35,0.10);
+  --ring: 0 0 0 3px rgba(232,118,58,0.22);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+input, textarea, select { font: inherit; color: inherit; }
+a { color: var(--citrus-deep); text-decoration: none; }
+a:hover { color: var(--citrus); text-decoration: underline; }
+::selection { background: var(--citrus); color: white; }
+
+/* ==========================================================
+   App shell
+   ========================================================== */
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 60px 1fr;
+  grid-template-areas: "topbar topbar" "sidebar main";
+  min-height: 100vh;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  grid-area: topbar;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-mark {
+  display: inline-block;
+  height: 44px;
+  width: auto;
+  color: var(--citrus-deep);
+  flex-shrink: 0;
+  line-height: 0;
+  /* CSS-driven 3D-ish rock. The SVG itself is a flat vector; perspective
+     + rotateY tilts it left/right like a sign swaying on a pivot. Free
+     (no JS, no WebGL, no redraws of a 3D scene). */
+  animation: brand-rock 6s ease-in-out infinite;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.brand-mark svg {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+@keyframes brand-rock {
+  0%, 100% { transform: perspective(320px) rotateY(-22deg); }
+  50%      { transform: perspective(320px) rotateY( 22deg); }
+}
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 17px;
+  letter-spacing: -0.015em; line-height: 1;
+}
+.brand-sub {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 10px; font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-top: 4px;
+}
+.topbar-spacer { flex: 1; }
+.countdown {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: var(--radius-pill);
+  background: var(--citrus-soft); color: var(--citrus-deep);
+  font-size: 12px; font-weight: 500;
+}
+.countdown b {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: 14px; font-variant-numeric: tabular-nums;
+}
+.topbar-actions { display: flex; gap: 6px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 500;
+  transition: all 0.15s ease;
+}
+.btn-outline {
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+.btn-outline:hover { border-color: var(--citrus); color: var(--citrus-deep); background: var(--citrus-soft); }
+.btn-ghost { color: var(--ink-3); }
+.btn-ghost:hover { color: var(--citrus-deep); background: var(--citrus-soft); }
+.btn-primary {
+  background: var(--ink);
+  color: white;
+  padding: 8px 14px;
+}
+.btn-primary:hover { background: var(--citrus-deep); }
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.btn-danger:hover { background: var(--danger); color: white; }
+
+.lock-indicator {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 500;
+  background: var(--leaf-soft); color: var(--leaf);
+}
+.lock-indicator.is-locked { background: var(--sun-soft); color: var(--sun); }
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  grid-area: sidebar;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 20px 14px;
+  overflow-y: auto;
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
+}
+.sidebar-heading {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 8px 8px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; color: var(--ink-2);
+  text-align: left;
+  position: relative;
+  transition: all 0.15s ease;
+}
+.nav-link:hover { background: var(--bg-3); }
+.nav-link.is-active { background: var(--citrus-soft); color: var(--citrus-deep); }
+.nav-num {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 500;
+  color: var(--muted);
+  min-width: 22px;
+}
+.nav-link.is-active .nav-num { color: var(--citrus); }
+.nav-progress {
+  margin-left: auto;
+  font-size: 10px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-divider {
+  border-top: 1px solid var(--line);
+  margin: 16px 8px;
+}
+.sidebar-stats { padding: 0 8px; }
+.stat-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; font-size: 12px;
+}
+.stat-row .k { color: var(--ink-3); }
+.stat-row .v {
+  font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.stat-row.is-urgent .v { color: var(--danger); }
+.stat-row.is-blocked .v { color: var(--blocked); }
+.stat-row.is-complete .v { color: var(--leaf); }
+
+.tab-nav {
+  display: flex; gap: 2px;
+  padding: 4px 8px 0;
+  margin-bottom: 12px;
+}
+.tab-btn {
+  padding: 7px 10px;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-3);
+  border-radius: var(--radius-sm);
+  flex: 1;
+  transition: all 0.15s ease;
+}
+.tab-btn:hover { background: var(--bg-3); color: var(--ink-2); }
+.tab-btn.is-active {
+  background: var(--ink);
+  color: white;
+}
+
+/* ---------- Main ---------- */
+.main {
+  grid-area: main;
+  padding: 28px 32px 80px;
+  max-width: 1180px;
+}
+
+.hero {
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+.hero-kicker {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--citrus-deep);
+  padding: 4px 10px; border-radius: var(--radius-pill);
+  background: var(--citrus-soft);
+  margin-bottom: 16px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 44px; font-weight: 500;
+  line-height: 1.05; letter-spacing: -0.025em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.hero-title em {
+  color: var(--citrus-deep);
+  font-style: italic; font-weight: 400;
+}
+.hero-subtitle {
+  max-width: 640px;
+  color: var(--ink-3);
+  font-size: 15px; line-height: 1.55;
+  margin: 0;
+}
+.hero-progress {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+}
+.progress-track {
+  height: 8px;
+  background: var(--bg-3);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--citrus) 0%, var(--citrus-deep) 100%);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+.progress-label {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.progress-label .num { color: var(--citrus-deep); }
+.progress-label .sub {
+  font-family: var(--font-body); font-size: 11px;
+  font-weight: 500; color: var(--muted);
+  display: block; margin-top: 2px;
+}
+
+/* ---------- Tabs ---------- */
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.view-tab {
+  padding: 10px 16px;
+  font-size: 13px; font-weight: 500;
+  color: var(--ink-3);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  position: relative;
+  transition: all 0.15s ease;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.view-tab:hover { color: var(--ink); }
+.view-tab.is-active {
+  color: var(--citrus-deep);
+}
+.view-tab.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; left: 16px; right: 16px;
+  height: 2px;
+  background: var(--citrus);
+  border-radius: 2px 2px 0 0;
+}
+.view-tab .count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px;
+  padding: 0 5px; border-radius: var(--radius-pill);
+  background: var(--bg-3);
+  font-size: 10px; font-weight: 600;
+  color: var(--ink-3);
+}
+.view-tab.is-active .count { background: var(--citrus-soft); color: var(--citrus-deep); }
+.view-panel { display: none; }
+.view-panel.is-active { display: block; }
+
+/* ---------- Filter bar ---------- */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  flex: 1; max-width: 320px;
+  position: relative;
+}
+.search-wrap svg {
+  position: absolute; left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+.search {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+.search:focus {
+  border-color: var(--citrus);
+  outline: none;
+  box-shadow: var(--ring);
+}
+.chip-group { display: flex; gap: 4px; }
+.chip {
+  padding: 6px 11px; border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 500;
+  color: var(--ink-3);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--ink-3); color: var(--ink-2); }
+.chip.is-on {
+  background: var(--ink); color: white;
+  border-color: var(--ink);
+}
+.chip.is-on.chip-urgent { background: var(--danger); border-color: var(--danger); }
+
+/* ---------- Attention panel ---------- */
+.attention {
+  background: linear-gradient(135deg, #fff 0%, var(--citrus-soft) 100%);
+  border: 1px solid rgba(232,118,58,0.2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.attention-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.attention-title {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.attention-meta {
+  margin-left: auto;
+  font-size: 11px; color: var(--ink-3);
+}
+.attention-list {
+  display: grid; gap: 7px;
+}
+.attention-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid rgba(232,118,58,0.15);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.attention-item:hover { border-color: var(--citrus); transform: translateX(2px); }
+.attention-item .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.attention-item .dot.urgent { background: var(--danger); }
+.attention-item .dot.blocked { background: var(--blocked); }
+.attention-item .dot.due { background: var(--sun); }
+.attention-item .title { flex: 1; color: var(--ink); font-weight: 500; }
+.attention-item .meta { font-size: 11px; color: var(--muted); }
+
+/* ---------- Phase sections ---------- */
+.phase {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+.phase:hover { box-shadow: var(--shadow-sm); }
+.phase.is-open { box-shadow: var(--shadow-sm); }
+
+.phase-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease;
+}
+.phase-header:hover { background: var(--bg-2); }
+.phase-num {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  color: var(--muted);
+  min-width: 28px;
+  letter-spacing: 0.05em;
+}
+.phase-title {
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  flex: 1;
+}
+.phase-window {
+  font-size: 11px; color: var(--muted);
+  margin-left: 12px;
+  white-space: nowrap;
+}
+.phase-stats {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 11px;
+}
+.phase-stat {
+  display: flex; align-items: center; gap: 4px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.phase-stat .n { font-weight: 600; color: var(--ink); }
+.phase-stat.is-complete .n { color: var(--leaf); }
+.phase-stat.is-urgent .n { color: var(--danger); }
+.phase-ring {
+  position: relative;
+  width: 32px; height: 32px;
+  flex-shrink: 0;
+}
+.phase-ring svg { transform: rotate(-90deg); }
+.phase-ring circle { fill: none; stroke-width: 3; }
+.phase-ring .bg { stroke: var(--line); }
+.phase-ring .fg {
+  stroke: var(--citrus);
+  stroke-dasharray: var(--dash, 0 100);
+  transition: stroke-dasharray 0.4s ease;
+}
+.phase-ring .pct {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.phase-chevron {
+  color: var(--muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.phase.is-open .phase-chevron { transform: rotate(180deg); }
+
+.phase-body {
+  display: none;
+  padding: 0 20px 18px;
+  border-top: 1px solid var(--line);
+}
+.phase.is-open .phase-body { display: block; }
+
+.phase-desc {
+  padding: 14px 0;
+  font-size: 13px; color: var(--ink-3);
+  line-height: 1.55;
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 14px;
+}
+
+.group-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+.group-title:first-child { margin-top: 4px; }
+
+/* ---------- Task card ---------- */
+.task {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  background: var(--surface);
+  transition: all 0.12s ease;
+  overflow: hidden;
+}
+.task:hover { border-color: var(--line-2); }
+.task.is-urgent { border-left: 3px solid var(--danger); }
+.task.is-complete { opacity: 0.72; }
+.task.is-expanded { border-color: var(--citrus); box-shadow: 0 2px 8px rgba(232,118,58,0.08); }
+
+.task-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+}
+.task-status {
+  position: relative;
+  flex-shrink: 0;
+}
+.task-status-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.12s ease;
+}
+.task-status-btn:hover { box-shadow: var(--shadow-sm); }
+.task-status-btn::after {
+  content: ""; display: inline-block;
+  width: 0; height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid currentColor;
+  margin-left: 2px; opacity: 0.6;
+}
+.status-not_started { background: var(--bg-3); color: var(--ink-3); }
+.status-in_progress { background: var(--info-soft); color: var(--info); }
+.status-complete { background: var(--leaf-soft); color: var(--leaf); }
+.status-blocked { background: var(--blocked-soft); color: var(--blocked); }
+
+.task-status-menu {
+  position: absolute; top: calc(100% + 4px); left: 0;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  min-width: 160px;
+  z-index: 20;
+  display: none;
+}
+.task-status-menu.is-open { display: block; }
+/* When a status dropdown is open, let it escape the rounded/clipping ancestors */
+.task:has(.task-status-menu.is-open),
+.phase:has(.task-status-menu.is-open) { overflow: visible; }
+.task-status-menu button {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 12px; font-weight: 500;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+.task-status-menu button:hover { background: var(--bg-2); }
+.task-status-menu .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.task-status-menu .kbd {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.task-title {
+  font-size: 13px; font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.task.is-complete .task-title { text-decoration: line-through; color: var(--ink-3); }
+
+.task-badges {
+  display: flex; gap: 5px; align-items: center;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 10px; font-weight: 500;
+}
+.badge-urgent { background: var(--danger-soft); color: var(--danger); }
+.badge-priority { background: var(--sun-soft); color: var(--sun); }
+.badge-owner {
+  background: var(--bg-3); color: var(--ink-3);
+  max-width: 100px; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
+}
+.badge-due { background: var(--info-soft); color: var(--info); }
+.badge-due.is-overdue { background: var(--danger-soft); color: var(--danger); }
+.badge-bugs { background: var(--sun-soft); color: var(--sun); }
+.badge-bugs.has-critical { background: var(--danger-soft); color: var(--danger); }
+
+.task-chevron {
+  color: var(--muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.task.is-expanded .task-chevron { transform: rotate(180deg); }
+
+.task-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px dashed var(--line);
+  margin-top: 0;
+  padding-top: 12px;
+}
+.task.is-expanded .task-body { display: block; }
+
+.task-desc {
+  font-size: 13px; color: var(--ink-3);
+  padding: 2px 0 10px;
+  line-height: 1.55;
+}
+
+.task-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.field-label {
+  display: block;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.field-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: var(--bg-2);
+  font-size: 12px;
+  color: var(--ink);
+  transition: all 0.12s ease;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--citrus);
+  background: var(--surface);
+  box-shadow: var(--ring);
+}
+.field-input[type="date"] { font-family: var(--font-body); }
+
+.notes-area {
+  width: 100%;
+  min-height: 60px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: var(--bg-2);
+  font-size: 12px; line-height: 1.5;
+  color: var(--ink);
+  resize: vertical;
+  font-family: var(--font-body);
+  transition: all 0.12s ease;
+}
+.notes-area:focus {
+  outline: none;
+  border-color: var(--citrus);
+  background: var(--surface);
+  box-shadow: var(--ring);
+}
+
+.task-actions {
+  display: flex; gap: 6px; align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.mini-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px; font-weight: 500;
+  color: var(--ink-3);
+  transition: all 0.12s ease;
+}
+.mini-btn:hover { border-color: var(--ink-3); color: var(--ink); }
+.mini-btn.is-on {
+  background: var(--danger-soft); color: var(--danger);
+  border-color: rgba(178,58,72,0.3);
+}
+.mini-btn .count {
+  padding: 0 4px; border-radius: 3px;
+  background: var(--bg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Bug section ---------- */
+.bugs-section {
+  border-top: 1px dashed var(--line);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.bugs-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.bugs-title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+}
+.bugs-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px;
+  padding: 0 5px; border-radius: var(--radius-pill);
+  background: var(--sun-soft); color: var(--sun);
+  font-size: 10px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.bugs-count.has-critical { background: var(--danger-soft); color: var(--danger); }
+
+.bug-list { display: grid; gap: 6px; }
+.bug-item {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg-2);
+  padding: 10px 12px;
+  transition: all 0.12s ease;
+}
+.bug-item:hover { border-color: var(--line-2); }
+.bug-item.severity-critical { border-left: 3px solid var(--danger); }
+.bug-item.severity-high { border-left: 3px solid var(--sun); }
+.bug-item.severity-medium { border-left: 3px solid var(--info); }
+.bug-item.severity-low { border-left: 3px solid var(--muted); }
+.bug-item.is-resolved { opacity: 0.55; }
+.bug-item.is-resolved .bug-title { text-decoration: line-through; }
+
+.bug-row-1 {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.bug-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+.bug-severity, .bug-status-chip {
+  font-size: 9px; font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.sev-critical { background: var(--danger-soft); color: var(--danger); }
+.sev-high { background: var(--sun-soft); color: var(--sun); }
+.sev-medium { background: var(--info-soft); color: var(--info); }
+.sev-low { background: var(--bg-3); color: var(--ink-3); }
+
+.bst-open { background: var(--danger-soft); color: var(--danger); }
+.bst-in_progress { background: var(--info-soft); color: var(--info); }
+.bst-resolved { background: var(--leaf-soft); color: var(--leaf); }
+.bst-wont_fix { background: var(--bg-3); color: var(--ink-3); }
+
+.bug-meta {
+  display: flex; gap: 10px;
+  font-size: 10px; color: var(--muted);
+  flex-wrap: wrap;
+}
+.bug-meta span { display: inline-flex; align-items: center; gap: 3px; }
+.bug-body {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+.bug-item.is-open .bug-body { display: block; }
+.bug-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.bug-input {
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 11px;
+  color: var(--ink);
+}
+.bug-input:focus {
+  outline: none; border-color: var(--citrus);
+  box-shadow: 0 0 0 2px rgba(232,118,58,0.15);
+}
+.bug-textarea {
+  width: 100%; min-height: 45px;
+  padding: 7px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 11px; line-height: 1.4;
+  color: var(--ink);
+  font-family: var(--font-body);
+  resize: vertical;
+}
+.bug-textarea:focus {
+  outline: none; border-color: var(--citrus);
+  box-shadow: 0 0 0 2px rgba(232,118,58,0.15);
+}
+.bug-link-row {
+  display: flex; gap: 6px; margin-top: 6px;
+  flex-wrap: wrap;
+}
+.bug-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px; font-weight: 500;
+}
+.bug-link.zendesk { background: #E9F0FC; color: #1F6FD6; }
+.bug-link.airtable { background: #FFF4D6; color: #8B6408; }
+.bug-link:hover { text-decoration: none; opacity: 0.85; }
+
+.bug-add-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 11px;
+  border: 1px dashed var(--line-2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 11px; font-weight: 500;
+  width: 100%;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.bug-add-btn:hover {
+  border-color: var(--sun);
+  color: var(--sun);
+  background: var(--sun-soft);
+}
+
+/* ---------- Calendar view ---------- */
+.calendar-wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.cal-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 18px;
+}
+.cal-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  flex: 1;
+}
+.cal-nav {
+  display: flex; align-items: center; gap: 4px;
+}
+.cal-nav-btn {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  background: var(--bg-2);
+  color: var(--ink-2);
+  transition: all 0.12s ease;
+}
+.cal-nav-btn:hover { background: var(--citrus-soft); color: var(--citrus-deep); }
+.cal-today-btn {
+  padding: 7px 12px;
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: all 0.12s ease;
+}
+.cal-today-btn:hover { border-color: var(--citrus); color: var(--citrus-deep); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.cal-dow {
+  background: var(--bg-2);
+  padding: 10px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+.cal-day {
+  background: var(--surface);
+  min-height: 96px;
+  padding: 7px 8px 6px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.cal-day:hover { background: var(--bg-2); }
+.cal-day.is-other-month { background: var(--bg-3); color: var(--muted); }
+.cal-day.is-today { background: var(--citrus-soft); }
+.cal-day.is-today .cal-daynum { color: var(--citrus-deep); font-weight: 700; }
+.cal-day.is-weekend { background: #FAF7F0; }
+.cal-day.is-weekend.is-other-month { background: #EDE7D9; }
+.cal-daynum {
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.cal-events {
+  margin-top: 4px;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.cal-event {
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.cal-event.is-milestone {
+  background: var(--danger-soft); color: var(--danger);
+  font-weight: 600;
+}
+.cal-event.is-recurring {
+  background: var(--info-soft); color: var(--info);
+}
+.cal-event.is-complete { background: var(--leaf-soft); color: var(--leaf); }
+.cal-event.is-overdue { background: var(--danger-soft); color: var(--danger); }
+.cal-event-more {
+  font-size: 10px; color: var(--muted);
+  padding: 2px 5px;
+  font-weight: 500;
+}
+
+.cal-legend {
+  display: flex; gap: 16px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--ink-3);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+.legend-dot.milestone { background: var(--danger-soft); border: 1px solid var(--danger); }
+.legend-dot.task { background: var(--citrus-soft); border: 1px solid var(--citrus); }
+.legend-dot.recurring { background: var(--info-soft); border: 1px solid var(--info); }
+.legend-dot.complete { background: var(--leaf-soft); border: 1px solid var(--leaf); }
+
+.cal-upcoming {
+  margin-top: 22px;
+}
+.cal-upcoming h3 {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 600;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+.upcoming-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  margin-bottom: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.upcoming-item:hover { border-color: var(--citrus); }
+.upcoming-date {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  color: var(--citrus-deep);
+  min-width: 70px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.upcoming-title { flex: 1; color: var(--ink); font-weight: 500; }
+.upcoming-meta { font-size: 11px; color: var(--muted); }
+
+/* ---------- Bugs tab (global view) ---------- */
+.bugs-global-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.bug-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.bug-stat-num {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.bug-stat-num.is-critical { color: var(--danger); }
+.bug-stat-num.is-high { color: var(--sun); }
+.bug-stat-num.is-resolved { color: var(--leaf); }
+.bug-stat-label {
+  font-size: 11px; color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.global-bug-list {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px;
+}
+.global-bug-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 7px;
+  transition: background 0.12s ease;
+  cursor: pointer;
+}
+.global-bug-row:hover { background: var(--bg-2); }
+.global-bug-row + .global-bug-row { border-top: 1px solid var(--line); }
+.global-bug-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+.global-bug-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,29,35,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.is-open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  flex: 1;
+}
+.modal-close {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 5px;
+  color: var(--muted);
+  transition: all 0.12s ease;
+}
+.modal-close:hover { background: var(--bg-2); color: var(--ink); }
+.modal-body { padding: 18px 22px; }
+.modal-body p { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.modal-body p:last-child { margin-bottom: 0; }
+.modal-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.modal-body .field-label { margin-top: 12px; }
+.modal-body .field-label:first-child { margin-top: 0; }
+
+.security-notice {
+  display: flex; gap: 10px;
+  padding: 12px 14px;
+  background: var(--sun-soft);
+  border: 1px solid rgba(217,119,6,0.2);
+  border-radius: 7px;
+  font-size: 12px; line-height: 1.5;
+  color: var(--ink-2);
+  margin-bottom: 14px;
+}
+.security-notice svg { color: var(--sun); flex-shrink: 0; margin-top: 1px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 22px; right: 22px;
+  padding: 10px 16px;
+  background: var(--ink); color: white;
+  border-radius: 7px;
+  font-size: 12px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.22s ease;
+  pointer-events: none;
+  z-index: 300;
+}
+.toast.is-on { opacity: 1; transform: translateY(0); }
+.toast.is-warn { background: var(--danger); }
+.toast.is-success { background: var(--leaf); }
+
+/* ---------- Backup reminder ---------- */
+.backup-reminder {
+  position: fixed; bottom: 22px; left: 22px;
+  background: var(--surface);
+  border: 1px solid var(--citrus);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  max-width: 320px;
+  box-shadow: var(--shadow-lg);
+  z-index: 250;
+  display: none;
+}
+.backup-reminder.is-on { display: block; }
+.backup-reminder h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 600;
+  color: var(--ink);
+}
+.backup-reminder p {
+  margin: 0 0 10px;
+  font-size: 12px; line-height: 1.5;
+  color: var(--ink-3);
+}
+.backup-reminder-actions {
+  display: flex; gap: 6px;
+}
+
+/* ---------- Lock screen ---------- */
+.lock-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lock-screen.is-on { display: flex; }
+.lock-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 38px 40px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.lock-icon {
+  width: 56px; height: 56px;
+  margin: 0 auto 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--citrus), var(--citrus-deep));
+  border-radius: 14px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(232,118,58,0.25);
+}
+.lock-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  margin: 0 0 8px;
+  letter-spacing: -0.015em;
+}
+.lock-sub {
+  font-size: 13px; color: var(--ink-3);
+  margin: 0 0 22px;
+  line-height: 1.55;
+}
+.lock-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 7px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+.lock-input:focus {
+  outline: none; border-color: var(--citrus);
+  box-shadow: var(--ring);
+}
+.lock-error {
+  color: var(--danger);
+  font-size: 12px;
+  min-height: 18px;
+  margin-bottom: 12px;
+}
+
+.fab {
+  position: fixed; bottom: 22px; right: 22px;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  display: none;
+  align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  transition: all 0.15s ease;
+}
+.fab.is-visible { display: inline-flex; }
+.fab:hover { background: var(--citrus-deep); transform: translateY(-2px); }
+
+kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 6px;
+  background: var(--bg-3);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  min-width: 18px;
+  box-shadow: 0 1px 0 var(--line-2);
+}
+
+/* ---------- Empty states ---------- */
+.empty {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.empty-emoji { font-size: 28px; margin-bottom: 8px; display: block; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .app { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+  .sidebar { display: none; }
+  .main { padding: 20px 18px 60px; }
+  .hero-title { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<!-- shell will be rendered here -->
+</div>
+
+<div class="toast" id="toast">Saved</div>
+<div class="backup-reminder" id="backup-reminder">
+  <h4>Backup reminder</h4>
+  <p>It's been 7+ days since your last export. Consider downloading a JSON backup so your progress survives a browser reset.</p>
+  <div class="backup-reminder-actions">
+    <button class="btn btn-primary" id="backup-now">Export now</button>
+    <button class="btn btn-ghost" id="backup-dismiss">Remind me later</button>
+  </div>
+</div>
+
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2 class="lock-title">Tracker is locked</h2>
+    <p class="lock-sub">Enter your passphrase to decrypt your progress. If you forget it, there is no recovery — you'll need to reset and start fresh.</p>
+    <input type="password" class="lock-input" id="lock-input" placeholder="••••••••" autocomplete="off" />
+    <div class="lock-error" id="lock-error"></div>
+    <button class="btn btn-primary" id="lock-submit" style="width: 100%; justify-content: center; padding: 10px;">Unlock</button>
+    <div style="margin-top: 18px; font-size: 11px; color: var(--muted);">
+      <button class="btn-ghost" id="lock-reset" style="color: var(--danger); font-size: 11px;">Forgot passphrase — reset tracker</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="import-file" accept="application/json" style="display: none;" />
+<div class="modal-overlay" id="modal-overlay"></div>
+
+<script>
+/* ============================================================================
+   CONFIG
+   ============================================================================ */
+const GO_LIVE = "2026-07-13";
+const PAYROLL_FIRST = "2026-07-21";
+const STORAGE_KEY = "wonderful-pt3-tracker-v3";
+
+/* Inline SVG logo — "PLANNER" wordmark with stylized P. Kept as a string
+   so it can be injected into the topbar via innerHTML. fill colors are
+   swapped to currentColor so CSS can tint it to the site's citrus palette. */
+const LOGO_SVG = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 544" xml:space="preserve" aria-hidden="true">
+<path fill="#000000" opacity="1" stroke="none" d="M488.141968,316.296692 C486.502533,329.325989 487.667389,341.998169 487.308075,354.639679 C487.213776,357.958740 487.554565,361.280975 486.746979,364.586853 C482.833038,380.608673 469.014313,390.127838 452.282379,388.245392 C437.717072,386.606720 425.935547,373.308838 425.869019,357.708801 C425.709198,320.213074 425.812683,282.716217 425.811462,245.219833 C425.811188,236.220779 425.740967,227.220840 425.847229,218.223007 C425.914978,212.487854 426.064850,206.805939 421.025085,202.649429 C426.877747,199.274368 440.761841,200.634842 444.922729,204.716446 C448.046967,207.781174 448.396210,211.702606 448.393585,215.808792 C448.370056,252.805252 448.398743,289.801758 448.412476,326.798248 C448.415771,335.630737 448.373444,344.463654 448.457855,353.295349 C448.478333,355.438416 448.734070,357.619080 449.205750,359.709259 C450.038513,363.399261 452.563446,365.431427 456.292664,365.639160 C459.932465,365.841919 462.766388,364.296844 464.397186,360.921082 C465.433563,358.775787 465.660767,356.470398 465.653168,354.104675 C465.621643,344.272400 465.590302,334.439667 465.649597,324.607666 C465.792145,300.972229 482.827057,283.892456 506.361603,283.774445 C516.860413,283.721771 527.360046,283.809082 537.858459,283.725433 C560.382019,283.546021 579.879517,265.719513 581.658264,243.756851 C583.607544,219.688721 568.335571,198.720306 545.679749,194.425644 C541.752747,193.681229 537.790344,193.325027 533.764282,193.330078 C488.768616,193.386597 443.772827,193.374359 398.777069,193.372406 C391.958740,193.372116 392.075470,193.358109 392.380463,186.746414 C392.541016,183.265854 392.302856,179.756683 392.077484,176.271240 C391.813904,172.194763 393.527496,170.740051 397.644958,170.764542 C420.808594,170.902359 443.973511,170.831741 467.137970,170.825745 C489.802521,170.819870 512.467163,170.757401 535.131592,170.807663 C567.494324,170.879440 593.506897,190.209625 602.023071,221.413300 C609.842346,250.063354 598.159607,283.560669 569.430969,296.497070 C562.349243,299.685944 554.928467,301.346710 547.147400,301.347473 C533.815308,301.348785 520.482910,301.298279 507.151306,301.384552 C497.107300,301.449524 490.924591,306.270111 488.141968,316.296692 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M507.116760,137.283020 C509.704529,134.663666 508.492737,131.686417 508.669952,128.962082 C508.935333,124.881233 510.003754,121.369576 514.772888,121.481041 C519.160828,121.583611 521.046265,124.624641 521.282593,128.852249 C521.773193,137.625809 521.850952,137.075592 530.621338,137.841675 C537.306580,138.425659 543.075684,135.721390 549.283630,134.685425 C552.079529,134.218872 550.949463,130.430801 553.467285,129.360474 C556.189331,130.223740 555.805481,132.698120 555.859680,134.673843 C555.943237,137.722229 557.361206,138.984360 560.257019,139.671600 C602.967346,149.807983 629.041260,176.511093 636.536926,219.632675 C646.767639,278.487915 601.402649,330.360779 545.134399,330.367340 C529.639099,330.369141 514.141235,330.220123 498.650146,330.479431 C493.948883,330.558136 492.624664,328.896820 492.709808,324.410126 C492.934723,312.554169 497.583649,307.875336 509.348114,307.700592 C523.993530,307.483032 538.699646,308.840057 553.276611,306.933929 C584.500732,302.851013 609.275513,278.604614 614.531311,247.433701 C619.911987,215.522125 604.606689,184.248276 576.039978,168.944534 C564.757080,162.900055 552.602722,160.803513 539.880554,160.838348 C494.906158,160.961517 449.931274,160.912262 404.956573,160.927338 C403.123810,160.927963 401.290863,160.932327 399.458313,160.910599 C392.291809,160.825668 392.120453,160.652664 392.090729,153.656235 C392.084381,152.156723 392.075317,150.657211 392.062683,149.157745 C391.974640,138.710983 391.985870,138.810471 402.446411,137.586426 C405.501099,137.228973 408.373199,136.172012 411.630341,136.606018 C414.302948,136.962128 415.698395,134.810242 415.951538,132.126755 C416.067261,130.900146 415.608765,129.513275 416.632172,128.488403 C417.922241,128.808884 417.805664,129.756851 417.897247,130.530533 C418.741119,137.659500 418.733978,137.663940 425.718048,137.680130 C429.050323,137.687866 432.386322,137.581497 435.713867,137.706757 C438.669800,137.818008 440.056824,136.631302 439.919037,133.616531 C439.827881,131.622528 439.814423,129.611298 439.965393,127.622894 C440.239349,124.014748 441.983704,121.511978 445.860321,121.531090 C449.750519,121.550262 451.957916,123.636436 452.301880,127.667381 C453.155029,137.665359 453.191315,137.662262 463.524078,137.676956 C463.690704,137.677200 463.857300,137.677551 464.023926,137.677765 C473.994965,137.689911 474.058014,137.693802 474.669464,127.815552 C474.882111,124.380257 476.153778,121.868813 479.734650,121.493073 C483.408661,121.107567 485.683746,123.128502 486.627441,126.650238 C486.799042,127.290565 486.925079,127.950226 486.996704,128.609161 C487.976776,137.628342 487.973480,137.649094 497.245880,137.653793 C500.406891,137.655380 503.567932,137.526047 507.116760,137.283020 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M496.257141,429.313049 C496.238220,432.758942 496.203278,435.754639 496.210236,438.750244 C496.215942,441.224548 495.061005,442.338684 492.545868,442.348999 C490.052826,442.359222 488.828400,441.317902 488.832611,438.814056 C488.847137,430.159576 488.841644,421.505127 488.860931,412.850647 C488.864441,411.275146 489.143311,409.846893 491.045593,409.438019 C493.107574,408.994873 495.038239,409.006744 496.500397,410.829895 C499.519592,414.594452 502.515625,418.377533 505.540405,422.137573 C506.990540,423.940155 508.484406,425.707581 510.356873,427.972931 C512.488281,423.279816 511.351318,418.811310 511.655396,414.519775 C511.827423,412.091980 511.117035,409.246796 515.044678,409.197113 C518.972534,409.147400 519.073975,411.791962 519.059021,414.629150 C519.019653,422.118622 519.056824,429.608765 518.966614,437.097443 C518.943970,438.977142 519.577515,441.397064 516.958435,442.140656 C514.569092,442.818909 512.418518,442.280609 510.751343,440.132904 C506.374908,434.494873 501.904968,428.929474 497.186432,422.974335 C495.791779,425.071747 496.478058,427.052551 496.257141,429.313049 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M531.590576,420.031494 C531.597107,417.873169 531.483704,416.197784 531.642151,414.548584 C531.818359,412.714874 530.786316,410.305176 533.487976,409.443207 C536.223633,408.570404 538.235352,409.631256 539.940552,411.894592 C543.242310,416.277222 546.696411,420.546051 550.128784,424.828796 C550.943970,425.845886 551.922791,426.731873 553.338623,428.214783 C554.480835,423.266296 553.765869,418.837952 554.025879,414.486847 C554.175781,411.979431 553.989685,409.259125 557.742859,409.277527 C561.519714,409.296051 561.306213,411.961395 561.307617,414.508820 C561.311829,421.996094 561.372070,429.484222 561.270874,436.970093 C561.246094,438.803436 562.135376,441.280457 559.497192,442.112610 C556.830322,442.953888 554.741516,441.883270 553.007446,439.653351 C548.633362,434.028442 544.121033,428.511017 539.247681,422.431000 C537.754272,427.854126 538.665466,432.778381 538.426086,437.617798 C538.307739,440.011566 538.489807,442.376709 534.925537,442.336273 C531.295593,442.295105 531.633850,439.825562 531.622803,437.497162 C531.596069,431.840179 531.599365,426.183075 531.590576,420.031494 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M627.291138,409.241455 C633.127991,409.958832 637.145569,412.384827 638.651367,417.949310 C640.227905,423.775146 637.434753,427.826843 632.662231,431.376892 C634.923462,434.744781 637.093628,437.977051 639.520935,441.592285 C634.625916,443.088654 631.007324,442.889465 628.540100,438.353058 C627.597473,436.619934 626.290710,435.060791 625.006592,433.543671 C623.490295,431.752167 621.366577,432.096680 619.434753,432.483002 C617.259888,432.917969 617.499268,434.866119 617.396484,436.498810 C617.344360,437.326874 617.325195,438.159393 617.341736,438.988892 C617.387512,441.277222 616.288635,442.252167 614.001038,442.266327 C611.695007,442.280579 610.661682,441.286163 610.662781,439.003662 C610.667053,430.202362 610.656677,421.400970 610.606384,412.599854 C610.591309,409.957825 612.145874,409.117706 614.414856,409.106964 C618.563965,409.087311 622.713318,409.144562 627.291138,409.241455 M628.464172,416.491241 C626.151062,416.361145 623.833252,416.285706 621.525879,416.088562 C617.681091,415.760010 617.283875,418.070801 617.291992,421.108887 C617.299866,424.038727 617.880066,426.027252 621.398254,425.701630 C623.045288,425.549225 624.728210,425.741760 626.366089,425.542236 C628.632629,425.266113 630.509216,424.210022 631.285095,421.906586 C632.038574,419.669525 630.965820,418.074524 628.464172,416.491241 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M597.997437,426.939331 C596.537415,430.229309 593.784851,428.614838 591.760132,429.311005 C588.296448,430.502045 581.661072,426.114532 581.666260,432.361145 C581.671692,438.884674 588.427002,434.541504 592.012634,435.647339 C593.382141,436.069733 594.985474,435.750427 596.482056,435.740479 C598.701416,435.725769 599.873291,436.780762 599.981140,439.025116 C600.093018,441.355713 598.937500,442.348541 596.684692,442.343872 C590.198181,442.330444 583.711487,442.317413 577.225342,442.365326 C574.654053,442.384308 573.688354,441.102417 573.697388,438.666718 C573.729431,430.017883 573.748596,421.368591 573.682251,412.720123 C573.662476,410.141327 574.917908,409.079834 577.305603,409.091919 C583.624268,409.123932 589.943176,409.166382 596.261047,409.264313 C598.371643,409.297028 599.732117,410.286865 599.742798,412.598541 C599.754333,415.086884 598.491211,416.208038 596.030762,416.187775 C592.371948,416.157593 588.712341,416.228729 585.053589,416.196777 C582.762512,416.176758 581.188110,416.759125 581.161072,419.498077 C581.132080,422.438751 582.962280,422.637390 585.146545,422.538391 C588.134399,422.402924 591.122437,422.216888 594.111816,422.185699 C596.946960,422.156128 598.507263,423.462952 597.997437,426.939331 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M375.027802,430.967957 C375.025513,424.808258 375.054840,419.143463 375.014648,413.479218 C374.992676,410.382874 376.361145,408.850891 379.540436,408.962402 C384.190399,409.125519 388.871094,408.501221 393.485626,409.553131 C399.978333,411.033203 403.341278,415.134644 403.296021,421.542206 C403.253143,427.615540 399.396545,431.967926 392.934570,433.065613 C391.305206,433.342377 389.598999,433.434418 387.954010,433.298309 C384.040924,432.974487 381.867188,434.220764 382.343689,438.569824 C382.600525,440.914215 381.675537,442.298004 378.984314,442.350677 C376.149658,442.406128 375.053253,441.087921 375.053436,438.460480 C375.053589,436.128021 375.038696,433.795593 375.027802,430.967957 M389.213104,416.047852 C386.439758,416.479584 382.520752,414.568787 382.329041,419.946564 C382.106659,426.185120 382.938446,427.137115 389.369049,426.643372 C392.610229,426.394501 395.410553,425.402130 395.646759,421.616150 C395.882355,417.840546 393.537750,416.305542 389.213104,416.047852 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M451.865753,423.945770 C453.778076,419.647552 455.427032,415.640656 457.339447,411.763733 C459.077026,408.241302 464.689270,407.517670 466.258087,410.820679 C471.016235,420.838715 475.323059,431.071136 479.944733,441.534912 C475.650543,442.837891 472.442657,443.267059 470.849762,438.746918 C470.202789,436.911011 468.793488,436.283508 466.943665,436.299713 C463.614929,436.328857 460.285461,436.331573 456.956879,436.295349 C455.097443,436.275146 453.665924,436.964996 452.995331,438.722656 C451.425537,442.837128 448.460785,442.949799 444.106201,441.577850 C446.702454,435.681854 449.209778,429.987762 451.865753,423.945770 M462.626862,419.859100 C458.762268,421.864380 459.116333,425.804474 457.346741,429.657745 C460.869781,429.422241 463.449615,430.202698 466.035858,428.885742 C465.573883,425.657471 464.039734,423.088501 462.626862,419.859100 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M420.310913,432.500916 C420.441315,435.522827 422.253479,435.687683 424.203278,435.688538 C427.368042,435.689911 430.534332,435.777863 433.697083,435.704102 C436.445587,435.639984 437.679321,436.921417 437.626923,439.604950 C437.576263,442.196930 435.820129,442.398407 433.838287,442.396545 C428.008331,442.391113 422.177307,442.362335 416.348877,442.465179 C413.780670,442.510468 412.764587,441.424500 412.781464,438.899506 C412.839417,430.238281 412.832458,421.576233 412.787018,412.914856 C412.774139,410.457397 413.763397,409.175842 416.300446,409.165131 C418.952759,409.153961 420.284698,410.301910 420.264862,413.069885 C420.219513,419.399048 420.277496,425.729004 420.310913,432.500916 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M488.037842,239.997681 C487.527039,238.705414 487.126617,237.742279 487.129761,236.780487 C487.182739,220.704453 485.343384,223.300308 500.764313,223.033051 C501.259918,223.024460 501.821625,222.940720 502.243134,223.132492 C508.065186,225.781204 504.378296,230.934570 505.146210,234.882370 C505.595947,237.194519 506.243622,240.728577 502.120667,240.919571 C497.528137,241.132309 492.870911,241.835617 488.037842,239.997681 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M491.353546,250.918945 C492.149628,250.895584 492.482880,250.887756 492.816162,250.886154 C506.026642,250.822372 507.399170,252.503784 505.246796,265.804199 C504.968994,267.520721 504.343689,268.765259 502.577362,268.818207 C498.419159,268.942780 494.255524,268.903107 490.094269,268.887848 C489.618317,268.886108 488.961212,268.768616 488.695557,268.449127 C485.289673,264.353210 487.605347,259.521271 487.087982,255.045670 C486.792877,252.493011 488.144470,250.939606 491.353546,250.918945 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M416.891541,266.445190 C414.351532,268.806580 402.437500,269.813324 400.329193,268.259827 C399.126709,267.373810 399.071869,266.037018 398.957367,264.699677 C397.820099,251.419693 400.051453,249.329163 413.415863,250.861649 C415.875336,251.143677 417.031433,252.202164 417.032227,254.592346 C417.033508,258.396362 417.001434,262.200378 416.891541,266.445190 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M414.397339,223.339478 C416.992798,225.692429 418.106537,237.607880 416.336456,239.757782 C415.528473,240.739182 414.342712,240.834351 413.179962,240.992966 C400.149475,242.770477 398.324036,240.988693 399.046844,227.675385 C399.214203,224.593506 400.299561,223.034042 403.494690,223.126297 C406.981812,223.227036 410.472260,223.212708 414.397339,223.339478 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M533.200317,223.962479 C535.011414,228.766296 534.095276,233.433304 534.220154,238.048859 C534.269470,239.875778 533.065247,240.701279 531.387634,240.905594 C530.564758,241.005814 529.730103,241.018173 528.899963,241.048279 C515.880188,241.520386 513.320923,238.214859 516.593811,225.387268 C517.091736,223.435806 518.382812,223.091934 519.908264,223.128326 C524.214172,223.231125 528.558105,222.601044 533.200317,223.962479 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M563.296631,264.757812 C563.020691,266.160095 563.025635,267.349915 562.434021,267.976440 C561.073486,269.417328 547.811279,269.477539 546.344543,268.242737 C545.501038,267.532532 545.291077,266.557556 545.313721,265.546265 C545.343506,264.215668 545.410217,262.877686 545.588867,261.560181 C546.048279,258.171875 543.816650,253.294464 546.743347,251.674194 C550.834839,249.409073 556.176575,250.794403 560.981506,250.998688 C562.879272,251.079376 563.256470,252.675674 563.267151,254.290787 C563.289246,257.623657 563.294434,260.956635 563.296631,264.757812 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M516.609985,257.369904 C515.867065,252.498932 517.481018,250.679138 522.227112,250.775055 C536.769897,251.068970 534.072998,249.444153 534.325562,262.515747 C534.449463,268.930939 534.273254,269.009735 528.033386,269.023682 C516.626160,269.049164 516.626160,269.049164 516.609985,257.369904 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M459.171204,252.523712 C464.102631,249.796677 469.649658,249.745255 473.846375,251.376129 C479.155579,253.439346 475.451874,259.551788 476.228790,263.809906 C476.590240,265.790955 476.860748,268.500702 473.768738,268.871735 C469.825409,269.344879 465.839905,269.338898 461.895203,268.678284 C459.453522,268.269379 458.718231,266.527405 458.742279,264.332275 C458.783905,260.531342 458.884644,256.731049 459.171204,252.523712 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M476.320251,231.078247 C476.308197,241.634354 476.312195,241.513596 465.632446,241.161102 C460.970673,241.007233 458.793396,239.336548 458.722656,234.362579 C458.570801,223.690750 463.366760,220.070755 473.827698,223.439621 C477.835938,224.730438 475.734802,228.128235 476.320251,231.078247 z"/>
+<path fill="#000000" opacity="1" stroke="none" d="M563.272522,236.765778 C563.323181,239.349487 562.555054,240.877136 560.228882,240.942627 C556.406738,241.050232 552.580383,241.084534 548.757080,241.039581 C546.797668,241.016571 545.613708,239.902084 545.697083,237.890244 C545.887756,233.288879 543.654114,227.411346 546.671997,224.430679 C549.687195,221.452667 555.527405,223.921188 560.122742,223.700653 C562.485291,223.587280 563.230042,225.226059 563.243408,227.314194 C563.262512,230.308182 563.269104,233.302231 563.272522,236.765778 z"/>
+</svg>`.replace(/fill="#000000"/g, 'fill="currentColor"');
+const UI_KEY = "wonderful-pt3-ui-v3";
+const LOCK_KEY = "wonderful-pt3-lock-v3";
+const BACKUP_KEY = "wonderful-pt3-last-backup-v3";
+
+/* ============================================================================
+   PHASES & TASKS
+   Includes everything from original SOP + new info from April 15 meeting:
+   - NPT Scripts inventory (Rogelio harvesting + Rosa nursery/farming)
+   - Reporting Time Pay 4022 wiring
+   - Rogelio vs Rosa ownership split
+   - Backfill rules, scheduling rules
+   ============================================================================ */
+const PHASES = [
+  {
+    id: "p0", num: "00", title: "Discovery & Requirements",
+    window: "Complete · Feb 2026",
+    desc: "Foundation work that preceded this tracker. Left visible so new team members can see what was already agreed to.",
+    groups: [
+      { id: "discovery", title: "Pre-Work", tasks: [
+        { id: "d-1", title: "Initial requirements gathering with Wonderful", desc: "FLC model, daily billing cadence, legacy feature inventory.", defaultStatus: "complete" },
+        { id: "d-2", title: "Legacy feature inventory documented", defaultStatus: "complete" },
+        { id: "d-3", title: "Feature gap analysis produced", defaultStatus: "complete" },
+        { id: "d-4", title: "Monthly Progress Check cadence established with Wonderful", defaultStatus: "complete" },
+        { id: "d-5", title: "Stakeholders identified: Rogelio (Harvesting) + Rosa (Farming & Nursery)", desc: "Both must be involved in future research calls. Both run scripts themselves in legacy, along with their FLCs.", defaultStatus: "complete" }
+      ]}
+    ]
+  },
+  {
+    id: "p1", num: "01", title: "Feature Development — Core",
+    window: "Feb – Jun 2026",
+    desc: "The six tracked workstreams from the Monthly Progress Check deck. These are PickTrace product features being built.",
+    groups: [
+      { id: "track-a", title: "Tracked workstreams", tasks: [
+        { id: "f-sb", title: "Scanning Barcodes", desc: "Actions easier than field selections (fields tied to schedules). Requires new BE + mobile dev. Dev expected to start April." },
+        { id: "f-dob", title: "DoB Update for Hiring", desc: "Understanding implications of removing DoB requirement. Dev expected to start April. Wonderful wants DoB removed from in-field hiring." },
+        { id: "f-bp", title: "Bulk Actions: Break Penalty Premium", desc: "Released.", defaultStatus: "complete" },
+        { id: "f-bl", title: "Bulk Actions: Add Break / Lunch", desc: "Planning." },
+        { id: "f-nb", title: "Bulk Actions: NPT Bulk Actions", desc: "Discovery. Wonderful wants to retain manual-trigger control for harvesting; Rosa wants schedule-triggered for nursery." },
+        { id: "f-qc", title: "QC Tracking & Reporting", desc: "Standalone QC app, additional tracked variables, photos on records (future). Dev starts late March.", priority: "priority" },
+        { id: "f-rep", title: "Reporting Templates & Recreation", desc: "Wonderful has custom calculated fields in legacy reports. Recreation begins earlier than typical implementation. Requires data in system first." },
+        { id: "f-ukg", title: "UKG Integration", desc: "FTP integration overhaul. Needs feature flag for daily import." }
+      ]}
+    ]
+  },
+  {
+    id: "p2", num: "02", title: "Feature Development — Wonderful-Specific",
+    window: "Mar – Jun 2026",
+    desc: "Features that exist in legacy but not in 3.0 — these must be built or explicitly negotiated away with Wonderful's written consent.",
+    groups: [
+      { id: "harvest", title: "Harvesting (Rogelio)", tasks: [
+        { id: "w-ftl", title: "Follow-the-Leader crew attribution", desc: "Crew badge scanned, then follow-the-leader crew scans groups all employees. Crew ID must not appear on reports — needs 'report ignore' flag." },
+        { id: "w-bb", title: "Barcode Bin workflow — multi-scan attribution", desc: "Auto-generated barcodes, rolls don't work because they use new bins. When paying per tree with dropped fruit, they scan multiple times (e.g., 100+10+2 = 112 then employer ID) to accredit pieces." },
+        { id: "w-rescan", title: "Ability to scan barcode to print active employees / crew summary", desc: "Preference is to scan a barcode to trigger print." },
+        { id: "w-cl", title: "Crew leader piece-accreditation ($2.25/bin)", desc: "Crew leader auto-accredited per what the crew did. Today $2.25 per bin. Mechanics need their own scanners." },
+        { id: "w-moveckpt", title: "Auto-checkpoint creation on location change", desc: "When someone scans a barcode bin at a different location, auto-create a new checkpoint (timecard) for that employee indicating a move." },
+        { id: "w-pickup", title: "Pick-up multiplier (scan 2x/3x/4x to claim %)", desc: "Rare: when someone picks up where someone left off, they scan the picker-up barcode multiple times to claim that percentage of the piece." },
+        { id: "w-sg", title: "Site Groups (district-wide mayordomos)", desc: "Mayordomos in charge of districts — need a site-group layer above ranches so they can view district-wide." },
+        { id: "w-cs", title: "Crew Scheduler (range-open + block flexibility)", desc: "Leave range open in crew scheduler. Wonderful dislikes the current open-ended behavior where any employee can work in any block any ranch. Needs validation.", priority: "priority" },
+        { id: "w-lock", title: "Locking devices to contractor/employer", desc: "Must lock devices so they can only be used by one contractor." }
+      ]},
+      { id: "nursery-shop", title: "Nursery & Shop (Rosa)", tasks: [
+        { id: "n-clock", title: "Clock into Activity/Job (not Location) for Nursery", desc: "Nursery employees don't clock into location, they clock into activity/job. No 'Block' field — it's called 'Project'. They cannot change Ranch." },
+        { id: "n-scan", title: "Single-scan combined location + activity", desc: "One ADM scan writes ubicación and actividad simultaneously — critical UX requirement. Today they scan yellow barcode + white barcode; goal is single-scan." },
+        { id: "n-letters", title: "Quick letter filter instead of search bar", desc: "They use a letter-bucket filter (A, B, C...) instead of free-text search. Required for their workflow." },
+        { id: "n-overnight", title: "Overnight activity clear", desc: "Activity currently stays in system overnight and doesn't clear — allows employees to scan into the wrong job the next day. Needs overnight clear + require scan before clocking in." },
+        { id: "n-mech", title: "Mechanics' own scanner — change activity from field", desc: "Mechanics need their own scanner to track their owners and change activity from the field." },
+        { id: "n-devicelock", title: "Device lock to default site + location (house)", desc: "Employees cannot change houses; only locked for office use. Each device set to its own house; activity able to change." },
+        { id: "n-breaks", title: "Break as NPT with scan-out + scan-in", desc: "Breaks are on one kiosk and are NPT even though it's hourly work. They scan NPT to clock out, then re-scan to return. 15 min max. The 2 minutes walking from house = NPT even though it's hourly time." },
+        { id: "n-attest", title: "Same-day attestation (not previous-shift)", desc: "They do attestation BEFORE clocking out. Wonderful wants daily attestations, not previous-shift. Minor timecard changes should NOT force re-attest." },
+        { id: "n-pieces", title: "Pieces — lead-entered via their own device", desc: "Green piece job: lead tracks how many beds each employee did and enters the amount into their own device. Leads need their own scanner for price tracking." }
+      ]},
+      { id: "cross", title: "Cross-cutting", tasks: [
+        { id: "x-kiosk-locked", title: "Kiosk job/location locked per device", desc: "In-house jobs on kiosk stay the same per device (locked). Managed through office-side Devices page." },
+        { id: "x-tabbed", title: "Clock in/out as toggle tabs on same screen", desc: "Not separate screens — single screen with tab toggle." },
+        { id: "x-nolunch", title: "No automatic lunch (they don't stop)", desc: "Harvest workers don't take a lunch even if they go over 6 hours. System must not auto-insert lunch." },
+        { id: "x-live-lunch", title: "Keep live lunches (no delayed)", desc: "They want to keep live lunches." },
+        { id: "x-docs", title: "Document storage on employee profiles", desc: "Upload file into someone's org profile (arbitration agreements, meal waivers) with metadata: uploaded/created/signed/completed dates. Currently on a flash drive. Need a report for who has/hasn't signed." },
+        { id: "x-modifiers", title: "Crop modifiers / pack styles discussion", desc: "Wonderful doesn't like setting up piece rates per location. Introduce pack styles? They may not want it while working in bins. Consider open-ended piece rates.", priority: "priority" }
+      ]}
+    ]
+  },
+  {
+    id: "p3", num: "03", title: "NPT Scripts Inventory & Implementation",
+    window: "Apr – Jun 2026",
+    desc: "From the April 15 Delight Grooming call: Wonderful runs six scripts in legacy that must be supported in 3.0. Rogelio owns Harvesting scripts. Rosa owns Nursery/Farming scripts. Each script has different targeting, scheduling, and insertion-vs-extension behavior.",
+    groups: [
+      { id: "scripts-harvest", title: "Harvesting (Rogelio — manual trigger preferred)", tasks: [
+        { id: "s-r6", title: "Report 6 — Add Breaks First (before NPT)", desc: "Breaks must be added before NPT is added. Ordering matters. FLCs also run this script.", priority: "priority" },
+        { id: "s-r51", title: "Report 51 — Break Removals", desc: "For when there are break-insertion issues and they need to reverse.", priority: "priority" },
+        { id: "s-r99", title: "Report 99 — NPT Script for PW (18 minutes for carrying ladder)", desc: "Carrying a ladder = 18 minutes of NPT on piecework shifts. Due to the amount of hours involved. FLCs also run this.", priority: "priority" },
+        { id: "s-r50", title: "Report 50 — Daily Crew Timesheet report", desc: "FLCs bill Wonderful daily from this report. Cannot go live without it. See the sample workbook for exact format.", priority: "priority" }
+      ]},
+      { id: "scripts-nursery", title: "Nursery / Farming (Rosa — scheduled every Tuesday morning)", tasks: [
+        { id: "s-r19", title: "Report 19 — Break/Lunch Penalty (Nursery)", desc: "Runs for prior pay period because all timecard punches will be audited by then. FLCs also run this." },
+        { id: "s-r4", title: "Report 4 — NPT 2-min Addition (FLC Employees ONLY — Nursery)", desc: "Applies ONLY to a specific FLC whose employees are the only ones receiving 2 minutes. EXTENDS time (adds to total) — does not insert within existing hours. This distinguishes it from the harvesting NPT scripts." }
+      ]},
+      { id: "scripts-plat", title: "Platform work", tasks: [
+        { id: "sp-trigger", title: "Trigger model: manual for harvesting, schedule-override-capable for nursery", desc: "Rogelio: retain manual control. Rosa: scheduled every Tuesday morning, with ability to override when a Holiday lands on Monday (results in auditing the prior Sunday)." },
+        { id: "sp-target", title: "Script targeting: by FLC / by crew / by individual", desc: "Rosa targets by FLC (only one specific FLC gets 2-min script). Need targeting by crew, by employer, and by individual employee. Confirm definition of 'crew employee' with Rosa." },
+        { id: "sp-ext", title: "Insertion-vs-Extension toggle per script", desc: "Only Rosa's Report 4 EXTENDS time; all others INSERT within the shift. This option existed in legacy and is not yet in 3.0.", priority: "priority" },
+        { id: "sp-backfill", title: "Backfill limits: current (unpaid) pay period only", desc: "Yes to backfill, but only the current pay period that has not yet been paid. No further back." },
+        { id: "sp-meal", title: "Edge case: meal penalty interactions with NPT", desc: "Wonderful to revisit in a follow-up. Open question." },
+        { id: "sp-preset", title: "Saved filter presets + pay-period quick filter on time cards", desc: "Team alignment from April 15: approach includes crew-level config, scheduled background jobs, saved filter presets, and a pay-period quick filter." },
+        { id: "sp-jorge", title: "Schedule time with Jorge (TSS) to investigate legacy script + NPT Misc logic", desc: "Action item from April 15 meeting." }
+      ]}
+    ]
+  },
+  {
+    id: "p4", num: "04", title: "Configuration & Data Setup",
+    window: "Jun 2026",
+    desc: "DataTech payroll integration setup, ALT IDs, crop IDs, job codes, and the Reporting Time Pay wiring from image001.",
+    groups: [
+      { id: "datatech", title: "DataTech integration", tasks: [
+        { id: "c-alt", title: "Import ALT IDs for all employees", desc: "Every employee in PickTrace must have their DataTech-assigned employee number in the ALT ID field. Edit profile → add → save. Step 1 of the DataTech Import SOP.", priority: "priority" },
+        { id: "c-grower", title: "Configure Grower ID = 500", desc: "Wonderful's Grower ID in DataTech." },
+        { id: "c-crops", title: "Configure Crop IDs: Oranges 2000, Lemons 2001, Mandarins 2002, Clementines 2003, Minneola 2004, Grapefruit 2005", desc: "Verify that Cost Center = Crop ID is acceptable to Wonderful. Today in 3.0 Cost Center can be Crop ID but this needs explicit sign-off." },
+        { id: "c-jobs", title: "Configure Job codes: 4000-4023, 4050", desc: "Foreman 4000, Assistant 4001, Picking 4002, Dropping Fruit 4003, Forklift 4004, Tractor 4005, Hauling 4006, NPT-Training 4007, NPT-Switching 4008, R&R 4009, NPT-Wait 4010, Drenching 4011, Hourly Picking 4012, Reporting Time Pay 4022, NPT Misc 4020, Block Change 4021, QC 4023, Malla 4050." },
+        { id: "c-rtp", title: "Reporting Time Pay (Job 4022) — wire PHASE1/RH/OT/DT", desc: "Per the Jobs screenshot: PHASE1=4022; RH=wcRT; OT=wcRTOT; DT=wcRTDT. Site = MASTER EMPLOYEES & JOBS. Rate = 0. Required to avoid the 'letters in numbers field' error in DataTech when half-day show-up pay is paid (common on rain days).", priority: "priority" },
+        { id: "c-wage", title: "Configure Wage Types: RH, OT, DT, PW, PO, PD, SA, BO, GP", desc: "Regular Hourly / Overtime / Double-time for hourly and piecework, plus Salary, Bonus, Guaranteed Piecework." },
+        { id: "c-flag", title: "Turn on feature flag: daily import", desc: "Enable the daily import feature flag in the account config." },
+        { id: "c-map", title: "Map payroll when mapping job alt ID / site alt ID", desc: "Ability to map out-out payroll whenever you map out job alt ID, site alt ID, etc. — so it auto-flows to payroll." }
+      ]},
+      { id: "copy-legacy", title: "Copy from Legacy (one-time)", tasks: [
+        { id: "c-copy-nj", title: "Copy Nursery/Shop: Jobs, Sites, Locations", desc: "Required because Shop + Harvest go live at the same time." },
+        { id: "c-copy-h", title: "Copy Harvesting: Jobs", desc: "Harvesting uses blocks not projects, so locations are different." },
+        { id: "c-pg", title: "Pay Groups audit (Rogelio's method, not Rosa's)", desc: "Rogelio uses pay groups; Rosa doesn't. Pay groups override jobs (take the higher rate). Need to support pay-group-per-day overrides for sub-foremen scenarios.", priority: "priority" }
+      ]}
+    ]
+  },
+  {
+    id: "p5", num: "05", title: "Testing & UAT",
+    window: "Jun – early Jul 2026",
+    desc: "131 tests across 16 modules from the Test Execution Tracker. Rogelio is the primary tester for many check-in and job scenarios. Must pass before parallel payroll run.",
+    groups: [
+      { id: "uat-large", title: "Large modules (plan dedicated sessions)", tasks: [
+        { id: "t-jobs", title: "Jobs — 17 tests", desc: "Jobs create/edit/expire, site mapping, pay group interaction, piece rate config." },
+        { id: "t-ts", title: "Timesheet — 17 tests", desc: "Timecard create/edit, bulk actions, attestation, meal penalty, script behavior." },
+        { id: "t-reports", title: "Reports — 13 tests", desc: "Data Dump parity, Daily Crew Timesheet, Report 68 (payroll export), custom calculated fields." },
+        { id: "t-pg", title: "Pay Groups — 13 tests", desc: "Rate overrides, per-day overrides, device/location binding." }
+      ]},
+      { id: "uat-med", title: "Medium modules", tasks: [
+        { id: "t-sb", title: "Special Barcode — 12 tests", desc: "Barcode bins, piece attribution scans, follow-the-leader." },
+        { id: "t-ci", title: "PT Check-In — 9 tests", desc: "Ranch, Block, Job, clock in employee. Rogelio testing this module directly." },
+        { id: "t-scale", title: "PT Scale — 9 tests" },
+        { id: "t-ct", title: "Crop Tracker — 8 tests" },
+        { id: "t-auto", title: "Auto Email Reports — 7 tests", desc: "Daily Crew Timesheet email cadence for FLCs." }
+      ]},
+      { id: "uat-small", title: "Small modules", tasks: [
+        { id: "t-emp", title: "Employee — 6 tests", desc: "Hiring flow (remove DoB, add last 4 of SSN), ALT ID, document upload." },
+        { id: "t-dev", title: "Devices — 5 tests", desc: "Device lock settings, contractor binding." },
+        { id: "t-loc", title: "Locations — 4 tests" },
+        { id: "t-cm", title: "Crop Modifiers — 3 tests" },
+        { id: "t-lab", title: "Labor — 3 tests" },
+        { id: "t-usr", title: "Users — 3 tests" },
+        { id: "t-feat", title: "Features — 2 tests" }
+      ]},
+      { id: "uat-process", title: "Process", tasks: [
+        { id: "t-owner", title: "Assign Wonderful test owners per module", desc: "Rogelio confirmed for Check-In #1 and #2. Need owner assignments for other modules." },
+        { id: "t-daily-standup", title: "Daily test-result standup during UAT weeks", desc: "Runs during the last 2 weeks before go-live." },
+        { id: "t-bugs", title: "Bug triage cadence: daily (P0/P1), weekly (P2/P3)", desc: "Link bugs to Zendesk and Airtable via URL fields." },
+        { id: "t-signoff", title: "Written UAT sign-off from Rogelio + Rosa before go-live", desc: "Must be documented — can't go live on a verbal 'looks good.'", priority: "priority", urgent: true }
+      ]}
+    ]
+  },
+  {
+    id: "p6", num: "06", title: "Training & Change Management",
+    window: "Jul 6 – 12, 2026",
+    desc: "Week-before training for FLCs, office staff, and field leads. Short, targeted, multi-language where needed.",
+    groups: [
+      { id: "train", title: "Training deliverables", tasks: [
+        { id: "tr-flc", title: "FLC training — billing + Daily Crew Timesheet workflow", desc: "FLCs must leave training able to run Report 50 and reconcile against prior-day billing." },
+        { id: "tr-office", title: "Office staff — payroll audit workflow (weekly Data Dump)", desc: "Friday Data Dump walkthrough with at least two people from Wonderful." },
+        { id: "tr-field", title: "Field lead training — new 3.0 kiosk + scanner behaviors", desc: "Short video + one in-person session per FLC." },
+        { id: "tr-lang", title: "Spanish-language training materials", desc: "Most field staff operate in Spanish. Translate quick reference cards, error message guide, attestation screens." },
+        { id: "tr-mayor", title: "Mayordomo training — site groups + crew management", desc: "District-level mayordomos need specific training on the site-group layer." },
+        { id: "tr-mech", title: "Mechanics scanner training", desc: "Mechanics have their own scanners for activity changes from field." }
+      ]}
+    ]
+  },
+  {
+    id: "p7", num: "07", title: "Go-Live (July 13, 2026)",
+    window: "Mon Jul 13, 2026",
+    desc: "Harvest + Nursery/Shop go live together. Websites: Nursery and Shop on same site; everything else on separate sites. Full IM on-site or on-call.",
+    groups: [
+      { id: "golive", title: "Day-of", tasks: [
+        { id: "g-harvest", title: "Harvest go-live", desc: "First scans, follow-the-leader, barcode bins, district mayordomo view.", priority: "priority", urgent: true },
+        { id: "g-ns", title: "Nursery + Shop go-live (same day)", desc: "Must go live together. Same website for Nursery/Shop.", priority: "priority", urgent: true },
+        { id: "g-kiosk", title: "Kiosks physically deployed + device-locked", desc: "One singular device locked to ADM (general overhead). Each house device set to its own house." },
+        { id: "g-printer", title: "Bluetooth printer connection verified", desc: "Legacy had Bluetooth printer connection issues — test extensively before." },
+        { id: "g-wifi", title: "WiFi + sync stress test", desc: "Nursery had one time where no WiFi caused issues. Shop has sync issues that knock users out. Test both before go-live." },
+        { id: "g-oncall", title: "24-hour on-call rotation for IM team", desc: "Monday through Thursday minimum. Go-live week is no-vacation week." },
+        { id: "g-war-room", title: "War-room channel (Slack)", desc: "Dedicated channel with Wonderful IT + IM team + product. Respond in minutes not hours." }
+      ]}
+    ]
+  },
+  {
+    id: "p8", num: "08", title: "First Payroll Run — Parallel (July 21)",
+    window: "Tue Jul 21, 2026",
+    desc: "First DataTech payroll import from 3.0. Must reconcile against parallel legacy run. Any dollar-variance outside tolerance = back to investigation before paying.",
+    groups: [
+      { id: "payroll", title: "Parallel run checklist", tasks: [
+        { id: "pay-pick", title: "Pick 1 crew for trial run (per DataTech SOP Step 4)", desc: "Start small. Full period of timecards and crop records reviewed for accuracy." },
+        { id: "pay-alt", title: "Verify every employee has ALT ID", desc: "Re-check before download." },
+        { id: "pay-68", title: "Download Report 68 from 3.0", desc: "Payroll import file." },
+        { id: "pay-import", title: "Import Report 68 to DataTech", desc: "Payroll Menu → Daily Payroll Entry → Import Data. Use 'Filename to Import' field." },
+        { id: "pay-review", title: "Review import for accuracy (line-by-line)", desc: "First run gets checked line-by-line. No exceptions." },
+        { id: "pay-recon", title: "Reconcile 3.0 output vs legacy parallel run", desc: "Any dollar-variance outside tolerance = don't pay from 3.0 yet. Investigate first.", priority: "priority", urgent: true },
+        { id: "pay-scale", title: "If reconciled: roll out to remaining crews", desc: "Step 5 of DataTech SOP." },
+        { id: "pay-friday", title: "Friday audit Data Dump (range: all contractors, combined)", desc: "Weekly. This is the lawsuit-driven report. Exact format and all fields must match legacy output. Rogelio downloads and combines weekly.", priority: "priority" }
+      ]}
+    ]
+  },
+  {
+    id: "p9", num: "09", title: "Hypercare & Post-Go-Live",
+    window: "Jul 13 – Aug 15, 2026",
+    desc: "First 4 weeks of hypercare — daily Wonderful check-ins. After week 4, shift to weekly cadence if stable.",
+    groups: [
+      { id: "hyper", title: "Hypercare", tasks: [
+        { id: "hc-daily", title: "Daily Wonderful sync (weeks 1-4)", desc: "15 minutes max. Pending issues, resolved issues, new ones from overnight field use." },
+        { id: "hc-bugs", title: "Bug triage: P0 same-day, P1 within 48 hours", desc: "Everything tracked in Zendesk + mirrored here with Zendesk URL." },
+        { id: "hc-weekly", title: "Weekly payroll audit meeting w/ Rogelio", desc: "Fridays. Review Data Dump variance. Each week catches a class of bug." },
+        { id: "hc-nursery-script", title: "Monitor Rosa's scheduled Tuesday script run", desc: "Every Tuesday morning for first 4 weeks. Confirm Holiday-on-Monday override works when it occurs." },
+        { id: "hc-handoff", title: "Handoff to account management (end of week 4)", desc: "IM team stays available for P0/P1, AM owns weekly cadence going forward." }
+      ]}
+    ]
+  }
+];
+
+/* ============================================================================
+   MILESTONES (shown on calendar)
+   ============================================================================ */
+const MILESTONES = [
+  { date: "2026-04-15", title: "Delight Grooming call", type: "meeting", desc: "Wonderful Citrus NPT scripts review with Rosa + Rogelio" },
+  { date: "2026-05-01", title: "Feature dev mid-point", type: "milestone", desc: "Track A + Track B should be 50% through dev" },
+  { date: "2026-06-01", title: "Config freeze begins", type: "milestone", desc: "DataTech codes, ALT IDs, crop/job configuration locked" },
+  { date: "2026-06-15", title: "UAT starts", type: "milestone", desc: "131 tests across 16 modules begin" },
+  { date: "2026-07-06", title: "Training week begins", type: "milestone", desc: "FLC, office, field lead, mayordomo training" },
+  { date: "2026-07-10", title: "Final UAT sign-off from Rogelio + Rosa", type: "milestone", desc: "Written sign-off required before go-live" },
+  { date: "2026-07-13", title: "🚀 GO LIVE — Harvest + Nursery + Shop", type: "critical", desc: "All three go live simultaneously" },
+  { date: "2026-07-21", title: "🧾 First DataTech payroll run (parallel)", type: "critical", desc: "Reconcile 3.0 vs legacy. Pick 1 crew first." },
+  { date: "2026-08-15", title: "Hypercare ends → AM handoff", type: "milestone", desc: "IM team still on-call for P0/P1" }
+];
+
+/* Recurring events (weekly cadence items) */
+const RECURRING = [
+  { dayOfWeek: 2, title: "Rosa's Nursery script run", desc: "Scheduled every Tuesday morning for prior pay period", startDate: "2026-07-14", endDate: "2026-08-31" },
+  { dayOfWeek: 5, title: "Friday Data Dump audit", desc: "Weekly payroll audit — all contractors combined", startDate: "2026-07-17", endDate: "2026-12-31" }
+];
+
+/* ============================================================================
+   TASK INDEX (lookup)
+   ============================================================================ */
+const TASK_INDEX = {};
+PHASES.forEach(p => p.groups.forEach(g => g.tasks.forEach(t => {
+  TASK_INDEX[t.id] = { ...t, phaseId: p.id, groupId: g.id };
+})));
+
+const TOTAL_TASKS = Object.keys(TASK_INDEX).length;
+
+/* ============================================================================
+   STATE
+   ============================================================================ */
+let STATE = {};
+let UI = {};
+let LOCKED = false;
+let PASSPHRASE = null;
+
+function defaultTaskState(t) {
+  return {
+    status: t.defaultStatus || "not_started",
+    urgent: t.urgent || false,
+    priority: t.priority || null,
+    notes: "",
+    owner: "",
+    dueDate: "",
+    updated: null,
+    bugs: []
+  };
+}
+
+function hydrateState(raw) {
+  const out = raw || {};
+  Object.values(TASK_INDEX).forEach(t => {
+    if (!out[t.id]) out[t.id] = defaultTaskState(t);
+    else {
+      const d = defaultTaskState(t);
+      for (const k of Object.keys(d)) if (!(k in out[t.id])) out[t.id][k] = d[k];
+    }
+  });
+  return out;
+}
+
+function defaultUI() {
+  return {
+    view: "tasks",
+    openPhases: { p1: true },
+    openTasks: {},
+    openBugs: {},
+    activeNavPhase: null,
+    statusFilter: "all",
+    urgentOnly: false,
+    search: "",
+    calMonth: ym(new Date())
+  };
+}
+
+/* ============================================================================
+   ENCRYPTION (Web Crypto: PBKDF2 + AES-GCM)
+   ============================================================================ */
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+
+function buf2b64(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b642buf(b64) { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); }
+
+async function deriveKey(passphrase, salt) {
+  const material = await crypto.subtle.importKey("raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 250000, hash: "SHA-256" },
+    material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptPayload(plaintext, passphrase) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(passphrase, salt);
+  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(plaintext));
+  return { v: 1, salt: buf2b64(salt), iv: buf2b64(iv), data: buf2b64(ciphertext) };
+}
+
+async function decryptPayload(payload, passphrase) {
+  const salt = b642buf(payload.salt);
+  const iv = b642buf(payload.iv);
+  const ciphertext = b642buf(payload.data);
+  const key = await deriveKey(passphrase, salt);
+  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  return dec.decode(plaintext);
+}
+
+/* ============================================================================
+   STORAGE LAYER
+   ============================================================================ */
+function getLockConfig() {
+  try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || { enabled: false }; }
+  catch { return { enabled: false }; }
+}
+function setLockConfig(cfg) { localStorage.setItem(LOCK_KEY, JSON.stringify(cfg)); }
+
+async function saveState() {
+  const json = JSON.stringify(STATE);
+  const lockCfg = getLockConfig();
+  if (lockCfg.enabled && PASSPHRASE) {
+    const payload = await encryptPayload(json, PASSPHRASE);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ encrypted: true, payload }));
+  } else {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ encrypted: false, data: json }));
+  }
+}
+
+async function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return hydrateState({});
+    const wrapped = JSON.parse(raw);
+    if (wrapped.encrypted) {
+      if (!PASSPHRASE) throw new Error("locked");
+      const json = await decryptPayload(wrapped.payload, PASSPHRASE);
+      return hydrateState(JSON.parse(json));
+    }
+    return hydrateState(JSON.parse(wrapped.data || raw));
+  } catch (e) {
+    if (e.message === "locked") throw e;
+    console.warn("State load failed, starting fresh", e);
+    return hydrateState({});
+  }
+}
+
+function saveUI() { localStorage.setItem(UI_KEY, JSON.stringify(UI)); }
+function loadUI() {
+  try { return { ...defaultUI(), ...JSON.parse(localStorage.getItem(UI_KEY) || "{}") }; }
+  catch { return defaultUI(); }
+}
+
+/* ============================================================================
+   UTILITIES
+   ============================================================================ */
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const h = (tag, attrs = {}, children = []) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") el.className = v;
+    else if (k === "html") el.innerHTML = v;
+    else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+    else if (k === "data") Object.entries(v).forEach(([dk, dv]) => el.dataset[dk] = dv);
+    else if (v === true) el.setAttribute(k, "");
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  const kids = Array.isArray(children) ? children : [children];
+  kids.forEach(c => {
+    if (c == null || c === false) return;
+    if (typeof c === "string" || typeof c === "number") el.appendChild(document.createTextNode(String(c)));
+    else el.appendChild(c);
+  });
+  return el;
+};
+
+function daysUntil(dateStr) {
+  const target = new Date(dateStr + "T00:00:00");
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.round((target - now) / (1000 * 60 * 60 * 24));
+}
+
+/* Local (non-UTC) date formatters. toISOString() converts to UTC which
+   silently shifts the date by a day for most US timezones — these keep
+   calendar cells, due dates, and exported events aligned to the user's
+   wall clock. */
+function ymd(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function ym(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return "";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+function fmtDateShort(dateStr) {
+  if (!dateStr) return "";
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function uid() { return "b_" + Math.random().toString(36).slice(2, 10); }
+
+const STATUS_LABELS = {
+  not_started: "Not started",
+  in_progress: "In progress",
+  complete: "Complete",
+  blocked: "Blocked"
+};
+const STATUS_DOT_CLASS = {
+  not_started: "not_started", in_progress: "in_progress",
+  complete: "complete", blocked: "blocked"
+};
+const SEVERITY_LABELS = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
+const BUG_STATUS_LABELS = { open: "Open", in_progress: "In progress", resolved: "Resolved", wont_fix: "Won't fix" };
+
+/* ============================================================================
+   COMPUTED STATS
+   ============================================================================ */
+function phaseStats(phase) {
+  let total = 0, complete = 0, urgent = 0, inProgress = 0, blocked = 0, bugs = 0;
+  phase.groups.forEach(g => g.tasks.forEach(t => {
+    total++;
+    const s = STATE[t.id];
+    if (!s) return;
+    if (s.status === "complete") complete++;
+    if (s.status === "in_progress") inProgress++;
+    if (s.status === "blocked") blocked++;
+    if (s.urgent) urgent++;
+    bugs += (s.bugs || []).filter(b => b.status === "open" || b.status === "in_progress").length;
+  }));
+  const pct = total ? Math.round((complete / total) * 100) : 0;
+  return { total, complete, urgent, inProgress, blocked, bugs, pct };
+}
+
+function globalStats() {
+  let total = 0, complete = 0, urgent = 0, blocked = 0, bugsOpen = 0, bugsCritical = 0, bugsResolved = 0, bugsHigh = 0;
+  Object.entries(STATE).forEach(([id, s]) => {
+    total++;
+    if (s.status === "complete") complete++;
+    if (s.urgent) urgent++;
+    if (s.status === "blocked") blocked++;
+    (s.bugs || []).forEach(b => {
+      if (b.status === "resolved") bugsResolved++;
+      else if (b.status === "open" || b.status === "in_progress") {
+        bugsOpen++;
+        if (b.severity === "critical") bugsCritical++;
+        if (b.severity === "high") bugsHigh++;
+      }
+    });
+  });
+  return { total, complete, urgent, blocked, bugsOpen, bugsCritical, bugsResolved, bugsHigh, pct: total ? Math.round((complete / total) * 100) : 0 };
+}
+
+function allBugsWithContext() {
+  const bugs = [];
+  Object.entries(STATE).forEach(([tid, s]) => {
+    (s.bugs || []).forEach(b => {
+      bugs.push({ ...b, taskId: tid, taskTitle: TASK_INDEX[tid]?.title || tid });
+    });
+  });
+  return bugs;
+}
+
+function eventsOnDate(dateStr) {
+  const events = [];
+  MILESTONES.forEach(m => {
+    if (m.date === dateStr) events.push({ ...m, kind: "milestone" });
+  });
+  Object.entries(STATE).forEach(([tid, s]) => {
+    if (s.dueDate === dateStr) {
+      const t = TASK_INDEX[tid];
+      events.push({
+        title: t.title, taskId: tid,
+        kind: "task", complete: s.status === "complete", urgent: s.urgent
+      });
+    }
+  });
+  const d = new Date(dateStr + "T00:00:00");
+  const dow = d.getDay();
+  RECURRING.forEach(r => {
+    if (r.dayOfWeek === dow && dateStr >= r.startDate && dateStr <= r.endDate) {
+      events.push({ title: r.title, desc: r.desc, kind: "recurring" });
+    }
+  });
+  return events;
+}
+
+function attentionItems() {
+  const items = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+  Object.entries(STATE).forEach(([tid, s]) => {
+    const t = TASK_INDEX[tid];
+    if (!t) return;
+    if (s.status === "complete") return;
+    if (s.urgent) items.push({ tid, kind: "urgent", label: "Urgent" });
+    else if (s.status === "blocked") items.push({ tid, kind: "blocked", label: "Blocked" });
+    else if (s.dueDate) {
+      const due = new Date(s.dueDate + "T00:00:00");
+      const diff = Math.round((due - now) / (86400000));
+      if (diff < 0) items.push({ tid, kind: "urgent", label: `Overdue ${Math.abs(diff)}d` });
+      else if (diff <= 3) items.push({ tid, kind: "due", label: `Due in ${diff}d` });
+    }
+    // P0 bugs
+    const crit = (s.bugs || []).filter(b => b.severity === "critical" && b.status !== "resolved" && b.status !== "wont_fix").length;
+    if (crit > 0) items.push({ tid, kind: "urgent", label: `${crit} critical bug${crit > 1 ? "s" : ""}` });
+  });
+  // Sort: urgent first, then blocked, then due
+  const order = { urgent: 0, blocked: 1, due: 2 };
+  items.sort((a, b) => order[a.kind] - order[b.kind]);
+  return items;
+}
+
+/* ============================================================================
+   ICON HELPERS (inline SVG)
+   ============================================================================ */
+const ICONS = {
+  check: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  chevron: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  search: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+  download: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  upload: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+  cal: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  bug: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l-3 2M5 7l3 2M19 13h-3M8 13H5M19 19l-3-2M5 19l3-2M12 2v4"/></svg>',
+  lock: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  unlock: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
+  settings: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  help: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  plus: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  x: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  chevLeft: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevRight: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  zendesk: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M11 7v10l-9 0zM11 4a4.5 4.5 0 0 1-9 0zM13 17V7l9 0zM13 20a4.5 4.5 0 0 1 9 0z"/></svg>',
+  airtable: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4L3 8l9 4 9-4zM3 10v6l9 4v-6zM13 20l9-4v-6l-9 4z"/></svg>',
+  alert: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  fire: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+  up: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>'
+};
+
+/* ============================================================================
+   TOAST
+   ============================================================================ */
+let toastTimer = null;
+function toast(msg, kind = "") {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast is-on" + (kind ? " is-" + kind : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("is-on"), 2200);
+}
+
+/* ============================================================================
+   SHELL RENDERING
+   ============================================================================ */
+function renderShell() {
+  const app = $("#app");
+  app.innerHTML = "";
+
+  // ---- Topbar
+  const cd = daysUntil(GO_LIVE);
+  const lockCfg = getLockConfig();
+  const lockOn = lockCfg.enabled;
+
+  const topbar = h("header", { class: "topbar" }, [
+    h("div", { class: "brand" }, [
+      h("span", {
+        class: "brand-mark",
+        html: LOGO_SVG,
+        role: "img",
+        "aria-label": "Wonderful Planner logo"
+      }),
+      h("div", {}, [
+        h("div", { class: "brand-text" }, "Wonderful · PickTrace 3.0"),
+        h("div", { class: "brand-sub" }, "Migration Tracker")
+      ])
+    ]),
+    h("div", { class: "topbar-spacer" }),
+    h("div", { class: "countdown", title: "Days to Go-Live (July 13, 2026)" }, [
+      h("span", {}, cd > 0 ? "Go-live in" : (cd === 0 ? "🚀" : "Live +")),
+      h("b", {}, cd > 0 ? `${cd} days` : (cd === 0 ? "TODAY" : `${Math.abs(cd)}d`))
+    ]),
+    h("div", { class: "topbar-actions" }, [
+      h("button", { class: "btn btn-ghost", title: "Help (?)",
+        onclick: openHelp, html: ICONS.help + '<span style="font-size:11px;margin-left:2px;">Help</span>' }),
+      h("button", { class: "btn btn-outline", onclick: () => $("#import-file").click(),
+        html: ICONS.upload + "<span>Import</span>" }),
+      h("button", { class: "btn btn-outline", onclick: exportJSON,
+        html: ICONS.download + "<span>Export JSON</span>" }),
+      h("button", { class: "btn btn-outline", onclick: openSettings,
+        html: ICONS.settings + "<span>" + (lockOn ? "Encrypted" : "Settings") + "</span>" })
+    ])
+  ]);
+
+  // ---- Sidebar
+  const sidebar = h("aside", { class: "sidebar" }, []);
+  sidebar.appendChild(h("div", { class: "tab-nav" }, [
+    h("button", {
+      class: "tab-btn" + (UI.view === "tasks" ? " is-active" : ""),
+      onclick: () => setView("tasks")
+    }, "Tasks"),
+    h("button", {
+      class: "tab-btn" + (UI.view === "calendar" ? " is-active" : ""),
+      onclick: () => setView("calendar")
+    }, "Calendar"),
+    h("button", {
+      class: "tab-btn" + (UI.view === "bugs" ? " is-active" : ""),
+      onclick: () => setView("bugs")
+    }, "Bugs")
+  ]));
+
+  sidebar.appendChild(h("div", { class: "sidebar-heading" }, "Phases"));
+  PHASES.forEach(p => {
+    const st = phaseStats(p);
+    const link = h("button", {
+      class: "nav-link" + (UI.view === "tasks" && UI.activeNavPhase === p.id ? " is-active" : ""),
+      onclick: () => {
+        UI.view = "tasks";
+        UI.openPhases[p.id] = true;
+        UI.activeNavPhase = p.id;
+        saveUI();
+        renderShell();
+        setTimeout(() => {
+          const el = document.getElementById("phase-" + p.id);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 50);
+      }
+    }, [
+      h("span", { class: "nav-num" }, p.num),
+      h("span", {}, p.title),
+      h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
+    ]);
+    sidebar.appendChild(link);
+  });
+
+  const gs = globalStats();
+  sidebar.appendChild(h("div", { class: "sidebar-divider" }));
+  sidebar.appendChild(h("div", { class: "sidebar-heading" }, "Summary"));
+  sidebar.appendChild(h("div", { class: "sidebar-stats" }, [
+    h("div", { class: "stat-row" }, [
+      h("span", { class: "k" }, "Tasks complete"),
+      h("span", { class: "v" }, `${gs.complete}/${gs.total}`)
+    ]),
+    h("div", { class: "stat-row is-complete" }, [
+      h("span", { class: "k" }, "Progress"),
+      h("span", { class: "v" }, `${gs.pct}%`)
+    ]),
+    h("div", { class: "stat-row is-urgent" }, [
+      h("span", { class: "k" }, "Urgent"),
+      h("span", { class: "v" }, gs.urgent)
+    ]),
+    h("div", { class: "stat-row is-blocked" }, [
+      h("span", { class: "k" }, "Blocked"),
+      h("span", { class: "v" }, gs.blocked)
+    ]),
+    h("div", { class: "stat-row" }, [
+      h("span", { class: "k" }, "Open bugs"),
+      h("span", { class: "v" }, gs.bugsOpen)
+    ])
+  ]));
+
+  if (lockOn) {
+    sidebar.appendChild(h("div", { class: "sidebar-divider" }));
+    sidebar.appendChild(h("div", { class: "lock-indicator", style: "margin: 0 8px;" }, [
+      h("span", { html: ICONS.lock }),
+      h("span", {}, "Encrypted at rest")
+    ]));
+  }
+
+  // ---- Main
+  const main = h("main", { class: "main", id: "main" });
+
+  app.appendChild(topbar);
+  app.appendChild(sidebar);
+  app.appendChild(main);
+
+  renderMain();
+}
+
+/* ============================================================================
+   MAIN VIEW ROUTER
+   ============================================================================ */
+function renderMain() {
+  const main = $("#main");
+  main.innerHTML = "";
+
+  // Hero (shared)
+  const gs = globalStats();
+  main.appendChild(h("section", { class: "hero" }, [
+    h("div", { class: "hero-kicker" }, "Internal Working Document"),
+    h("h1", { class: "hero-title", html: `Wonderful Citrus <em>PickTrace&nbsp;3.0</em><br/>Migration Tracker` }),
+    h("p", { class: "hero-subtitle" }, "Track every phase, task, milestone, and bug on the path to July 13 go-live. Harvest, Nursery, and Shop migrate simultaneously. Rogelio owns Harvesting; Rosa owns Farming & Nursery."),
+    h("div", { class: "hero-progress" }, [
+      h("div", { class: "progress-track" }, [
+        h("div", { class: "progress-fill", style: `width: ${gs.pct}%` })
+      ]),
+      h("div", { class: "progress-label" }, [
+        h("span", { class: "num" }, gs.pct + "%"),
+        h("span", { class: "sub" }, `${gs.complete} of ${gs.total} tasks`)
+      ])
+    ])
+  ]));
+
+  // View tabs
+  main.appendChild(h("nav", { class: "view-tabs" }, [
+    h("button", {
+      class: "view-tab" + (UI.view === "tasks" ? " is-active" : ""),
+      onclick: () => setView("tasks")
+    }, [h("span", {}, "Tasks"), h("span", { class: "count" }, gs.total)]),
+    h("button", {
+      class: "view-tab" + (UI.view === "calendar" ? " is-active" : ""),
+      onclick: () => setView("calendar")
+    }, [h("span", {}, "Calendar"), h("span", { class: "count" }, MILESTONES.length)]),
+    h("button", {
+      class: "view-tab" + (UI.view === "bugs" ? " is-active" : ""),
+      onclick: () => setView("bugs")
+    }, [h("span", {}, "Bugs"), h("span", { class: "count" }, gs.bugsOpen)])
+  ]));
+
+  if (UI.view === "tasks") renderTasksView(main);
+  else if (UI.view === "calendar") renderCalendarView(main);
+  else if (UI.view === "bugs") renderBugsView(main);
+}
+
+function setView(v) {
+  UI.view = v;
+  saveUI();
+  renderShell();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================================================
+   TASKS VIEW
+   ============================================================================ */
+function renderTasksView(main) {
+  // Filter bar
+  const filter = h("div", { class: "filter-bar" }, [
+    h("div", { class: "search-wrap" }, [
+      h("span", { html: ICONS.search }),
+      h("input", {
+        class: "search", id: "search-input",
+        placeholder: "Search tasks, notes, owners…",
+        value: UI.search || "",
+        oninput: (e) => { UI.search = e.target.value; saveUI(); renderPhaseList(); }
+      })
+    ]),
+    h("div", { class: "chip-group" }, [
+      h("button", {
+        class: "chip" + (UI.statusFilter === "all" ? " is-on" : ""),
+        onclick: () => { UI.statusFilter = "all"; saveUI(); renderPhaseList(); }
+      }, "All"),
+      h("button", {
+        class: "chip" + (UI.statusFilter === "in_progress" ? " is-on" : ""),
+        onclick: () => { UI.statusFilter = "in_progress"; saveUI(); renderPhaseList(); }
+      }, "Active"),
+      h("button", {
+        class: "chip" + (UI.statusFilter === "not_started" ? " is-on" : ""),
+        onclick: () => { UI.statusFilter = "not_started"; saveUI(); renderPhaseList(); }
+      }, "Not started"),
+      h("button", {
+        class: "chip" + (UI.statusFilter === "blocked" ? " is-on" : ""),
+        onclick: () => { UI.statusFilter = "blocked"; saveUI(); renderPhaseList(); }
+      }, "Blocked"),
+      h("button", {
+        class: "chip" + (UI.statusFilter === "complete" ? " is-on" : ""),
+        onclick: () => { UI.statusFilter = "complete"; saveUI(); renderPhaseList(); }
+      }, "Complete")
+    ]),
+    h("button", {
+      class: "chip chip-urgent" + (UI.urgentOnly ? " is-on" : ""),
+      onclick: () => { UI.urgentOnly = !UI.urgentOnly; saveUI(); renderPhaseList(); }
+    }, "🔥 Urgent only")
+  ]);
+  main.appendChild(filter);
+
+  // Attention panel
+  const att = attentionItems();
+  if (att.length > 0) {
+    const panel = h("div", { class: "attention" }, [
+      h("div", { class: "attention-header" }, [
+        h("div", { html: ICONS.alert, style: "color: var(--citrus-deep);" }),
+        h("div", { class: "attention-title" }, "Needs Attention"),
+        h("div", { class: "attention-meta" }, `${att.length} item${att.length > 1 ? "s" : ""}`)
+      ]),
+      h("div", { class: "attention-list" }, att.slice(0, 8).map(item => {
+        const t = TASK_INDEX[item.tid];
+        return h("div", {
+          class: "attention-item",
+          onclick: () => jumpToTask(item.tid)
+        }, [
+          h("span", { class: "dot " + item.kind }),
+          h("span", { class: "title" }, t.title),
+          h("span", { class: "meta" }, item.label)
+        ]);
+      }))
+    ]);
+    main.appendChild(panel);
+  }
+
+  // Phase list container
+  const list = h("div", { id: "phase-list" });
+  main.appendChild(list);
+  renderPhaseList();
+}
+
+function renderPhaseList() {
+  const list = $("#phase-list");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const q = (UI.search || "").toLowerCase().trim();
+  const matchesFilter = (t) => {
+    const s = STATE[t.id];
+    if (UI.statusFilter !== "all" && s.status !== UI.statusFilter) return false;
+    if (UI.urgentOnly && !s.urgent) return false;
+    if (q) {
+      const hay = (t.title + " " + (t.desc || "") + " " + (s.notes || "") + " " + (s.owner || "")).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  };
+
+  PHASES.forEach(p => {
+    // build filtered groups for this phase
+    const visibleGroups = p.groups.map(g => ({
+      ...g,
+      tasks: g.tasks.filter(matchesFilter)
+    })).filter(g => g.tasks.length > 0);
+
+    // if filtering and nothing matches, skip
+    const isFiltering = q || UI.statusFilter !== "all" || UI.urgentOnly;
+    if (isFiltering && visibleGroups.length === 0) return;
+
+    const isOpen = UI.openPhases[p.id] || isFiltering;
+    const st = phaseStats(p);
+
+    const header = h("div", { class: "phase-header" }, [
+      h("span", { class: "phase-num" }, p.num),
+      h("div", { class: "phase-title" }, p.title),
+      h("div", { class: "phase-window" }, p.window),
+      h("div", { class: "phase-stats" }, [
+        st.urgent > 0 ? h("div", { class: "phase-stat is-urgent" }, [h("span", { class: "n" }, st.urgent), h("span", {}, "urgent")]) : null,
+        st.bugs > 0 ? h("div", { class: "phase-stat" }, [h("span", { class: "n" }, st.bugs), h("span", {}, "bugs")]) : null,
+        h("div", { class: "phase-stat is-complete" }, [
+          h("span", { class: "n" }, `${st.complete}/${st.total}`),
+          h("span", {}, "done")
+        ])
+      ]),
+      h("div", { class: "phase-ring", style: `--dash: ${st.pct} ${100 - st.pct}` }, [
+        h("span", { class: "pct" }, st.pct + "%"),
+        (() => {
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("width", "32"); svg.setAttribute("height", "32"); svg.setAttribute("viewBox", "0 0 32 32");
+          const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          bg.setAttribute("cx","16"); bg.setAttribute("cy","16"); bg.setAttribute("r","14");
+          bg.setAttribute("class","bg");
+          svg.appendChild(bg);
+          const fg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          fg.setAttribute("cx","16"); fg.setAttribute("cy","16"); fg.setAttribute("r","14");
+          fg.setAttribute("pathLength","100"); fg.setAttribute("class","fg");
+          svg.appendChild(fg);
+          return svg;
+        })()
+      ]),
+      h("div", { class: "phase-chevron", html: ICONS.chevron })
+    ]);
+    header.addEventListener("click", () => {
+      UI.openPhases[p.id] = !UI.openPhases[p.id];
+      saveUI();
+      renderPhaseList();
+    });
+
+    const body = h("div", { class: "phase-body" });
+    body.appendChild(h("div", { class: "phase-desc" }, p.desc));
+    visibleGroups.forEach(g => {
+      body.appendChild(h("div", { class: "group-title" }, g.title));
+      g.tasks.forEach(t => body.appendChild(renderTask(t)));
+    });
+
+    const phase = h("section", {
+      class: "phase" + (isOpen ? " is-open" : ""),
+      id: "phase-" + p.id
+    }, [header, body]);
+    list.appendChild(phase);
+  });
+
+  if (list.children.length === 0) {
+    list.appendChild(h("div", { class: "empty" }, [
+      h("span", { class: "empty-emoji" }, "🔍"),
+      h("div", {}, "No tasks match your filters")
+    ]));
+  }
+}
+
+/* ============================================================================
+   TASK CARD
+   ============================================================================ */
+function renderTask(t) {
+  const s = STATE[t.id];
+  const isExpanded = UI.openTasks[t.id];
+  const bugs = s.bugs || [];
+  const openBugs = bugs.filter(b => b.status === "open" || b.status === "in_progress");
+  const criticalBugs = openBugs.filter(b => b.severity === "critical").length;
+  const overdue = s.dueDate && s.status !== "complete" && new Date(s.dueDate + "T00:00:00") < new Date(new Date().toDateString());
+
+  const header = h("div", { class: "task-header" }, [
+    // Status button
+    h("div", { class: "task-status" }, [
+      h("button", {
+        class: "task-status-btn status-" + s.status,
+        onclick: (e) => { e.stopPropagation(); toggleStatusMenu(t.id); }
+      }, STATUS_LABELS[s.status]),
+      renderStatusMenu(t.id)
+    ]),
+    h("div", { class: "task-title" }, t.title),
+    h("div", { class: "task-badges" }, [
+      s.urgent ? h("span", { class: "badge badge-urgent", html: ICONS.fire + "<span>Urgent</span>" }) : null,
+      s.priority === "priority" ? h("span", { class: "badge badge-priority" }, "★ Priority") : null,
+      s.owner ? h("span", { class: "badge badge-owner", title: "Owner: " + s.owner }, "@" + s.owner) : null,
+      s.dueDate ? h("span", {
+        class: "badge badge-due" + (overdue ? " is-overdue" : ""),
+        title: overdue ? "Overdue" : "Due " + fmtDate(s.dueDate)
+      }, (overdue ? "⚠ " : "") + fmtDateShort(s.dueDate)) : null,
+      openBugs.length > 0 ? h("span", {
+        class: "badge badge-bugs" + (criticalBugs > 0 ? " has-critical" : "")
+      }, openBugs.length + " bug" + (openBugs.length > 1 ? "s" : "")) : null
+    ].filter(Boolean)),
+    h("div", { class: "task-chevron", html: ICONS.chevron })
+  ]);
+  header.addEventListener("click", (e) => {
+    if (e.target.closest(".task-status-menu") || e.target.closest(".task-status-btn")) return;
+    UI.openTasks[t.id] = !UI.openTasks[t.id];
+    saveUI();
+    renderPhaseList();
+  });
+
+  const task = h("div", {
+    class: "task" +
+      (s.urgent ? " is-urgent" : "") +
+      (s.status === "complete" ? " is-complete" : "") +
+      (isExpanded ? " is-expanded" : ""),
+    id: "task-" + t.id
+  }, [header]);
+
+  if (isExpanded) {
+    const body = h("div", { class: "task-body" });
+    if (t.desc) body.appendChild(h("div", { class: "task-desc" }, t.desc));
+
+    // Editable fields
+    body.appendChild(h("div", { class: "task-fields" }, [
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Owner"),
+        h("input", {
+          class: "field-input", type: "text",
+          value: s.owner || "", placeholder: "Unassigned",
+          onchange: (e) => updateTaskField(t.id, "owner", e.target.value)
+        })
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Due date"),
+        h("input", {
+          class: "field-input", type: "date",
+          value: s.dueDate || "",
+          onchange: (e) => updateTaskField(t.id, "dueDate", e.target.value)
+        })
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Last updated"),
+        h("div", { style: "font-size:11px;color:var(--muted);padding:7px 0;" },
+          s.updated ? new Date(s.updated).toLocaleString() : "Never")
+      ])
+    ]));
+
+    body.appendChild(h("label", { class: "field-label" }, "Notes"));
+    body.appendChild(h("textarea", {
+      class: "notes-area", placeholder: "Progress notes, blockers, decisions, links…",
+      value: s.notes || "",
+      onchange: (e) => updateTaskField(t.id, "notes", e.target.value)
+    }));
+
+    body.appendChild(h("div", { class: "task-actions" }, [
+      h("button", {
+        class: "mini-btn" + (s.urgent ? " is-on" : ""),
+        onclick: () => toggleUrgent(t.id)
+      }, [
+        h("span", { html: ICONS.fire }),
+        h("span", {}, s.urgent ? "Unmark urgent" : "Mark urgent")
+      ])
+    ]));
+
+    // Bugs section
+    body.appendChild(renderBugsForTask(t.id));
+    task.appendChild(body);
+  }
+
+  return task;
+}
+
+function renderStatusMenu(taskId) {
+  const menu = h("div", { class: "task-status-menu" + (UI.statusMenu === taskId ? " is-open" : "") });
+  const options = [
+    { k: "not_started", label: "Not started", dot: "not_started" },
+    { k: "in_progress", label: "In progress", dot: "in_progress" },
+    { k: "complete", label: "Complete", dot: "complete" },
+    { k: "blocked", label: "Blocked", dot: "blocked" }
+  ];
+  options.forEach((o, i) => {
+    menu.appendChild(h("button", {
+      onclick: (e) => { e.stopPropagation(); setStatus(taskId, o.k); }
+    }, [
+      h("span", { class: "dot status-" + o.dot,
+        style: `background: var(--${o.k === "complete" ? "leaf" : o.k === "in_progress" ? "info" : o.k === "blocked" ? "blocked" : "muted"})` }),
+      h("span", {}, o.label),
+      h("kbd", { class: "kbd" }, String(i + 1))
+    ]));
+  });
+  return menu;
+}
+
+/* ============================================================================
+   BUGS (per-task)
+   ============================================================================ */
+function renderBugsForTask(taskId) {
+  const s = STATE[taskId];
+  const bugs = s.bugs || [];
+  const openBugs = bugs.filter(b => b.status === "open" || b.status === "in_progress").length;
+  const criticalBugs = bugs.filter(b => b.severity === "critical" && b.status !== "resolved" && b.status !== "wont_fix").length;
+
+  const section = h("div", { class: "bugs-section" }, [
+    h("div", { class: "bugs-header" }, [
+      h("div", { html: ICONS.bug, style: "color: var(--sun);" }),
+      h("div", { class: "bugs-title" }, "Bugs"),
+      bugs.length > 0 ? h("div", {
+        class: "bugs-count" + (criticalBugs > 0 ? " has-critical" : "")
+      }, `${openBugs} open / ${bugs.length} total`) : null
+    ].filter(Boolean))
+  ]);
+
+  const bugList = h("div", { class: "bug-list" });
+  bugs.forEach(bug => bugList.appendChild(renderBug(taskId, bug)));
+  section.appendChild(bugList);
+
+  section.appendChild(h("button", {
+    class: "bug-add-btn",
+    onclick: () => addBug(taskId)
+  }, [h("span", { html: ICONS.plus }), h("span", {}, "Add bug")]));
+
+  return section;
+}
+
+function renderBug(taskId, bug) {
+  const isOpen = UI.openBugs[bug.id];
+  const header = h("div", {}, [
+    h("div", { class: "bug-row-1" }, [
+      h("div", { class: "bug-title" }, bug.title || "(Untitled bug)"),
+      h("span", { class: "bug-severity sev-" + bug.severity }, SEVERITY_LABELS[bug.severity]),
+      h("span", { class: "bug-status-chip bst-" + bug.status }, BUG_STATUS_LABELS[bug.status])
+    ]),
+    h("div", { class: "bug-meta" }, [
+      bug.reporter ? h("span", {}, "@" + bug.reporter) : null,
+      bug.reportedDate ? h("span", {}, fmtDateShort(bug.reportedDate)) : null,
+      bug.zendeskUrl ? h("span", {}, "Zendesk linked") : null,
+      bug.airtableUrl ? h("span", {}, "Airtable linked") : null
+    ].filter(Boolean))
+  ]);
+  header.addEventListener("click", () => {
+    UI.openBugs[bug.id] = !UI.openBugs[bug.id];
+    saveUI();
+    renderPhaseList();
+  });
+
+  const bugEl = h("div", {
+    class: "bug-item severity-" + bug.severity +
+      (bug.status === "resolved" ? " is-resolved" : "") +
+      (isOpen ? " is-open" : "")
+  }, [header]);
+
+  if (isOpen) {
+    const body = h("div", { class: "bug-body" });
+
+    body.appendChild(h("label", { class: "field-label" }, "Title"));
+    body.appendChild(h("input", {
+      class: "bug-input", type: "text", value: bug.title || "",
+      placeholder: "Brief description of the bug",
+      onchange: (e) => updateBug(taskId, bug.id, "title", e.target.value)
+    }));
+
+    body.appendChild(h("div", { class: "bug-fields", style: "margin-top:10px;" }, [
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Severity"),
+        h("select", {
+          class: "bug-input",
+          onchange: (e) => updateBug(taskId, bug.id, "severity", e.target.value)
+        }, [
+          ["critical", "Critical — blocks go-live"],
+          ["high", "High — major feature broken"],
+          ["medium", "Medium — workaround exists"],
+          ["low", "Low — cosmetic / minor"]
+        ].map(([v, l]) => {
+          const opt = h("option", { value: v }, l);
+          if (bug.severity === v) opt.selected = true;
+          return opt;
+        }))
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Status"),
+        h("select", {
+          class: "bug-input",
+          onchange: (e) => updateBug(taskId, bug.id, "status", e.target.value)
+        }, Object.entries(BUG_STATUS_LABELS).map(([v, l]) => {
+          const opt = h("option", { value: v }, l);
+          if (bug.status === v) opt.selected = true;
+          return opt;
+        }))
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Reporter"),
+        h("input", {
+          class: "bug-input", type: "text",
+          value: bug.reporter || "", placeholder: "Who found it",
+          onchange: (e) => updateBug(taskId, bug.id, "reporter", e.target.value)
+        })
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Reported"),
+        h("input", {
+          class: "bug-input", type: "date",
+          value: bug.reportedDate || "",
+          onchange: (e) => updateBug(taskId, bug.id, "reportedDate", e.target.value)
+        })
+      ])
+    ]));
+
+    body.appendChild(h("label", { class: "field-label" }, "Steps to reproduce"));
+    body.appendChild(h("textarea", {
+      class: "bug-textarea",
+      placeholder: "1. Open … 2. Click … 3. Observe …",
+      value: bug.stepsToReproduce || "",
+      onchange: (e) => updateBug(taskId, bug.id, "stepsToReproduce", e.target.value)
+    }));
+
+    body.appendChild(h("label", { class: "field-label" }, "Resolution"));
+    body.appendChild(h("textarea", {
+      class: "bug-textarea",
+      placeholder: "Fix applied / workaround / root cause",
+      value: bug.resolution || "",
+      onchange: (e) => updateBug(taskId, bug.id, "resolution", e.target.value)
+    }));
+
+    body.appendChild(h("div", { class: "bug-fields", style: "margin-top:10px;" }, [
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Zendesk ticket URL"),
+        h("input", {
+          class: "bug-input", type: "url",
+          placeholder: "https://yourco.zendesk.com/agent/tickets/1234",
+          value: bug.zendeskUrl || "",
+          onchange: (e) => updateBug(taskId, bug.id, "zendeskUrl", e.target.value)
+        })
+      ]),
+      h("div", {}, [
+        h("label", { class: "field-label" }, "Airtable record URL"),
+        h("input", {
+          class: "bug-input", type: "url",
+          placeholder: "https://airtable.com/appXXX/tblXXX/…",
+          value: bug.airtableUrl || "",
+          onchange: (e) => updateBug(taskId, bug.id, "airtableUrl", e.target.value)
+        })
+      ])
+    ]));
+
+    if (bug.zendeskUrl || bug.airtableUrl) {
+      const links = h("div", { class: "bug-link-row" });
+      if (bug.zendeskUrl) links.appendChild(h("a", {
+        class: "bug-link zendesk", href: bug.zendeskUrl, target: "_blank",
+        html: ICONS.zendesk + "<span>Zendesk →</span>"
+      }));
+      if (bug.airtableUrl) links.appendChild(h("a", {
+        class: "bug-link airtable", href: bug.airtableUrl, target: "_blank",
+        html: ICONS.airtable + "<span>Airtable →</span>"
+      }));
+      body.appendChild(links);
+    }
+
+    body.appendChild(h("div", { style: "margin-top: 12px; text-align: right;" }, [
+      h("button", {
+        class: "mini-btn", style: "color: var(--danger); border-color: rgba(178,58,72,0.3);",
+        onclick: () => deleteBug(taskId, bug.id)
+      }, [h("span", { html: ICONS.x }), h("span", {}, "Delete bug")])
+    ]));
+
+    bugEl.appendChild(body);
+  }
+
+  return bugEl;
+}
+
+/* ============================================================================
+   CALENDAR VIEW
+   ============================================================================ */
+function renderCalendarView(main) {
+  const [yearStr, monthStr] = UI.calMonth.split("-");
+  const year = parseInt(yearStr, 10);
+  const month = parseInt(monthStr, 10) - 1;
+  const monthDate = new Date(year, month, 1);
+  const monthName = monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const wrap = h("div", { class: "calendar-wrap" });
+
+  // Header
+  wrap.appendChild(h("div", { class: "cal-header" }, [
+    h("div", { class: "cal-title" }, monthName),
+    h("button", {
+      class: "cal-today-btn",
+      onclick: () => { UI.calMonth = ym(new Date()); saveUI(); renderMain(); }
+    }, "Today"),
+    h("div", { class: "cal-nav" }, [
+      h("button", {
+        class: "cal-nav-btn", html: ICONS.chevLeft,
+        onclick: () => { UI.calMonth = shiftMonth(UI.calMonth, -1); saveUI(); renderMain(); }
+      }),
+      h("button", {
+        class: "cal-nav-btn", html: ICONS.chevRight,
+        onclick: () => { UI.calMonth = shiftMonth(UI.calMonth, 1); saveUI(); renderMain(); }
+      })
+    ]),
+    h("button", {
+      class: "btn btn-outline",
+      onclick: exportICS,
+      html: ICONS.download + "<span>Export .ics</span>"
+    })
+  ]));
+
+  // Grid
+  const grid = h("div", { class: "cal-grid" });
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+    grid.appendChild(h("div", { class: "cal-dow" }, d));
+  });
+
+  const firstDay = new Date(year, month, 1);
+  const firstWeekday = firstDay.getDay();
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const prevLastDay = new Date(year, month, 0).getDate();
+
+  const today = new Date();
+  const todayStr = ymd(today);
+
+  // Leading empty days (previous month)
+  for (let i = firstWeekday - 1; i >= 0; i--) {
+    const dayNum = prevLastDay - i;
+    const d = new Date(year, month - 1, dayNum);
+    grid.appendChild(renderCalDay(d, { otherMonth: true, todayStr }));
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    grid.appendChild(renderCalDay(new Date(year, month, d), { todayStr }));
+  }
+  // Trailing days (next month)
+  const totalCells = grid.children.length - 7;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= trailing; d++) {
+    grid.appendChild(renderCalDay(new Date(year, month + 1, d), { otherMonth: true, todayStr }));
+  }
+
+  wrap.appendChild(grid);
+
+  // Legend
+  wrap.appendChild(h("div", { class: "cal-legend" }, [
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot milestone" }), h("span", {}, "Milestone")]),
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot task" }), h("span", {}, "Task due")]),
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot complete" }), h("span", {}, "Complete")]),
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot recurring" }), h("span", {}, "Recurring")])
+  ]));
+
+  main.appendChild(wrap);
+
+  // Upcoming list
+  const upcoming = getUpcoming(30);
+  const upWrap = h("div", { class: "cal-upcoming" }, [
+    h("h3", {}, "Next 30 days")
+  ]);
+  if (upcoming.length === 0) {
+    upWrap.appendChild(h("div", { class: "empty" }, [
+      h("span", { class: "empty-emoji" }, "📅"),
+      h("div", {}, "Nothing scheduled in the next 30 days")
+    ]));
+  } else {
+    upcoming.forEach(ev => {
+      upWrap.appendChild(h("div", {
+        class: "upcoming-item",
+        onclick: () => ev.taskId ? jumpToTask(ev.taskId) : null
+      }, [
+        h("div", { class: "upcoming-date" }, fmtDateShort(ev.date)),
+        h("div", { class: "upcoming-title" }, ev.title),
+        h("div", { class: "upcoming-meta" },
+          ev.kind === "milestone" ? "Milestone" :
+          ev.kind === "recurring" ? "Recurring" :
+          ev.complete ? "Complete" : "Task due")
+      ]));
+    });
+  }
+  main.appendChild(upWrap);
+}
+
+function renderCalDay(date, opts) {
+  const dateStr = ymd(date);
+  const dayNum = date.getDate();
+  const events = eventsOnDate(dateStr);
+  const dow = date.getDay();
+  const isWeekend = dow === 0 || dow === 6;
+
+  const classes = ["cal-day"];
+  if (opts.otherMonth) classes.push("is-other-month");
+  if (dateStr === opts.todayStr) classes.push("is-today");
+  if (isWeekend) classes.push("is-weekend");
+
+  const cell = h("div", {
+    class: classes.join(" "),
+    onclick: () => events.length > 0 && showDayModal(dateStr, events)
+  }, [
+    h("div", { class: "cal-daynum" }, dayNum),
+    h("div", { class: "cal-events" }, [
+      ...events.slice(0, 3).map(ev => {
+        let cls = "cal-event";
+        if (ev.kind === "milestone" || ev.type === "critical") cls += " is-milestone";
+        if (ev.kind === "recurring") cls += " is-recurring";
+        if (ev.kind === "task" && ev.complete) cls += " is-complete";
+        return h("div", { class: cls, title: ev.title }, ev.title);
+      }),
+      events.length > 3 ? h("div", { class: "cal-event-more" }, `+${events.length - 3} more`) : null
+    ].filter(Boolean))
+  ]);
+  return cell;
+}
+
+function shiftMonth(ymStr, delta) {
+  const [y, m] = ymStr.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return ym(d);
+}
+
+function getUpcoming(days) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const end = new Date(now); end.setDate(end.getDate() + days);
+  const out = [];
+  MILESTONES.forEach(m => {
+    const d = new Date(m.date + "T00:00:00");
+    if (d >= now && d <= end) out.push({ date: m.date, title: m.title, kind: "milestone" });
+  });
+  Object.entries(STATE).forEach(([tid, s]) => {
+    if (!s.dueDate) return;
+    const d = new Date(s.dueDate + "T00:00:00");
+    if (d >= now && d <= end) {
+      out.push({ date: s.dueDate, title: TASK_INDEX[tid].title, kind: "task", complete: s.status === "complete", taskId: tid });
+    }
+  });
+  // Recurring
+  for (let i = 0; i <= days; i++) {
+    const d = new Date(now); d.setDate(d.getDate() + i);
+    const ds = ymd(d);
+    const dow = d.getDay();
+    RECURRING.forEach(r => {
+      if (r.dayOfWeek === dow && ds >= r.startDate && ds <= r.endDate) {
+        out.push({ date: ds, title: r.title, kind: "recurring" });
+      }
+    });
+  }
+  out.sort((a, b) => a.date.localeCompare(b.date));
+  return out;
+}
+
+function showDayModal(dateStr, events) {
+  openModal({
+    title: fmtDate(dateStr),
+    body: h("div", {}, events.map(ev => h("div", {
+      style: "padding:10px 12px; border:1px solid var(--line); border-radius:7px; margin-bottom:6px; cursor:" + (ev.taskId ? "pointer" : "default"),
+      onclick: () => { if (ev.taskId) { closeModal(); jumpToTask(ev.taskId); } }
+    }, [
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:3px;" }, ev.title),
+      ev.desc ? h("div", { style: "font-size:12px; color:var(--ink-3);" }, ev.desc) : null,
+      h("div", { style: "font-size:11px; color:var(--muted); margin-top:4px;" },
+        ev.kind === "milestone" ? "Milestone" :
+        ev.kind === "recurring" ? "Recurring event" :
+        "Task" + (ev.complete ? " · complete" : ""))
+    ].filter(Boolean))))
+  });
+}
+
+/* ============================================================================
+   BUGS GLOBAL VIEW
+   ============================================================================ */
+function renderBugsView(main) {
+  const gs = globalStats();
+  const bugs = allBugsWithContext();
+
+  main.appendChild(h("div", { class: "bugs-global-summary" }, [
+    h("div", { class: "bug-stat-card" }, [
+      h("div", { class: "bug-stat-num is-critical" }, gs.bugsCritical),
+      h("div", { class: "bug-stat-label" }, "Critical · open")
+    ]),
+    h("div", { class: "bug-stat-card" }, [
+      h("div", { class: "bug-stat-num is-high" }, gs.bugsHigh),
+      h("div", { class: "bug-stat-label" }, "High · open")
+    ]),
+    h("div", { class: "bug-stat-card" }, [
+      h("div", { class: "bug-stat-num" }, gs.bugsOpen),
+      h("div", { class: "bug-stat-label" }, "All open")
+    ]),
+    h("div", { class: "bug-stat-card" }, [
+      h("div", { class: "bug-stat-num is-resolved" }, gs.bugsResolved),
+      h("div", { class: "bug-stat-label" }, "Resolved")
+    ]),
+    h("div", { class: "bug-stat-card" }, [
+      h("div", { class: "bug-stat-num" }, bugs.length),
+      h("div", { class: "bug-stat-label" }, "Total tracked")
+    ])
+  ]));
+
+  if (bugs.length === 0) {
+    main.appendChild(h("div", { class: "empty", style: "background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:60px 20px;" }, [
+      h("span", { class: "empty-emoji" }, "🎉"),
+      h("div", { style: "font-size:15px; margin-bottom:6px; color:var(--ink);" }, "No bugs logged yet"),
+      h("div", {}, "Expand any task in the Tasks view and click \"Add bug\" to start tracking.")
+    ]));
+    return;
+  }
+
+  // Sort bugs: open critical first, then open high, etc.
+  const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  const statusOrder = { open: 0, in_progress: 1, resolved: 2, wont_fix: 3 };
+  bugs.sort((a, b) => {
+    if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
+    return severityOrder[a.severity] - severityOrder[b.severity];
+  });
+
+  const list = h("div", { class: "global-bug-list" });
+  bugs.forEach(b => {
+    list.appendChild(h("div", {
+      class: "global-bug-row",
+      onclick: () => { UI.openTasks[b.taskId] = true; UI.openBugs[b.id] = true; saveUI(); setView("tasks"); setTimeout(() => jumpToTask(b.taskId), 100); }
+    }, [
+      h("span", { class: "bug-severity sev-" + b.severity }, SEVERITY_LABELS[b.severity]),
+      h("div", {}, [
+        h("div", { class: "global-bug-title" }, b.title || "(Untitled bug)"),
+        h("div", { class: "global-bug-sub" }, "in " + b.taskTitle + (b.reporter ? " · @" + b.reporter : ""))
+      ]),
+      b.zendeskUrl ? h("a", {
+        class: "bug-link zendesk", href: b.zendeskUrl, target: "_blank",
+        onclick: (e) => e.stopPropagation(),
+        html: ICONS.zendesk + "<span>ZD</span>"
+      }) : h("span", {}, ""),
+      b.airtableUrl ? h("a", {
+        class: "bug-link airtable", href: b.airtableUrl, target: "_blank",
+        onclick: (e) => e.stopPropagation(),
+        html: ICONS.airtable + "<span>AT</span>"
+      }) : h("span", {}, ""),
+      h("span", { class: "bug-status-chip bst-" + b.status }, BUG_STATUS_LABELS[b.status])
+    ]));
+  });
+  main.appendChild(list);
+}
+
+/* ============================================================================
+   ACTIONS
+   ============================================================================ */
+async function setStatus(taskId, status) {
+  STATE[taskId].status = status;
+  STATE[taskId].updated = new Date().toISOString();
+  UI.statusMenu = null;
+  await saveState();
+  saveUI();
+  renderShell();
+}
+
+async function toggleUrgent(taskId) {
+  STATE[taskId].urgent = !STATE[taskId].urgent;
+  STATE[taskId].updated = new Date().toISOString();
+  await saveState();
+  renderShell();
+}
+
+async function updateTaskField(taskId, field, value) {
+  STATE[taskId][field] = value;
+  STATE[taskId].updated = new Date().toISOString();
+  await saveState();
+  renderPhaseList();
+  toast("Saved");
+}
+
+function toggleStatusMenu(taskId) {
+  UI.statusMenu = UI.statusMenu === taskId ? null : taskId;
+  saveUI();
+  renderPhaseList();
+}
+
+async function addBug(taskId) {
+  const bug = {
+    id: uid(),
+    title: "",
+    severity: "medium",
+    status: "open",
+    reporter: "",
+    reportedDate: ymd(new Date()),
+    stepsToReproduce: "",
+    resolution: "",
+    zendeskUrl: "",
+    airtableUrl: "",
+    updated: new Date().toISOString()
+  };
+  STATE[taskId].bugs = STATE[taskId].bugs || [];
+  STATE[taskId].bugs.push(bug);
+  UI.openBugs[bug.id] = true;
+  await saveState();
+  saveUI();
+  renderPhaseList();
+  toast("Bug added");
+}
+
+async function updateBug(taskId, bugId, field, value) {
+  const bug = STATE[taskId].bugs.find(b => b.id === bugId);
+  if (!bug) return;
+  bug[field] = value;
+  bug.updated = new Date().toISOString();
+  await saveState();
+  // re-render to reflect any chip changes
+  renderPhaseList();
+}
+
+async function deleteBug(taskId, bugId) {
+  if (!confirm("Delete this bug? This can't be undone.")) return;
+  STATE[taskId].bugs = (STATE[taskId].bugs || []).filter(b => b.id !== bugId);
+  delete UI.openBugs[bugId];
+  await saveState();
+  saveUI();
+  renderPhaseList();
+  toast("Bug deleted");
+}
+
+function jumpToTask(taskId) {
+  if (UI.view !== "tasks") setView("tasks");
+  const t = TASK_INDEX[taskId];
+  UI.openPhases[t.phaseId] = true;
+  UI.openTasks[taskId] = true;
+  saveUI();
+  renderPhaseList();
+  setTimeout(() => {
+    const el = document.getElementById("task-" + taskId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.style.transition = "box-shadow 0.3s";
+      el.style.boxShadow = "0 0 0 3px rgba(232,118,58,0.25)";
+      setTimeout(() => el.style.boxShadow = "", 1500);
+    }
+  }, 100);
+}
+
+/* ============================================================================
+   EXPORT / IMPORT
+   ============================================================================ */
+function exportJSON() {
+  const lockCfg = getLockConfig();
+  const data = {
+    schemaVersion: 3,
+    exportedAt: new Date().toISOString(),
+    encrypted: false,
+    state: STATE,
+    lockConfig: lockCfg
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  downloadBlob(blob, `wonderful-picktrace-tracker-${ymd(new Date())}.json`);
+  localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+  $("#backup-reminder").classList.remove("is-on");
+  toast("Exported", "success");
+}
+
+function icsEscape(s) {
+  return (s || "").replace(/\\/g, "\\\\").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\n/g, "\\n");
+}
+
+function icsDate(ymd) {
+  return ymd.replace(/-/g, "");
+}
+
+function exportICS() {
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//PickTrace//Wonderful Migration Tracker v3//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "X-WR-CALNAME:Wonderful Citrus PickTrace 3.0 Migration",
+    "X-WR-TIMEZONE:America/Los_Angeles"
+  ];
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  // Milestones
+  MILESTONES.forEach((m, i) => {
+    const start = icsDate(m.date);
+    const endDate = new Date(m.date + "T00:00:00");
+    endDate.setDate(endDate.getDate() + 1);
+    const end = ymd(endDate).replace(/-/g,"");
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:milestone-${i}-${m.date}@wonderful-picktrace`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${start}`,
+      `DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:${icsEscape(m.title)}`,
+      `DESCRIPTION:${icsEscape(m.desc || "")}`,
+      `CATEGORIES:Milestone${m.type === "critical" ? ",Critical" : ""}`,
+      "END:VEVENT"
+    );
+  });
+
+  // Task due dates
+  Object.entries(STATE).forEach(([tid, s]) => {
+    if (!s.dueDate) return;
+    const t = TASK_INDEX[tid];
+    const start = icsDate(s.dueDate);
+    const endDate = new Date(s.dueDate + "T00:00:00");
+    endDate.setDate(endDate.getDate() + 1);
+    const end = ymd(endDate).replace(/-/g,"");
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:task-${tid}@wonderful-picktrace`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${start}`,
+      `DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:${icsEscape(t.title + (s.urgent ? " [URGENT]" : ""))}`,
+      `DESCRIPTION:${icsEscape((t.desc || "") + (s.notes ? "\nNotes: " + s.notes : "") + (s.owner ? "\nOwner: " + s.owner : ""))}`,
+      `STATUS:${s.status === "complete" ? "COMPLETED" : s.status === "in_progress" ? "IN-PROCESS" : "NEEDS-ACTION"}`,
+      `CATEGORIES:Task,${TASK_INDEX[tid].phaseId}`,
+      "END:VEVENT"
+    );
+  });
+
+  // Recurring weekly events
+  RECURRING.forEach((r, i) => {
+    const startDate = new Date(r.startDate + "T00:00:00");
+    while (startDate.getDay() !== r.dayOfWeek) startDate.setDate(startDate.getDate() + 1);
+    const start = ymd(startDate).replace(/-/g,"");
+    const endDate = new Date(startDate); endDate.setDate(endDate.getDate() + 1);
+    const end = ymd(endDate).replace(/-/g,"");
+    const until = r.endDate.replace(/-/g,"") + "T235959Z";
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:recurring-${i}@wonderful-picktrace`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${start}`,
+      `DTEND;VALUE=DATE:${end}`,
+      `SUMMARY:${icsEscape(r.title)}`,
+      `DESCRIPTION:${icsEscape(r.desc || "")}`,
+      `RRULE:FREQ=WEEKLY;UNTIL=${until}`,
+      "CATEGORIES:Recurring",
+      "END:VEVENT"
+    );
+  });
+
+  lines.push("END:VCALENDAR");
+  const ics = lines.join("\r\n");
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  downloadBlob(blob, `wonderful-picktrace-calendar-${ymd(new Date())}.ics`);
+  toast("Calendar exported", "success");
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+async function importJSON(file) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.state) { toast("Invalid file", "warn"); return; }
+    if (!confirm("Importing will overwrite your current progress. Continue?")) return;
+    STATE = hydrateState(data.state);
+    if (data.lockConfig) setLockConfig(data.lockConfig);
+    await saveState();
+    renderShell();
+    toast("Imported", "success");
+  } catch (e) {
+    console.error(e);
+    toast("Import failed — invalid file", "warn");
+  }
+}
+
+/* ============================================================================
+   MODAL SYSTEM
+   ============================================================================ */
+function openModal({ title, body, footer }) {
+  const overlay = $("#modal-overlay");
+  overlay.innerHTML = "";
+  const modal = h("div", { class: "modal", onclick: (e) => e.stopPropagation() }, [
+    h("div", { class: "modal-header" }, [
+      h("div", { class: "modal-title" }, title),
+      h("button", { class: "modal-close", onclick: closeModal, html: ICONS.x })
+    ]),
+    h("div", { class: "modal-body" }, body instanceof HTMLElement ? [body] : body),
+    footer ? h("div", { class: "modal-footer" }, footer) : null
+  ].filter(Boolean));
+  overlay.appendChild(modal);
+  overlay.classList.add("is-open");
+  overlay.onclick = closeModal;
+}
+
+function closeModal() {
+  const overlay = $("#modal-overlay");
+  overlay.classList.remove("is-open");
+  overlay.innerHTML = "";
+}
+
+function openSettings() {
+  const lockCfg = getLockConfig();
+  const body = h("div", {}, [
+    h("div", { class: "security-notice" }, [
+      h("div", { html: ICONS.alert }),
+      h("div", {}, [
+        h("div", { style: "font-weight:600; margin-bottom:4px; color:var(--ink);" }, "About your data"),
+        h("div", {}, "Your progress is stored in this browser's local storage — it persists across sessions until you explicitly clear it or switch browsers/devices. Optional passphrase encryption wraps the data with AES-GCM so a shared or lost machine doesn't leak it.")
+      ])
+    ]),
+    h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Passphrase encryption"),
+      h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:12px;" },
+        lockCfg.enabled ? "Enabled — data at rest is encrypted. You'll need to enter your passphrase each session." : "Disabled — data at rest is readable by anyone with browser access."),
+      lockCfg.enabled
+        ? h("div", { style: "display:flex; gap:8px;" }, [
+            h("button", { class: "btn btn-outline", onclick: changePassphrase }, "Change passphrase"),
+            h("button", { class: "btn btn-danger", onclick: disableEncryption }, "Disable encryption")
+          ])
+        : h("button", { class: "btn btn-primary", onclick: setupPassphrase }, "Set up passphrase")
+    ]),
+    h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Backup"),
+      h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" }, "Download a JSON export weekly so your work survives a browser reset or device switch."),
+      h("div", { style: "display:flex; gap:8px; flex-wrap: wrap;" }, [
+        h("button", { class: "btn btn-outline", onclick: exportJSON, html: ICONS.download + "<span>Export JSON</span>" }),
+        h("button", { class: "btn btn-outline", onclick: exportICS, html: ICONS.cal + "<span>Export .ics calendar</span>" }),
+        h("button", { class: "btn btn-outline", onclick: () => $("#import-file").click(), html: ICONS.upload + "<span>Import JSON</span>" })
+      ]),
+      (() => {
+        const lastBackup = localStorage.getItem(BACKUP_KEY);
+        return h("div", { style: "font-size:11px; color:var(--muted); margin-top:8px;" },
+          lastBackup ? "Last export: " + new Date(lastBackup).toLocaleString() : "No backup exported yet");
+      })()
+    ]),
+    h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
+      h("div", { style: "font-weight:600; color:var(--danger); margin-bottom:6px;" }, "Danger zone"),
+      h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" }, "Reset all progress — clears all tasks, bugs, and settings on this browser. Cannot be undone."),
+      h("button", { class: "btn btn-danger", onclick: resetAll }, "Reset tracker")
+    ])
+  ]);
+  openModal({ title: "Settings & Data", body });
+}
+
+function setupPassphrase() {
+  const body = h("div", {}, [
+    h("div", { class: "security-notice" }, [
+      h("div", { html: ICONS.alert }),
+      h("div", {}, "There is no password recovery. Choose something you'll remember — if you forget it, you'll have to reset the tracker.")
+    ]),
+    h("label", { class: "field-label" }, "New passphrase"),
+    h("input", { class: "field-input", type: "password", id: "pp-1", autocomplete: "new-password" }),
+    h("label", { class: "field-label" }, "Confirm passphrase"),
+    h("input", { class: "field-input", type: "password", id: "pp-2", autocomplete: "new-password" }),
+    h("div", { id: "pp-error", style: "color:var(--danger);font-size:12px;margin-top:6px;min-height:18px;" })
+  ]);
+  const footer = [
+    h("button", { class: "btn btn-outline", onclick: () => { closeModal(); openSettings(); } }, "Cancel"),
+    h("button", { class: "btn btn-primary", onclick: async () => {
+      const p1 = $("#pp-1").value, p2 = $("#pp-2").value;
+      const err = $("#pp-error");
+      if (p1.length < 8) { err.textContent = "Passphrase must be at least 8 characters."; return; }
+      if (p1 !== p2) { err.textContent = "Passphrases do not match."; return; }
+      PASSPHRASE = p1;
+      setLockConfig({ enabled: true, createdAt: new Date().toISOString() });
+      await saveState();
+      closeModal();
+      toast("Encryption enabled", "success");
+      renderShell();
+    } }, "Enable encryption")
+  ];
+  openModal({ title: "Set up passphrase", body, footer });
+  setTimeout(() => $("#pp-1")?.focus(), 50);
+}
+
+function changePassphrase() {
+  const body = h("div", {}, [
+    h("label", { class: "field-label" }, "Current passphrase"),
+    h("input", { class: "field-input", type: "password", id: "pp-old", autocomplete: "current-password" }),
+    h("label", { class: "field-label" }, "New passphrase"),
+    h("input", { class: "field-input", type: "password", id: "pp-1", autocomplete: "new-password" }),
+    h("label", { class: "field-label" }, "Confirm new passphrase"),
+    h("input", { class: "field-input", type: "password", id: "pp-2", autocomplete: "new-password" }),
+    h("div", { id: "pp-error", style: "color:var(--danger);font-size:12px;margin-top:6px;min-height:18px;" })
+  ]);
+  const footer = [
+    h("button", { class: "btn btn-outline", onclick: () => { closeModal(); openSettings(); } }, "Cancel"),
+    h("button", { class: "btn btn-primary", onclick: async () => {
+      const old = $("#pp-old").value, p1 = $("#pp-1").value, p2 = $("#pp-2").value;
+      const err = $("#pp-error");
+      if (old !== PASSPHRASE) { err.textContent = "Current passphrase incorrect."; return; }
+      if (p1.length < 8) { err.textContent = "New passphrase must be at least 8 characters."; return; }
+      if (p1 !== p2) { err.textContent = "New passphrases do not match."; return; }
+      PASSPHRASE = p1;
+      await saveState();
+      closeModal();
+      toast("Passphrase updated", "success");
+    } }, "Update")
+  ];
+  openModal({ title: "Change passphrase", body, footer });
+  setTimeout(() => $("#pp-old")?.focus(), 50);
+}
+
+async function disableEncryption() {
+  if (!confirm("Disable encryption? Your data will be stored in plain text on this browser.")) return;
+  PASSPHRASE = null;
+  setLockConfig({ enabled: false });
+  await saveState();
+  closeModal();
+  toast("Encryption disabled");
+  renderShell();
+}
+
+async function resetAll() {
+  if (!confirm("Reset the tracker? This will delete all progress, bugs, and settings on this browser. Cannot be undone.")) return;
+  if (!confirm("Are you absolutely sure? Export a backup first if you might want this data later.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(UI_KEY);
+  localStorage.removeItem(LOCK_KEY);
+  localStorage.removeItem(BACKUP_KEY);
+  PASSPHRASE = null;
+  STATE = hydrateState({});
+  UI = defaultUI();
+  closeModal();
+  renderShell();
+  toast("Tracker reset");
+}
+
+function openHelp() {
+  const body = h("div", {}, [
+    h("p", {}, "This tracker runs entirely in your browser. Data lives in localStorage and persists across sessions until you clear it or switch browsers."),
+    h("div", { style: "margin:14px 0; padding:12px 14px; background:var(--bg-2); border-radius:7px;" }, [
+      h("div", { style: "font-weight:600; margin-bottom:8px; color:var(--ink);" }, "Keyboard shortcuts"),
+      h("div", { style: "display:grid; grid-template-columns:auto 1fr; gap:6px 12px; font-size:12px;" }, [
+        h("kbd", {}, "/"), h("span", {}, "Focus search"),
+        h("kbd", {}, "?"), h("span", {}, "Show this help"),
+        h("kbd", {}, "Esc"), h("span", {}, "Close / collapse")
+      ])
+    ]),
+    h("div", { style: "margin:14px 0;" }, [
+      h("div", { style: "font-weight:600; margin-bottom:6px; color:var(--ink);" }, "Status colors"),
+      h("div", { style: "display:flex; flex-wrap:wrap; gap:6px;" }, [
+        h("span", { class: "task-status-btn status-not_started" }, "Not started"),
+        h("span", { class: "task-status-btn status-in_progress" }, "In progress"),
+        h("span", { class: "task-status-btn status-complete" }, "Complete"),
+        h("span", { class: "task-status-btn status-blocked" }, "Blocked")
+      ])
+    ]),
+    h("p", { style: "font-size:12px; color:var(--ink-3);" }, "Export a JSON backup weekly so your work survives a browser reset. The .ics export works with Google Calendar, Outlook, and Apple Calendar.")
+  ]);
+  openModal({ title: "How this tracker works", body });
+}
+
+/* ============================================================================
+   LOCK SCREEN FLOW
+   ============================================================================ */
+async function attemptUnlock() {
+  const input = $("#lock-input");
+  const err = $("#lock-error");
+  const pass = input.value;
+  if (!pass) { err.textContent = "Enter your passphrase"; return; }
+  PASSPHRASE = pass;
+  try {
+    STATE = await loadState();
+    $("#lock-screen").classList.remove("is-on");
+    err.textContent = "";
+    boot();
+  } catch (e) {
+    console.error(e);
+    err.textContent = "Incorrect passphrase";
+    PASSPHRASE = null;
+    input.value = "";
+    input.focus();
+  }
+}
+
+function showLockScreen() {
+  $("#lock-screen").classList.add("is-on");
+  setTimeout(() => $("#lock-input").focus(), 100);
+}
+
+/* ============================================================================
+   BACKUP REMINDER
+   ============================================================================ */
+function checkBackupReminder() {
+  const last = localStorage.getItem(BACKUP_KEY);
+  const now = Date.now();
+  if (!last) {
+    // Don't nag new users; set a grace period.
+    localStorage.setItem(BACKUP_KEY, new Date(now - 86400000).toISOString());
+    return;
+  }
+  const lastMs = new Date(last).getTime();
+  const daysSince = (now - lastMs) / 86400000;
+  if (daysSince >= 7) {
+    setTimeout(() => $("#backup-reminder").classList.add("is-on"), 1500);
+  }
+}
+
+/* ============================================================================
+   BOOT
+   ============================================================================ */
+async function boot() {
+  renderShell();
+  checkBackupReminder();
+  // Update countdown every minute
+  setInterval(() => {
+    const cd = daysUntil(GO_LIVE);
+    const el = document.querySelector(".countdown b");
+    if (el) el.textContent = cd > 0 ? `${cd} days` : (cd === 0 ? "TODAY" : `${Math.abs(cd)}d`);
+  }, 60000);
+}
+
+async function init() {
+  UI = loadUI();
+  const lockCfg = getLockConfig();
+  if (lockCfg.enabled) {
+    showLockScreen();
+  } else {
+    STATE = await loadState();
+    boot();
+  }
+
+  // Global event wiring
+  document.addEventListener("click", (e) => {
+    // Close status menu when clicking outside
+    if (!e.target.closest(".task-status") && UI.statusMenu) {
+      UI.statusMenu = null;
+      saveUI();
+      renderPhaseList();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const overlay = $("#modal-overlay");
+      if (overlay.classList.contains("is-open")) { closeModal(); return; }
+      if ($("#lock-screen").classList.contains("is-on")) return;
+      UI.statusMenu = null;
+      saveUI();
+      renderPhaseList();
+      document.activeElement?.blur();
+    }
+    if ($("#lock-screen").classList.contains("is-on")) return;
+    if (document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+    if (e.key === "/" && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+      setView("tasks");
+      setTimeout(() => $("#search-input")?.focus(), 100);
+    }
+    if (e.key === "?") {
+      e.preventDefault();
+      openHelp();
+    }
+  });
+
+  $("#import-file").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (f) importJSON(f);
+    e.target.value = "";
+  });
+
+  $("#lock-submit").addEventListener("click", attemptUnlock);
+  $("#lock-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") attemptUnlock();
+  });
+  $("#lock-reset").addEventListener("click", async () => {
+    if (!confirm("Reset the tracker? All encrypted data will be lost — this cannot be undone.")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LOCK_KEY);
+    localStorage.removeItem(UI_KEY);
+    PASSPHRASE = null;
+    STATE = hydrateState({});
+    UI = defaultUI();
+    $("#lock-screen").classList.remove("is-on");
+    boot();
+  });
+
+  $("#backup-now").addEventListener("click", exportJSON);
+  $("#backup-dismiss").addEventListener("click", () => {
+    $("#backup-reminder").classList.remove("is-on");
+    // Snooze 3 days
+    const snooze = new Date(Date.now() - 4 * 86400000).toISOString();
+    localStorage.setItem(BACKUP_KEY, snooze);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

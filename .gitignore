@@ -1,0 +1,3 @@
+# large binaries — don't commit these
+*.glb
+3dsvg.glb
