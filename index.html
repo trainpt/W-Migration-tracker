@@ -49,7 +49,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; overscroll-behavior: none; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -93,6 +93,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   position: sticky;
   top: 0;
   z-index: 50;
+  will-change: transform;
 }
 .brand { display: flex; align-items: center; gap: 11px; }
 .brand-mark {
@@ -129,6 +130,25 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   margin-top: 4px;
 }
 .topbar-spacer { flex: 1; }
+.topbar-tabs {
+  display: flex;
+  align-self: stretch;
+  align-items: stretch;
+  gap: 0;
+  margin-left: 8px;
+}
+.topbar-tabs .view-tab {
+  padding: 0 16px;
+  height: auto;
+  border-radius: 0;
+  font-size: 13px;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.topbar-tabs .view-tab.is-active::after {
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+}
 .countdown {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: var(--radius-pill);
@@ -182,6 +202,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border-right: 1px solid var(--line);
   padding: 20px 14px;
   overflow-y: auto;
+  overscroll-behavior: none;
   position: sticky;
   top: 72px;
   height: calc(100vh - 72px);
@@ -344,12 +365,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 
 /* ---------- Tabs ---------- */
-.view-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 22px;
-}
+.view-tabs { display: none; }
 .view-tab {
   padding: 10px 16px;
   font-size: 13px; font-weight: 500;
@@ -1335,7 +1351,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 /* Quick-pick duration row sitting under a Start/End time input pair. */
 .time-quickpicks {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-  margin: -4px 0 4px;
+  margin: 0;
 }
 .time-quick-label {
   font-size: 10px; font-weight: 600;
@@ -1463,6 +1479,10 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   grid-template-columns: 1fr 1fr 1.2fr;
   gap: 12px;
   padding: 10px 14px;
+}
+.sched-new-card-times {
+  grid-template-columns: 120px 120px 1fr;
+  align-items: start;
 }
 .sched-new-card-field {
   display: flex; flex-direction: column; gap: 4px;
@@ -1777,7 +1797,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
 }
 .modal-overlay.is-open { display: flex; }
 .modal {
@@ -1880,7 +1900,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   background: var(--bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  max-width: 1320px;
+  max-width: calc(100vw - 32px);
   width: 100%;
   min-height: calc(100vh - 48px);
   display: flex; flex-direction: column;
@@ -1893,7 +1913,8 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   padding: 18px 24px 14px;
   display: flex; flex-direction: column; gap: 14px;
 }
-.dash-header-top { display: flex; align-items: center; gap: 16px; }
+.dash-header-top { display: flex; align-items: flex-start; gap: 16px; }
+.dash-header-top .dash-close { margin-left: auto; flex-shrink: 0; }
 .dash-title {
   font-family: var(--font-display);
   font-size: 22px; font-weight: 600;
@@ -1928,10 +1949,17 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
   min-width: 0;
 }
 .dash-filter-line > .dash-filter-spacer { flex: 1; }
+.dash-filter-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--line-2);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
 
 .dash-filter-group {
   display: inline-flex;
@@ -2866,6 +2894,22 @@ kbd {
   color: var(--muted);
 }
 
+/* ---- Two-column grid that holds risk rows within each phase group ---- */
+.risk-rows-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.risk-rows-grid .risk-phase-divider {
+  grid-column: 1 / -1;
+}
+.risk-rows-grid .risk-row.is-open {
+  align-self: start;
+}
+@media (max-width: 640px) {
+  .risk-rows-grid { grid-template-columns: 1fr; }
+}
+
 /* ---- Risk row (single task in the bucket list) ---- */
 .risk-row {
   position: relative;
@@ -2874,6 +2918,9 @@ kbd {
   border-radius: var(--radius-sm);
   overflow: hidden;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .risk-phase-tag-corner {
   position: absolute;
@@ -2933,8 +2980,7 @@ kbd {
   font-size: 13px; font-weight: 500;
   color: var(--ink);
   line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
 }
 .risk-row.is-open .risk-row-title { color: var(--citrus-deep); }
 
@@ -2982,6 +3028,7 @@ kbd {
   outline: none;
 }
 .risk-note:focus { border-color: var(--citrus); box-shadow: var(--ring); }
+.risk-bug-item { display: flex; flex-direction: column; }
 .risk-bug {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 10px;
@@ -2991,6 +3038,7 @@ kbd {
   font-size: 11px;
   color: var(--ink-2);
 }
+.risk-bug:hover { background: var(--bg-2); }
 .risk-bug-sev {
   font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
 }
@@ -2999,21 +3047,91 @@ kbd {
   font-size: 10px; color: var(--muted);
   text-transform: uppercase; letter-spacing: 0.05em;
 }
-.risk-bug-input {
-  width: 100%;
-  padding: 8px 11px;
+.risk-bug-form {
+  display: flex; flex-direction: column; gap: 6px;
   border: 1px dashed var(--line-2);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-family: inherit;
-  font-size: 11px;
-  color: var(--ink);
-  outline: none;
+  padding: 8px 10px;
+  background: var(--bg-2);
 }
-.risk-bug-input:focus {
-  border-style: solid; border-color: var(--citrus);
-  box-shadow: var(--ring);
+.risk-bug-form-title {
+  width: 100%; padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: inherit;
+  font-size: 11px; color: var(--ink); outline: none;
+  box-sizing: border-box;
 }
+.risk-bug-form-title:focus { border-color: var(--citrus); box-shadow: var(--ring); }
+.risk-bug-form-row {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+}
+.risk-bug-form-select {
+  padding: 4px 6px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: inherit;
+  font-size: 11px; color: var(--ink); outline: none; cursor: pointer;
+}
+.risk-bug-form-reporter {
+  flex: 1; min-width: 80px; padding: 4px 8px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: inherit;
+  font-size: 11px; color: var(--ink); outline: none;
+}
+.risk-bug-form-reporter:focus { border-color: var(--citrus); box-shadow: var(--ring); }
+.risk-bug-form-desc {
+  width: 100%; min-height: 52px; padding: 6px 10px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: inherit;
+  font-size: 11px; color: var(--ink); resize: vertical; outline: none;
+  box-sizing: border-box;
+}
+.risk-bug-form-desc:focus { border-color: var(--citrus); box-shadow: var(--ring); }
+.risk-bug-add-toggle {
+  align-self: flex-start;
+  padding: 4px 12px; border-radius: var(--radius-sm);
+  background: transparent; color: var(--citrus-deep);
+  font-size: 11px; font-weight: 600; font-family: inherit;
+  border: 1px dashed var(--citrus); cursor: pointer; white-space: nowrap;
+}
+.risk-bug-add-toggle:hover { background: var(--citrus-soft); }
+.risk-bug-form-add {
+  padding: 4px 12px; border-radius: var(--radius-sm);
+  background: var(--citrus); color: #fff;
+  font-size: 11px; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.risk-bug-form-add:hover { background: var(--citrus-deep); }
+.risk-bug-form-cancel {
+  padding: 4px 10px; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink-3);
+  font-size: 11px; font-weight: 500; font-family: inherit;
+  border: 1px solid var(--line-2); cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.risk-bug-form-cancel:hover { color: var(--ink); border-color: var(--line); }
+.risk-bug-del-btn {
+  margin-left: auto; padding: 1px 5px;
+  border: none; background: none;
+  color: var(--muted); font-size: 13px; line-height: 1;
+  cursor: pointer; border-radius: 3px; flex-shrink: 0;
+}
+.risk-bug-del-btn:hover { color: var(--danger); background: var(--danger-soft); }
+.risk-bug-steps-hint {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+  color: var(--muted); text-transform: uppercase;
+  border: 1px solid var(--line-2); border-radius: 3px;
+  padding: 1px 4px; cursor: default;
+}
+.risk-bug-reporter {
+  font-size: 10px; color: var(--ink-3);
+  font-style: italic;
+}
+.risk-bug-input {
+  width: 100%; padding: 7px 11px;
+  border: 1px dashed var(--line-2); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: inherit;
+  font-size: 11px; color: var(--ink); outline: none;
+}
+.risk-bug-input:focus { border-style: solid; border-color: var(--citrus); box-shadow: var(--ring); }
 
 /* ---- Matrix view (owners × phases) ---- */
 .matrix-wrap {
@@ -3078,11 +3196,19 @@ kbd {
   vertical-align: top;
   min-width: 150px;
 }
+.matrix-chip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .matrix-chip-grid { grid-template-columns: 1fr; }
+}
 .matrix-chip {
   padding: 6px 9px;
   border-left: 3px solid;
   border-radius: 4px;
-  margin-bottom: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   font-size: 11px;
@@ -3586,8 +3712,13 @@ kbd {
   background: var(--bg-2);
   display: flex; flex-direction: column;
 }
+.timed-labels-col-spacer {
+  height: 44px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
 .timed-labels-allday {
-  height: 60px;
+  min-height: 36px;
   display: flex; align-items: center; justify-content: flex-end;
   padding: 0 8px;
   font-size: 9px; font-weight: 600;
@@ -3637,13 +3768,14 @@ kbd {
 }
 .timed-col.is-today { background: rgba(232,118,58,0.03); }
 .timed-allday {
-  min-height: 60px;
+  min-height: 36px;
   border-bottom: 1px solid var(--line);
-  padding: 4px 4px;
-  display: flex; flex-direction: column; gap: 3px;
+  padding: 4px 6px;
+  display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px;
+  align-content: center;
   background: var(--bg-2);
 }
-.timed-allday-empty { flex: 1; }
+.timed-allday-empty { display: none; }
 .timed-grid {
   position: relative;
   height: calc(44px * 16); /* HOUR_PX * TIMED_HOUR_COUNT */
@@ -3668,11 +3800,14 @@ kbd {
 .timed-pill:hover { filter: brightness(0.96); }
 .timed-pill.is-allday {
   border-left-width: 3px;
-  padding: 3px 7px;
+  padding: 2px 8px;
   font-size: 10px;
   font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
+  flex: 0 0 auto;
+  width: min(160px, 100%);
 }
 .timed-pill.is-milestone {
   background: var(--danger-soft);
@@ -3938,6 +4073,7 @@ kbd {
 </div>
 
 <input type="file" id="import-file" accept="application/json" style="display: none;" />
+<input type="file" id="gcal-import-file" accept=".ics,text/calendar" style="display: none;" />
 <div class="modal-overlay" id="modal-overlay"></div>
 <div class="cal-tooltip" id="cal-tooltip" role="tooltip" aria-hidden="true"></div>
 <div class="ctx-menu" id="ctx-menu" role="menu" aria-hidden="true"></div>
@@ -5126,11 +5262,15 @@ function makeTimePair(startInput, endInput, opts = {}) {
     { label: "15m", min: 15 },
     { label: "30m", min: 30 },
     { label: "1h",  min: 60 },
+    { label: "1.5h", min: 90 },
     { label: "2h",  min: 120 },
-    { label: "3h",  min: 180 }
+    { label: "3h",  min: 180 },
+    { label: "4h",  min: 240 },
+    { label: "6h",  min: 360 },
+    { label: "8h",  min: 480 }
   ];
   const row = h("div", { class: "time-quickpicks" });
-  row.appendChild(h("span", { class: "time-quick-label" }, "Duration"));
+  if (!opts.hideLabel) row.appendChild(h("span", { class: "time-quick-label" }, "Duration"));
   presets.forEach(p => {
     const btn = h("button", {
       type: "button",
@@ -5387,6 +5527,7 @@ function renderShell() {
   const lockCfg = getLockConfig();
   const lockOn = lockCfg.enabled;
 
+  const gs = globalStats();
   const topbar = h("header", { class: "topbar" }, [
     h("div", { class: "brand" }, [
       h("span", {
@@ -5395,6 +5536,20 @@ function renderShell() {
         role: "img",
         "aria-label": "Wonderful Planner logo"
       })
+    ]),
+    h("nav", { class: "topbar-tabs" }, [
+      h("button", {
+        class: "view-tab" + (UI.view === "tasks" ? " is-active" : ""),
+        onclick: () => setView("tasks")
+      }, [h("span", {}, lbl("tabs.tasks")), h("span", { class: "count" }, gs.total)]),
+      h("button", {
+        class: "view-tab" + (UI.view === "calendar" ? " is-active" : ""),
+        onclick: () => setView("calendar")
+      }, [h("span", {}, lbl("tabs.calendar")), h("span", { class: "count" }, MILESTONES.length)]),
+      h("button", {
+        class: "view-tab" + (UI.view === "bugs" ? " is-active" : ""),
+        onclick: () => setView("bugs")
+      }, [h("span", {}, lbl("tabs.bugs")), h("span", { class: "count" }, gs.bugsOpen)])
     ]),
     h("div", { class: "topbar-spacer" }),
     h("div", { class: "countdown", title: "Days to Go-Live (July 13, 2026)" }, [
@@ -5415,20 +5570,6 @@ function renderShell() {
 
   // ---- Sidebar
   const sidebar = h("aside", { class: "sidebar" }, []);
-  sidebar.appendChild(h("div", { class: "tab-nav" }, [
-    h("button", {
-      class: "tab-btn" + (UI.view === "tasks" ? " is-active" : ""),
-      onclick: () => setView("tasks")
-    }, lbl("tabs.tasks")),
-    h("button", {
-      class: "tab-btn" + (UI.view === "calendar" ? " is-active" : ""),
-      onclick: () => setView("calendar")
-    }, lbl("tabs.calendar")),
-    h("button", {
-      class: "tab-btn" + (UI.view === "bugs" ? " is-active" : ""),
-      onclick: () => setView("bugs")
-    }, lbl("tabs.bugs"))
-  ]));
 
   sidebar.appendChild(h("div", { class: "sidebar-heading" }, lbl("sidebar.phases")));
   effectivePhases().forEach(p => {
@@ -5463,7 +5604,6 @@ function renderShell() {
     sidebar.appendChild(link);
   });
 
-  const gs = globalStats();
   sidebar.appendChild(h("div", { class: "sidebar-divider" }));
   // Admin Dashboard launcher — sits right above the Summary block so the
   // user always has one click into the full analytics overlay.
@@ -5538,26 +5678,6 @@ function renderMain() {
   const main = $("#main");
   main.innerHTML = "";
 
-  const gs = globalStats();
-  // The old editorial hero (kicker / title / subtitle / progress bar) has
-  // been retired — each view (Tasks, Calendar, Bugs) renders its own header
-  // with the relevant information, and the top strip was purely decorative.
-
-  // View tabs
-  main.appendChild(h("nav", { class: "view-tabs" }, [
-    h("button", {
-      class: "view-tab" + (UI.view === "tasks" ? " is-active" : ""),
-      onclick: () => setView("tasks")
-    }, [h("span", {}, "Tasks"), h("span", { class: "count" }, gs.total)]),
-    h("button", {
-      class: "view-tab" + (UI.view === "calendar" ? " is-active" : ""),
-      onclick: () => setView("calendar")
-    }, [h("span", {}, "Calendar"), h("span", { class: "count" }, MILESTONES.length)]),
-    h("button", {
-      class: "view-tab" + (UI.view === "bugs" ? " is-active" : ""),
-      onclick: () => setView("bugs")
-    }, [h("span", {}, "Bugs"), h("span", { class: "count" }, gs.bugsOpen)])
-  ]));
 
   if (UI.view === "tasks") renderTasksView(main);
   else if (UI.view === "calendar") renderCalendarView(main);
@@ -5791,13 +5911,18 @@ async function appendTaskNote(taskId, note) {
   await saveState();
 }
 
-async function addBugInline(taskId, title) {
-  if (!STATE[taskId] || !title.trim()) return;
+async function addBugInline(taskId, fields) {
+  if (!STATE[taskId] || !fields.title.trim()) return;
   STATE[taskId].bugs = STATE[taskId].bugs || [];
   STATE[taskId].bugs.push({
-    id: uid(), title: title.trim(), severity: "medium", status: "open",
-    reporter: "", reportedDate: ymd(new Date()),
-    stepsToReproduce: "", expected: "", actual: "",
+    id: uid(),
+    title: fields.title.trim(),
+    severity: fields.severity || "medium",
+    status: fields.status || "open",
+    reporter: fields.reporter || "",
+    reportedDate: ymd(new Date()),
+    stepsToReproduce: fields.description || "",
+    expected: "", actual: "",
     zendeskUrl: "", airtableUrl: ""
   });
   STATE[taskId].updated = new Date().toISOString();
@@ -6071,19 +6196,25 @@ function renderRiskList(rows) {
     // Skip the per-phase divider when a phase filter is already active —
     // every row in the bucket is from the same phase, so the divider is noise.
     const showPhaseDivider = !UI.phaseFilter;
+    // One shared grid for the whole bucket — tasks from single-task phases
+    // pair freely across phase boundaries instead of each wasting a full row.
+    const grid = h("div", { class: "risk-rows-grid" });
     phaseOrder.forEach(pid => {
       const inPhase = byPhase.get(pid);
       if (!inPhase || !inPhase.length) return;
       const head = inPhase[0];
-      if (showPhaseDivider) {
-        section.appendChild(h("div", { class: "risk-phase-divider" }, [
+      // Only show a full-width divider for phases with 2+ tasks; single-task
+      // phases flow freely — the corner phase tag on each card identifies them.
+      if (showPhaseDivider && inPhase.length > 1) {
+        grid.appendChild(h("div", { class: "risk-phase-divider" }, [
           h("span", { class: "risk-phase-divider-num" }, head.phaseNum),
           h("span", { class: "risk-phase-divider-name" }, head.phaseTitle),
           h("span", { class: "risk-phase-divider-count" }, inPhase.length)
         ]));
       }
-      inPhase.forEach(r => section.appendChild(renderRiskRow(r)));
+      inPhase.forEach(r => grid.appendChild(renderRiskRow(r)));
     });
+    section.appendChild(grid);
     wrap.appendChild(section);
   });
   if (!any) {
@@ -6204,30 +6335,132 @@ function renderRiskRow(r) {
       class: "risk-note", placeholder: "Add a note — what happened, what's next…",
       onblur: (e) => appendTaskNote(t.id, e.target.value)
     }, s.notes || "");
-    const bugInput = h("input", {
-      class: "risk-bug-input", type: "text",
-      placeholder: "🐞 Log a bug — press Enter",
-      onkeydown: (e) => {
-        if (e.key === "Enter" && e.target.value.trim()) {
-          addBugInline(t.id, e.target.value);
-          e.target.value = "";
-        }
-      }
-    });
+    const sevColor = (sev) => sev === "critical" ? "var(--danger)"
+      : sev === "high" ? "var(--citrus-deep)" : "var(--sun)";
+
+    // Bug form — hidden until the toggle button is clicked
+    const bugTitleInput   = h("input",    { class: "risk-bug-form-title", type: "text", placeholder: "Bug title — describe the issue" });
+    const bugSevSel       = h("select",   { class: "risk-bug-form-select" }, [
+      h("option", { value: "medium" }, "Medium"),
+      h("option", { value: "high"   }, "High"),
+      h("option", { value: "critical" }, "Critical"),
+      h("option", { value: "low"    }, "Low")
+    ]);
+    const bugStatusSel    = h("select",   { class: "risk-bug-form-select" }, [
+      h("option", { value: "open"       }, "Open"),
+      h("option", { value: "in_progress"}, "In progress"),
+      h("option", { value: "resolved"   }, "Resolved"),
+      h("option", { value: "wont_fix"   }, "Won't fix")
+    ]);
+    const bugReporterInput = h("input",   { class: "risk-bug-form-reporter", type: "text", placeholder: "Reporter" });
+    const bugDescInput    = h("textarea", { class: "risk-bug-form-desc", placeholder: "Steps to reproduce, expected vs. actual…" });
+
+    const showForm  = () => { bugForm.style.display = "flex"; addBugBtn.style.display = "none"; bugTitleInput.focus(); };
+    const hideForm  = () => { bugForm.style.display = "none"; addBugBtn.style.display = ""; bugTitleInput.value = ""; bugDescInput.value = ""; };
+    const submitBug = () => {
+      if (!bugTitleInput.value.trim()) return;
+      addBugInline(t.id, {
+        title: bugTitleInput.value, severity: bugSevSel.value,
+        status: bugStatusSel.value, reporter: bugReporterInput.value,
+        description: bugDescInput.value
+      });
+    };
+
+    bugTitleInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); submitBug(); } });
+
+    const bugForm = h("div", { class: "risk-bug-form", style: "display:none;" }, [
+      bugTitleInput,
+      h("div", { class: "risk-bug-form-row" }, [
+        bugSevSel, bugStatusSel, bugReporterInput,
+        h("button", { class: "risk-bug-form-add", type: "button", onclick: submitBug }, "Save bug"),
+        h("button", { class: "risk-bug-form-cancel", type: "button", onclick: hideForm }, "Cancel")
+      ]),
+      bugDescInput
+    ]);
+
+    const addBugBtn = h("button", { class: "risk-bug-add-toggle", type: "button", onclick: showForm }, "+ Add bug");
+
+    const makeBugItem = (b) => {
+      // ── View row ──────────────────────────────────────────────────
+      const bugView = h("div", {
+        class: "risk-bug",
+        style: `border-left-color: ${sevColor(b.severity)}; cursor: pointer;`,
+        title: "Click to edit"
+      }, [
+        h("span", { class: "risk-bug-sev", style: `color: ${sevColor(b.severity)};` },
+          (b.severity || "medium").toUpperCase()),
+        h("span", { class: "risk-bug-title" }, b.title),
+        b.stepsToReproduce ? h("span", { class: "risk-bug-steps-hint", title: b.stepsToReproduce }, "notes") : null,
+        h("span", { class: "risk-bug-status" }, (b.status || "").replace(/_/g, " ")),
+        b.reporter ? h("span", { class: "risk-bug-reporter" }, b.reporter) : null,
+        h("button", {
+          class: "risk-bug-del-btn", title: "Delete bug",
+          onclick: async (e) => {
+            e.stopPropagation();
+            if (!confirm("Delete this bug? This can't be undone.")) return;
+            STATE[t.id].bugs = (STATE[t.id].bugs || []).filter(x => x.id !== b.id);
+            await saveState(); renderMain(); toast("Bug deleted");
+          }
+        }, "×")
+      ].filter(Boolean));
+
+      // ── Edit form ─────────────────────────────────────────────────
+      const eTitle    = h("input",    { class: "risk-bug-form-title",    type: "text", value: b.title || "" });
+      const eSev      = h("select",   { class: "risk-bug-form-select" }, [
+        h("option", { value: "medium",   ...(b.severity === "medium"   ? { selected: true } : {}) }, "Medium"),
+        h("option", { value: "high",     ...(b.severity === "high"     ? { selected: true } : {}) }, "High"),
+        h("option", { value: "critical", ...(b.severity === "critical" ? { selected: true } : {}) }, "Critical"),
+        h("option", { value: "low",      ...(b.severity === "low"      ? { selected: true } : {}) }, "Low")
+      ]);
+      const eStatus   = h("select",   { class: "risk-bug-form-select" }, [
+        h("option", { value: "open",        ...(b.status === "open"        ? { selected: true } : {}) }, "Open"),
+        h("option", { value: "in_progress", ...(b.status === "in_progress" ? { selected: true } : {}) }, "In progress"),
+        h("option", { value: "resolved",    ...(b.status === "resolved"    ? { selected: true } : {}) }, "Resolved"),
+        h("option", { value: "wont_fix",    ...(b.status === "wont_fix"    ? { selected: true } : {}) }, "Won't fix")
+      ]);
+      const eReporter = h("input",    { class: "risk-bug-form-reporter",  type: "text", value: b.reporter || "", placeholder: "Reporter" });
+      const eDesc     = h("textarea", { class: "risk-bug-form-desc",      placeholder: "Steps to reproduce, expected vs. actual…" }, b.stepsToReproduce || "");
+
+      const openEdit  = () => { bugEdit.style.display = "flex"; bugView.style.display = "none"; eTitle.focus(); };
+      const closeEdit = () => { bugEdit.style.display = "none"; bugView.style.display = ""; };
+      const saveEdit  = async () => {
+        if (!eTitle.value.trim()) return;
+        b.title            = eTitle.value.trim();
+        b.severity         = eSev.value;
+        b.status           = eStatus.value;
+        b.reporter         = eReporter.value.trim();
+        b.stepsToReproduce = eDesc.value.trim();
+        STATE[t.id].updated = new Date().toISOString();
+        await saveState(); renderMain();
+      };
+      eTitle.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); saveEdit(); } });
+
+      const bugEdit = h("div", { class: "risk-bug-form", style: "display:none;" }, [
+        eTitle,
+        h("div", { class: "risk-bug-form-row" }, [
+          eSev, eStatus, eReporter,
+          h("button", { class: "risk-bug-form-add",    type: "button", onclick: saveEdit  }, "Save"),
+          h("button", { class: "risk-bug-form-cancel", type: "button", onclick: closeEdit }, "Cancel")
+        ]),
+        eDesc
+      ]);
+
+      bugView.addEventListener("click", (e) => {
+        if (e.target.closest(".risk-bug-del-btn")) return;
+        openEdit();
+      });
+
+      const wrap = h("div", { class: "risk-bug-item" });
+      wrap.appendChild(bugView);
+      wrap.appendChild(bugEdit);
+      return wrap;
+    };
+
     const body = h("div", { class: "risk-row-body" }, [
       noteArea,
-      ...(s.bugs || []).map(b => h("div", {
-        class: "risk-bug",
-        style: `border-left-color: ${b.severity === "critical" ? "var(--danger)" : "var(--sun)"};`
-      }, [
-        h("span", {
-          class: "risk-bug-sev",
-          style: `color: ${b.severity === "critical" ? "var(--danger)" : "var(--sun)"};`
-        }, (b.severity || "med").toUpperCase()),
-        h("span", { class: "risk-bug-title" }, b.title),
-        h("span", { class: "risk-bug-status" }, (b.status || "").replace("_", " "))
-      ])),
-      bugInput
+      ...(s.bugs || []).map(makeBugItem),
+      addBugBtn,
+      bugForm
     ]);
     row.appendChild(body);
   }
@@ -6282,7 +6515,9 @@ function renderMatrixView(rows) {
     phases.forEach(p => {
       const cellRows = ownerRows.filter(r => r.phaseId === p.id);
       const cell = h("td", { class: "matrix-cell" });
-      cellRows.forEach(r => cell.appendChild(renderMatrixChip(r)));
+      const chipGrid = h("div", { class: "matrix-chip-grid" });
+      cellRows.forEach(r => chipGrid.appendChild(renderMatrixChip(r)));
+      cell.appendChild(chipGrid);
       tr.appendChild(cell);
     });
     tr.appendChild(h("td", { class: "matrix-load-cell" }, [renderLoadBar(open, crit, blocked)]));
@@ -6427,7 +6662,7 @@ function renderMatrixEdit(r) {
     placeholder: "🐞 New bug (Enter)",
     onkeydown: (e) => {
       if (e.key === "Enter" && e.target.value.trim()) {
-        addBugInline(t.id, e.target.value);
+        addBugInline(t.id, { title: e.target.value });
         e.target.value = "";
       }
     }
@@ -8589,7 +8824,6 @@ function makeTimedPill(ev, dateStr, times, mode) {
   if (evMeta && evMeta.key === "cancelled") cls += " is-status-cancelled";
   const pill = h("div", {
     class: cls,
-    title: ev.title,
     onclick: (e) => {
       e.stopPropagation();
       hideEventTooltip();
@@ -8625,7 +8859,7 @@ function makeTimedPill(ev, dateStr, times, mode) {
 function renderTimedDay(dateStr, todayStr) {
   const wrap = h("div", { class: "timed-view timed-view-day" });
   const labels = h("div", { class: "timed-labels" });
-  // Empty cell to align with the all-day strip header
+  labels.appendChild(h("div", { class: "timed-labels-col-spacer" }));
   labels.appendChild(h("div", { class: "timed-labels-allday" }, "All day"));
   for (let h_ = TIMED_HOUR_START; h_ < TIMED_HOUR_END; h_++) {
     const hh = h_ === 0 ? 12 : (h_ > 12 ? h_ - 12 : h_);
@@ -8652,6 +8886,7 @@ function renderTimedWeek(weekStart, todayStr) {
   const wrap = h("div", { class: "timed-view timed-view-week" });
   // Left labels column
   const labels = h("div", { class: "timed-labels" });
+  labels.appendChild(h("div", { class: "timed-labels-col-spacer" }));
   labels.appendChild(h("div", { class: "timed-labels-allday" }, "All day"));
   for (let h_ = TIMED_HOUR_START; h_ < TIMED_HOUR_END; h_++) {
     const hh = h_ === 0 ? 12 : (h_ > 12 ? h_ - 12 : h_);
@@ -9254,8 +9489,8 @@ function showScheduleModal(dateStr) {
           repeatSel
         ])
       ]),
-      // Optional time strip — leave blank to mark all-day
-      h("div", { class: "sched-new-card-dates" }, [
+      // Optional time strip — duration quick-picks live in the third column
+      h("div", { class: "sched-new-card-dates sched-new-card-times" }, [
         h("div", { class: "sched-new-card-field" }, [
           h("label", { class: "sched-field-label" }, "Start time"),
           startTimeNew
@@ -9264,15 +9499,10 @@ function showScheduleModal(dateStr) {
           h("label", { class: "sched-field-label" }, "End time"),
           endTimeNew
         ]),
-        h("div", { class: "sched-new-card-field sched-new-card-allday-hint" }, [
-          h("label", { class: "sched-field-label" }, " "),
-          h("div", { style: "font-size:11px;color:var(--muted);font-style:italic;padding:6px 0;" },
-            "Leave blank for all-day")
+        h("div", { class: "sched-new-card-field" }, [
+          h("label", { class: "sched-field-label" }, "Duration"),
+          makeTimePair(startTimeNew, endTimeNew, { hideLabel: true })
         ])
-      ]),
-      // Quick-pick durations + auto-default end to start + 1h
-      h("div", { class: "sched-new-card-quickpicks" }, [
-        makeTimePair(startTimeNew, endTimeNew)
       ]),
       // Phase + group + create button
       h("div", { class: "sched-new-card-meta" }, [
@@ -9708,6 +9938,90 @@ async function importJSON(file) {
   } catch (e) {
     console.error(e);
     toast("Import failed — invalid file", "warn");
+  }
+}
+
+function icsEventToMilestone(ev) {
+  const dtstart = ev["DTSTART"];
+  if (!dtstart) return null;
+  const allDay = dtstart.params.includes("VALUE=DATE") || !dtstart.value.includes("T");
+  const v = dtstart.value.replace("Z", "");
+  const date = v.slice(0,4) + "-" + v.slice(4,6) + "-" + v.slice(6,8);
+  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) return null;
+  const time = allDay ? "" : v.slice(9,11) + ":" + v.slice(11,13);
+  let endTime = "";
+  const dtend = ev["DTEND"];
+  if (dtend && !allDay) {
+    const ve = dtend.value.replace("Z", "");
+    endTime = ve.slice(9,11) + ":" + ve.slice(11,13);
+  }
+  const decode = s => (s || "").replace(/\\n/g,"\n").replace(/\\,/g,",").replace(/\\;/g,";").replace(/\\\\/g,"\\");
+  const title = decode(ev["SUMMARY"]?.value).trim() || "Untitled Event";
+  const notes = decode(ev["DESCRIPTION"]?.value || "");
+  const status = (ev["STATUS"]?.value || "").toUpperCase() === "CANCELLED" ? "cancelled" : "scheduled";
+  return { date, title, type: "meeting", desc: "", notes, time, endTime, status };
+}
+
+async function importGoogleCalendar(file) {
+  try {
+    const text = await file.text();
+    // Unfold RFC 5545 line continuations
+    const unfolded = text.replace(/\r\n[ \t]/g,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+    const lines = unfolded.split("\n");
+
+    const events = [];
+    let cur = null;
+    for (const raw of lines) {
+      if (raw.trim() === "BEGIN:VEVENT") { cur = {}; continue; }
+      if (raw.trim() === "END:VEVENT")   { if (cur) events.push(cur); cur = null; continue; }
+      if (!cur) continue;
+      const ci = raw.indexOf(":");
+      if (ci === -1) continue;
+      const keyPart = raw.slice(0, ci);
+      const val     = raw.slice(ci + 1);
+      const baseKey = keyPart.split(";")[0].toUpperCase();
+      cur[baseKey]  = { params: keyPart.toUpperCase(), value: val };
+    }
+
+    if (!events.length) { toast("No events found in file", "warn"); return; }
+
+    const milestones = [];
+    let skipped = 0;
+    for (const ev of events) {
+      if (ev["RRULE"]) { skipped++; continue; }
+      const m = icsEventToMilestone(ev);
+      if (m) milestones.push(m);
+    }
+
+    if (!milestones.length) {
+      toast("No importable events" + (skipped ? ` · ${skipped} recurring skipped` : ""), "warn");
+      return;
+    }
+
+    const confirmMsg = `Import ${milestones.length} event${milestones.length !== 1 ? "s" : ""} as calendar milestones?`
+      + (skipped ? `\n\n${skipped} recurring event${skipped !== 1 ? "s" : ""} were skipped (repeating events are not supported).` : "");
+    if (!confirm(confirmMsg)) return;
+
+    // Deduplicate by date + title
+    const existing = new Set((STATE.__milestones || []).map(m => m.date + "|" + m.title));
+    let added = 0, dupes = 0;
+    for (const m of milestones) {
+      const key = m.date + "|" + m.title;
+      if (existing.has(key)) { dupes++; continue; }
+      existing.add(key);
+      STATE.__milestones.push(m);
+      added++;
+    }
+
+    await saveState();
+    renderShell();
+    const result = added + " event" + (added !== 1 ? "s" : "") + " imported"
+      + (dupes ? ` · ${dupes} duplicate${dupes !== 1 ? "s" : ""} skipped` : "")
+      + (skipped ? ` · ${skipped} recurring skipped` : "");
+    toast(result, "success");
+  } catch (e) {
+    console.error(e);
+    toast("Import failed — check that this is a valid .ics file", "warn");
   }
 }
 
@@ -10428,8 +10742,9 @@ function renderSparkline(values, color) {
 function renderDashboardFilters(host, filter, rerender) {
   host.innerHTML = "";
 
-  // -- Line 1: When + optional custom range -----------------------------------
-  const line1 = h("div", { class: "dash-filter-line" });
+  const line = h("div", { class: "dash-filter-line" });
+
+  // When
   const ranges = [
     ["all", "All time"],
     ["this_week", "Week"],
@@ -10448,7 +10763,7 @@ function renderDashboardFilters(host, filter, rerender) {
       onclick: () => { filter.timeRange = v; rerender(); }
     }, label));
   });
-  line1.appendChild(rangeGroup);
+  line.appendChild(rangeGroup);
 
   if (filter.timeRange === "custom") {
     const wrap = h("div", { class: "dash-custom-range" });
@@ -10461,15 +10776,13 @@ function renderDashboardFilters(host, filter, rerender) {
       type: "date", value: filter.customEnd || "",
       onchange: (e) => { filter.customEnd = e.target.value; rerender(); }
     }));
-    line1.appendChild(wrap);
+    line.appendChild(wrap);
   }
 
-  host.appendChild(line1);
+  // Divider
+  line.appendChild(h("div", { class: "dash-filter-divider" }));
 
-  // -- Line 2: Status + Phases + Reset ---------------------------------------
-  const line2 = h("div", { class: "dash-filter-line" });
-
-  // Status multi-select
+  // Status
   const statuses = [
     ["not_started", "Not started"],
     ["in_progress", "In progress"],
@@ -10494,9 +10807,12 @@ function renderDashboardFilters(host, filter, rerender) {
       }
     }, label));
   });
-  line2.appendChild(statGroup);
+  line.appendChild(statGroup);
 
-  // Phase multi-select — shown as compact numeric chips.
+  // Divider
+  line.appendChild(h("div", { class: "dash-filter-divider" }));
+
+  // Phases
   const phaseGroup = h("div", { class: "dash-filter-group" }, [
     h("span", { class: "dash-filter-label" }, "Phases")
   ]);
@@ -10516,16 +10832,15 @@ function renderDashboardFilters(host, filter, rerender) {
       }
     }, `${p.num}`));
   });
-  line2.appendChild(phaseGroup);
+  line.appendChild(phaseGroup);
 
-  // Spacer pushes the reset action to the far right of line 2.
-  line2.appendChild(h("div", { class: "dash-filter-spacer" }));
-
+  // Reset — pushed to far right
+  line.appendChild(h("div", { class: "dash-filter-spacer" }));
   const hasFilter = filter.timeRange !== "all"
     || (filter.phases && filter.phases.length)
     || (filter.statuses && filter.statuses.length);
   if (hasFilter) {
-    line2.appendChild(h("button", {
+    line.appendChild(h("button", {
       class: "dash-filter-reset",
       title: "Clear all filters",
       onclick: () => {
@@ -10539,7 +10854,7 @@ function renderDashboardFilters(host, filter, rerender) {
     }, "Reset"));
   }
 
-  host.appendChild(line2);
+  host.appendChild(line);
 }
 
 // ---------- UI: body sections ----------
@@ -11266,6 +11581,18 @@ function openSettings() {
       })()
     ]),
     h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Google Calendar"),
+      h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" },
+        "Import events from a Google Calendar export (.ics). Events are added as calendar milestones. Recurring events and duplicates are skipped automatically."),
+      h("div", { style: "font-size:11px; color:var(--muted); margin-bottom:10px;" },
+        "To export from Google Calendar: Settings → Import & Export → Export, then select the calendar and download the .ics file."),
+      h("button", {
+        class: "btn btn-outline",
+        onclick: () => $("#gcal-import-file").click(),
+        html: ICONS.cal + "<span>Import Google Calendar (.ics)</span>"
+      })
+    ]),
+    h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
       h("div", { style: "font-weight:600; color:var(--danger); margin-bottom:6px;" }, "Danger zone"),
       h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" }, "Reset all progress — clears all tasks, bugs, and settings on this browser. Cannot be undone."),
       h("button", { class: "btn btn-danger", onclick: resetAll }, "Reset tracker")
@@ -11532,6 +11859,12 @@ async function init() {
   $("#import-file").addEventListener("change", (e) => {
     const f = e.target.files[0];
     if (f) importJSON(f);
+    e.target.value = "";
+  });
+
+  $("#gcal-import-file").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (f) importGoogleCalendar(f);
     e.target.value = "";
   });
 
