@@ -1332,6 +1332,51 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .ef-add-btn svg { display: block; }
 .ef-add-btn:disabled { opacity: 0.45; cursor: default; }
 
+/* Quick-pick duration row sitting under a Start/End time input pair. */
+.time-quickpicks {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin: -4px 0 4px;
+}
+.time-quick-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+.time-quickpick-btn {
+  padding: 3px 9px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 11px; font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.time-quickpick-btn:hover {
+  border-color: var(--citrus);
+  color: var(--citrus-deep);
+  background: var(--citrus-soft);
+}
+.time-quickpick-btn.is-active {
+  border-color: var(--citrus);
+  color: var(--citrus-deep);
+  background: var(--citrus-soft);
+  font-weight: 600;
+}
+.time-quickpick-btn.time-quickpick-allday {
+  margin-left: auto;
+  border-style: dashed;
+  font-style: italic;
+}
+.time-quickpick-btn.time-quickpick-allday:hover {
+  border-style: solid;
+  color: var(--ink-3);
+  background: var(--bg-3);
+}
+
 /* Inline text input that temporarily replaces a Phase / Group <select> when
    the user clicks the + button — matches the select's size + color treatment. */
 .ef-inline-create {
@@ -1787,6 +1832,688 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .security-notice svg { color: var(--sun); flex-shrink: 0; margin-top: 1px; }
 
+/* ---------- Admin Dashboard ---------- */
+.sidebar-dashboard-btn {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 8px 12px;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--citrus) 0%, var(--citrus-deep) 100%);
+  color: white;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: -0.005em;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.18s ease;
+}
+.sidebar-dashboard-btn:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.sidebar-dashboard-btn:active { transform: translateY(0); }
+.sidebar-dashboard-btn svg { flex-shrink: 0; }
+.sidebar-dashboard-btn .dash-badge {
+  margin-left: auto;
+  background: rgba(255,255,255,0.22);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 10px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.dash-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,29,35,0.68);
+  backdrop-filter: blur(6px);
+  z-index: 220;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.dash-overlay.is-open { display: flex; }
+.dash-modal {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 1320px;
+  width: 100%;
+  min-height: calc(100vh - 48px);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.dash-header {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 18px 24px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.dash-header-top { display: flex; align-items: center; gap: 16px; }
+.dash-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  flex: 1;
+}
+.dash-subtitle {
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+}
+.dash-close {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  color: var(--muted);
+  transition: all 0.12s ease;
+}
+.dash-close:hover { background: var(--bg-2); color: var(--ink); }
+
+/* Filter bar — macOS-style segmented controls. A soft container holds a
+   small muted prefix label + a row of tightly spaced buttons. The active
+   button "lifts" with a white background and soft shadow, no noisy borders. */
+.dash-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dash-filter-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+.dash-filter-line > .dash-filter-spacer { flex: 1; }
+
+.dash-filter-group {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  gap: 1px;
+  background: rgba(26,29,35,0.05);
+  border: none;
+  border-radius: 8px;
+  height: 30px;
+}
+.dash-filter-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--muted);
+  padding: 0 8px 0 6px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  white-space: nowrap;
+  border: none;
+  margin-right: 0;
+}
+.dash-chip {
+  padding: 0 11px;
+  height: 24px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.01em;
+}
+.dash-chip:hover {
+  color: var(--ink);
+  background: rgba(26,29,35,0.04);
+}
+.dash-chip.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(26,29,35,0.08), 0 0 0 0.5px rgba(26,29,35,0.06);
+}
+.dash-chip.is-active:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.dash-chip.is-active.is-phase {
+  background: var(--surface);
+  color: var(--citrus-deep);
+  box-shadow: 0 1px 2px rgba(232,118,58,0.18), 0 0 0 0.5px rgba(232,118,58,0.22);
+}
+.dash-chip.is-active.is-status-complete {
+  background: var(--surface);
+  color: var(--leaf);
+  box-shadow: 0 1px 2px rgba(74,124,89,0.18), 0 0 0 0.5px rgba(74,124,89,0.22);
+}
+.dash-chip.is-active.is-status-in_progress {
+  background: var(--surface);
+  color: var(--citrus-deep);
+  box-shadow: 0 1px 2px rgba(232,118,58,0.18), 0 0 0 0.5px rgba(232,118,58,0.22);
+}
+.dash-chip.is-active.is-status-blocked {
+  background: var(--surface);
+  color: var(--blocked);
+  box-shadow: 0 1px 2px rgba(115,87,133,0.18), 0 0 0 0.5px rgba(115,87,133,0.22);
+}
+.dash-chip.is-active.is-status-not_started {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(26,29,35,0.08), 0 0 0 0.5px rgba(26,29,35,0.06);
+}
+
+.dash-custom-range {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  height: 30px;
+  background: rgba(26,29,35,0.05);
+  border: none;
+  border-radius: 8px;
+}
+.dash-custom-range input[type="date"] {
+  border: none; background: transparent;
+  font-family: inherit; font-size: 12px;
+  color: var(--ink);
+  padding: 2px 0;
+  outline: none;
+  font-weight: 500;
+}
+.dash-custom-range span { font-size: 11px; color: var(--muted); }
+
+.dash-filter-reset {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 12px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.12s ease;
+  gap: 5px;
+}
+.dash-filter-reset:hover { color: var(--danger); background: var(--danger-soft); }
+
+.dash-body {
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* A row of cards that share a 12-column grid. Items inside use .dash-col-N
+   classes to claim their width. Height behavior is stretch by default so
+   every card in the row ends up the same height. */
+.dash-row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+/* 3 equal columns — used for Needs attention and Bugs & time budget. */
+.dash-row.dash-row-three {
+  grid-template-columns: repeat(3, 1fr);
+}
+/* Start-align variant — for rows where equal heights would be misleading
+   (currently unused, retained for future one-offs). */
+.dash-row.is-start { align-items: start; }
+
+@media (max-width: 1100px) {
+  .dash-row.dash-row-three { grid-template-columns: 1fr; }
+}
+
+.dash-section-head {
+  display: flex; align-items: center; gap: 12px;
+  margin: 10px 0 -2px;
+}
+.dash-section-head h3 {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+.dash-section-head .line {
+  flex: 1; height: 1px; background: var(--line);
+}
+
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 15px 17px;
+  display: flex; flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.dash-card.is-clickable { cursor: pointer; }
+.dash-card.is-clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.dash-card-title {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.dash-card-title .dash-card-sub {
+  font-weight: 400; letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-3);
+  margin-left: auto;
+}
+
+.dash-kpi { gap: 5px; }
+.dash-kpi-val {
+  font-family: var(--font-display);
+  font-size: 36px; font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: baseline; gap: 4px;
+}
+.dash-kpi-val .dash-kpi-unit {
+  font-size: 18px; color: var(--ink-3);
+  font-weight: 500;
+}
+.dash-kpi-meta {
+  font-size: 11px; color: var(--ink-3);
+  display: flex; align-items: center; gap: 6px;
+}
+.dash-kpi-meta .delta-up { color: var(--leaf); font-weight: 600; }
+.dash-kpi-meta .delta-down { color: var(--danger); font-weight: 600; }
+.dash-kpi-meta .delta-flat { color: var(--muted); font-weight: 600; }
+.dash-kpi.is-warn .dash-kpi-val { color: var(--sun); }
+.dash-kpi.is-danger .dash-kpi-val { color: var(--danger); }
+.dash-kpi.is-good .dash-kpi-val { color: var(--leaf); }
+.dash-kpi.is-info .dash-kpi-val { color: var(--info); }
+.dash-kpi.is-blocked .dash-kpi-val { color: var(--blocked); }
+.dash-kpi.is-citrus .dash-kpi-val { color: var(--citrus-deep); }
+/* When the row stretches this KPI card taller than its natural height, glue
+   the meta line to the bottom so the card's interior feels filled rather
+   than top-clumped. */
+.dash-kpi .dash-kpi-meta { margin-top: auto; }
+
+/* Fill the card's stretched height with the main body element (list or empty
+   state). Prevents the "content at top, empty hole below" look when an equal-
+   height row sizes a short card to match a taller sibling. */
+.dash-card > .dash-item-list,
+.dash-card > .dash-empty,
+.dash-card > .dash-phase-list {
+  flex: 1;
+  min-height: 0;
+}
+.dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-kpi-ring {
+  display: flex; align-items: center; gap: 14px;
+}
+.dash-kpi-ring svg { flex-shrink: 0; }
+.dash-kpi-ring-text {
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.dash-col-2 { grid-column: span 2; }
+.dash-col-3 { grid-column: span 3; }
+.dash-col-4 { grid-column: span 4; }
+.dash-col-5 { grid-column: span 5; }
+.dash-col-6 { grid-column: span 6; }
+.dash-col-7 { grid-column: span 7; }
+.dash-col-8 { grid-column: span 8; }
+.dash-col-9 { grid-column: span 9; }
+.dash-col-12 { grid-column: span 12; }
+
+.dash-phase-list { display: flex; flex-direction: column; gap: 11px; }
+.dash-phase-row { display: flex; flex-direction: column; gap: 5px; cursor: pointer; }
+.dash-phase-row:hover .dash-phase-title { color: var(--citrus-deep); }
+.dash-phase-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+}
+.dash-phase-title {
+  font-size: 12px; font-weight: 500;
+  color: var(--ink);
+  transition: color 0.12s ease;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dash-phase-num {
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--muted);
+  margin-right: 8px;
+}
+.dash-phase-count {
+  font-size: 11px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dash-phase-bar {
+  height: 9px;
+  border-radius: 4px;
+  background: var(--bg-3);
+  overflow: hidden;
+  display: flex;
+}
+.dash-phase-seg { height: 100%; transition: flex-basis 0.25s ease; }
+.dash-phase-seg.is-complete { background: var(--leaf); }
+.dash-phase-seg.is-in_progress { background: var(--citrus); }
+.dash-phase-seg.is-blocked { background: var(--danger); }
+.dash-phase-seg.is-not_started { background: var(--line-2); }
+
+.dash-chart-svg { display: block; width: 100%; height: auto; }
+.dash-chart-legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 11px; color: var(--ink-3);
+  margin-top: 4px;
+}
+.dash-chart-legend span {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.dash-chart-legend i {
+  display: inline-block;
+  width: 10px; height: 10px; border-radius: 2px;
+}
+.dash-chart-legend i.is-line {
+  width: 14px; height: 2px; border-radius: 1px;
+}
+
+.dash-heatmap-wrap {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.dash-heatmap-inner {
+  display: flex; gap: 10px;
+  align-items: flex-start;
+}
+.dash-heatmap-daylabels {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+  font-size: 9px;
+  color: var(--muted);
+  padding-top: 18px;
+}
+.dash-heatmap-col-wrap {
+  display: flex; flex-direction: column; gap: 3px;
+  flex: 1; min-width: 0;
+}
+.dash-heatmap-monthrow {
+  display: flex; gap: 0;
+  height: 12px;
+  font-size: 9px;
+  color: var(--muted);
+  position: relative;
+}
+.dash-heatmap-monthrow span {
+  position: absolute; top: 0;
+  white-space: nowrap;
+}
+.dash-heatmap-grid {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 3px;
+  grid-template-rows: repeat(7, 12px);
+}
+.dash-heatmap-cell {
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  cursor: default;
+}
+.dash-heatmap-cell.l1 { background: rgba(232,118,58,0.20); border-color: rgba(232,118,58,0.30); }
+.dash-heatmap-cell.l2 { background: rgba(232,118,58,0.42); border-color: rgba(232,118,58,0.50); }
+.dash-heatmap-cell.l3 { background: rgba(232,118,58,0.68); border-color: rgba(232,118,58,0.70); }
+.dash-heatmap-cell.l4 { background: var(--citrus); border-color: var(--citrus-deep); }
+.dash-heatmap-cell.is-today { box-shadow: 0 0 0 1.5px var(--ink); }
+.dash-heatmap-scale {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--muted);
+  margin-left: auto;
+}
+.dash-heatmap-scale i {
+  width: 10px; height: 10px; border-radius: 2px;
+  display: inline-block; border: 1px solid var(--line);
+}
+
+.dash-item-list { display: flex; flex-direction: column; gap: 0; }
+.dash-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  border-radius: 3px;
+}
+.dash-item:last-child { border-bottom: none; }
+.dash-item:hover { background: var(--bg-2); }
+.dash-item-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.dash-item-dot.is-not_started { background: var(--muted); }
+.dash-item-dot.is-in_progress { background: var(--citrus); }
+.dash-item-dot.is-complete { background: var(--leaf); }
+.dash-item-dot.is-blocked { background: var(--danger); }
+.dash-item-title {
+  flex: 1;
+  font-size: 12px; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+.dash-item-meta {
+  font-size: 10px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dash-item-pill {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.dash-item-pill.is-overdue { background: var(--danger-soft); color: var(--danger); }
+.dash-item-pill.is-soon { background: var(--sun-soft); color: var(--sun); }
+.dash-item-pill.is-blocked { background: var(--blocked-soft); color: var(--blocked); }
+.dash-item-pill.is-urgent { background: var(--sun-soft); color: var(--sun); }
+.dash-item-pill.is-bug { background: var(--danger-soft); color: var(--danger); }
+
+.dash-empty {
+  padding: 22px 6px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-style: italic;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+}
+
+/* Keep compatibility for any residual selectors. */
+.dash-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
+  gap: 14px;
+}
+.dash-attention-grid > .dash-card,
+.dash-row.dash-row-three > .dash-card { min-height: 200px; }
+.dash-item-list.is-capped {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Side-by-side split that pairs one tall card with a vertical stack of
+   shorter cards — prevents the "wasted space under the short card" problem
+   that a plain 12-col grid row creates when siblings have very different
+   natural heights. */
+.dash-split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 14px;
+}
+.dash-split-row > .dash-split-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.dash-split-row > .dash-split-stack > .dash-card:last-child { flex: 1; }
+@media (max-width: 1100px) {
+  .dash-split-row { grid-template-columns: 1fr; }
+}
+
+.dash-donut-wrap {
+  display: flex; align-items: center; gap: 20px;
+}
+.dash-donut-legend {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 6px;
+  font-size: 12px;
+}
+.dash-donut-legend-row {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--ink-2);
+}
+.dash-donut-legend-row i {
+  width: 10px; height: 10px; border-radius: 2px;
+  display: inline-block;
+}
+.dash-donut-legend-row .v {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.dash-milestone-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.dash-milestone-row:last-child { border-bottom: none; }
+.dash-milestone-title {
+  font-size: 12px; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.dash-milestone-date {
+  font-size: 11px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dash-milestone-countdown {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  font-variant-numeric: tabular-nums;
+  min-width: 64px;
+  text-align: center;
+  white-space: nowrap;
+}
+.dash-milestone-countdown.is-past { background: var(--bg-3); color: var(--muted); }
+.dash-milestone-countdown.is-soon { background: var(--sun-soft); color: var(--sun); }
+.dash-milestone-countdown.is-now { background: var(--danger-soft); color: var(--danger); }
+
+.dash-bug-sev-bar {
+  display: flex; align-items: stretch;
+  height: 8px; border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg-3);
+  margin-top: 2px;
+}
+.dash-bug-sev-seg { height: 100%; }
+.dash-bug-sev-seg.is-critical { background: var(--danger); }
+.dash-bug-sev-seg.is-high { background: var(--sun); }
+.dash-bug-sev-seg.is-medium { background: var(--info); }
+.dash-bug-sev-seg.is-low { background: var(--muted); }
+
+.dash-time-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.dash-time-row:last-child { border-bottom: none; }
+.dash-time-bar-wrap {
+  flex: 1;
+  height: 6px; border-radius: 3px;
+  background: var(--bg-3);
+  overflow: hidden;
+}
+.dash-time-bar-fill {
+  height: 100%;
+  background: var(--citrus);
+  border-radius: 3px;
+}
+.dash-time-title { min-width: 80px; color: var(--ink-2); }
+.dash-time-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+  font-size: 11px;
+}
+
+.is-dash-flash {
+  animation: dash-flash 1.4s ease-out;
+}
+@keyframes dash-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(232,118,58,0.55); background: var(--citrus-soft); }
+  60%  { box-shadow: 0 0 0 6px rgba(232,118,58,0); background: var(--citrus-soft); }
+  100% { box-shadow: 0 0 0 0 rgba(232,118,58,0); background: transparent; }
+}
+
+@media (max-width: 1100px) {
+  .dash-col-2, .dash-col-3 { grid-column: span 6; }
+  .dash-col-4 { grid-column: span 6; }
+  .dash-col-5 { grid-column: span 6; }
+  .dash-col-6 { grid-column: span 12; }
+  .dash-col-7 { grid-column: span 12; }
+  .dash-col-8 { grid-column: span 12; }
+  .dash-col-9 { grid-column: span 12; }
+  .dash-attention-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .dash-col-2, .dash-col-3, .dash-col-4, .dash-col-5 { grid-column: span 6; }
+  .dash-body { grid-template-columns: repeat(6, 1fr); padding: 14px; gap: 10px; }
+  .dash-header { padding: 14px 16px 10px; }
+  .dash-kpi-val { font-size: 28px; }
+}
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed; bottom: 22px; right: 22px;
@@ -2141,11 +2868,26 @@ kbd {
 
 /* ---- Risk row (single task in the bucket list) ---- */
 .risk-row {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   overflow: hidden;
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.risk-phase-tag-corner {
+  position: absolute;
+  top: 3px;
+  right: 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  opacity: 0.5;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
 }
 .risk-row:hover { border-color: var(--line-2); }
 .risk-row.is-open {
@@ -2158,7 +2900,9 @@ kbd {
   display: grid;
   grid-template-columns: auto auto 1fr auto;
   align-items: center; gap: 10px;
-  padding: 10px 14px;
+  /* Extra right padding so the corner phase-tag has clear space and doesn't
+     visually collide with the bug chip / repeat tag at the end of the meta. */
+  padding: 10px 30px 10px 14px;
   cursor: pointer;
 }
 .risk-dot {
@@ -2215,11 +2959,6 @@ kbd {
   color: var(--sun);
   padding: 2px 7px;
   border-radius: 10px;
-}
-.risk-phase-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--muted);
 }
 
 /* ---- Expanded row body (note + bugs + bug-log input) ---- */
@@ -2810,6 +3549,199 @@ kbd {
   text-transform: uppercase;
 }
 
+/* ---- Calendar Day / Week timed views ---- */
+.cal-view-toggle {
+  display: inline-flex;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  margin-left: 4px;
+}
+.cal-view-btn {
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  font-size: 11px; font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-family: inherit;
+}
+.cal-view-btn:hover { color: var(--ink); background: var(--surface); }
+.cal-view-btn.is-on { background: var(--ink); color: white; }
+
+.timed-view {
+  display: grid;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  font-size: 12px;
+}
+.timed-view-day  { grid-template-columns: 64px 1fr; }
+.timed-view-week { grid-template-columns: 64px repeat(7, 1fr); }
+.timed-labels {
+  border-right: 1px solid var(--line);
+  background: var(--bg-2);
+  display: flex; flex-direction: column;
+}
+.timed-labels-allday {
+  height: 60px;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0 8px;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.timed-hour-label {
+  height: 44px;
+  padding: 2px 8px 0 0;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: right;
+  border-bottom: 1px dashed var(--line);
+}
+.timed-col-wrap {
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--line);
+  min-width: 0;
+}
+.timed-col-wrap:last-child { border-right: none; }
+.timed-col-header {
+  height: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.timed-col-header.is-today { background: var(--citrus-soft); }
+.timed-col-header .timed-col-dow {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.timed-col-header.is-today .timed-col-dow { color: var(--citrus-deep); }
+.timed-col-header .timed-col-num {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.timed-col-header.is-today .timed-col-num { color: var(--citrus-deep); }
+.timed-col {
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.timed-col.is-today { background: rgba(232,118,58,0.03); }
+.timed-allday {
+  min-height: 60px;
+  border-bottom: 1px solid var(--line);
+  padding: 4px 4px;
+  display: flex; flex-direction: column; gap: 3px;
+  background: var(--bg-2);
+}
+.timed-allday-empty { flex: 1; }
+.timed-grid {
+  position: relative;
+  height: calc(44px * 16); /* HOUR_PX * TIMED_HOUR_COUNT */
+}
+.timed-slot {
+  height: 44px;
+  border-bottom: 1px dashed var(--line);
+  cursor: pointer;
+}
+.timed-slot:hover { background: rgba(232,118,58,0.05); }
+.timed-pill {
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  border-left: 3px solid var(--citrus);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: filter 0.12s ease;
+}
+.timed-pill:hover { filter: brightness(0.96); }
+.timed-pill.is-allday {
+  border-left-width: 3px;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.timed-pill.is-milestone {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-left-color: var(--danger);
+}
+.timed-pill.is-recurring {
+  background: var(--info-soft);
+  color: var(--info);
+  border-left-color: var(--info);
+}
+.timed-pill.is-complete,
+.timed-pill.is-status-completed {
+  background: var(--leaf-soft);
+  color: var(--leaf);
+  border-left-color: var(--leaf);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+.timed-pill.is-status-cancelled {
+  background: var(--bg-3);
+  color: var(--muted);
+  border-left-color: var(--muted);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.timed-grid > .timed-pill {
+  /* When inside the grid, the pills are absolutely positioned by JS. */
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 2;
+}
+.timed-pill-time {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timed-pill-title {
+  font-weight: 500;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.timed-now {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--danger);
+  z-index: 5;
+  pointer-events: none;
+}
+.timed-now::before {
+  content: "";
+  position: absolute;
+  left: -4px; top: -3px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
 /* ---- Calendar upcoming list (Risk-row aesthetic) ---- */
 .cal-upcoming-section {
   background: var(--surface);
@@ -3374,6 +4306,11 @@ function defaultTaskState(t) {
     owner: "",
     startDate: "",
     dueDate: "",
+    // Optional time-of-day. Empty strings = all-day. HH:MM 24h.
+    // Applies to every day of the range / every occurrence by default;
+    // per-occurrence overrides live in STATE.__occurrenceTimes.
+    startTime: "",
+    endTime: "",
     // "none" | "daily" | "weekly" | "biweekly" | "monthly"
     // Cadence anchors off startDate — no separate day-of-week field.
     repeat: "none",
@@ -3454,10 +4391,16 @@ function hydrateState(raw) {
   if (!out.__occurrenceNotes || typeof out.__occurrenceNotes !== "object") {
     out.__occurrenceNotes = {};
   }
-  // Backfill status/notes on milestones (added later as a feature).
+  // Per-occurrence time overrides — { startTime, endTime } keyed the same way.
+  if (!out.__occurrenceTimes || typeof out.__occurrenceTimes !== "object") {
+    out.__occurrenceTimes = {};
+  }
+  // Backfill status/notes/time on milestones.
   out.__milestones.forEach(m => {
     if (m.status == null) m.status = "scheduled";
     if (m.notes == null) m.notes = "";
+    if (m.time == null) m.time = "";        // HH:MM, "" = all-day
+    if (m.endTime == null) m.endTime = "";  // optional end time
   });
   // Migrate legacy recurring entries → custom tasks with repeat: "weekly".
   // Per-occurrence notes/status get re-keyed under "task:{taskId}:{date}".
@@ -3763,6 +4706,8 @@ function defaultUI() {
     urgentOnly: false,
     search: "",
     calMonth: ym(new Date()),
+    calView: "month",         // "day" | "week" | "month"
+    calCursor: ymd(new Date()),// anchor date for day/week views
     tasksView: "list",        // "list" | "matrix"
     matrixSelected: null,     // taskId selected in matrix view
     archiveFilter: "active",  // "active" (default) | "archived" | "all"
@@ -4070,6 +5015,170 @@ function occKey(ev, dateStr) {
   return ev.recurringIndex + ":" + dateStr;
 }
 
+// Per-occurrence time access.
+// Returns { startTime, endTime } strings (HH:MM, "" = all-day) for a given
+// task occurrence on dateStr. Falls back to the task's own startTime/endTime.
+function eventTimes(ev, dateStr) {
+  if (!ev) return { startTime: "", endTime: "" };
+  if (ev.kind === "milestone") {
+    const m = MILESTONES[ev.milestoneIndex];
+    return { startTime: m?.time || "", endTime: m?.endTime || "" };
+  }
+  if (ev.kind === "task") {
+    const k = "task:" + ev.taskId + ":" + dateStr;
+    const ovr = STATE.__occurrenceTimes?.[k];
+    if (ovr && (ovr.startTime || ovr.endTime)) {
+      return { startTime: ovr.startTime || "", endTime: ovr.endTime || "" };
+    }
+    const s = STATE[ev.taskId];
+    return { startTime: s?.startTime || "", endTime: s?.endTime || "" };
+  }
+  if (ev.kind === "recurring") {
+    const k = ev.recurringIndex + ":" + dateStr;
+    const ovr = STATE.__occurrenceTimes?.[k];
+    if (ovr) return { startTime: ovr.startTime || "", endTime: ovr.endTime || "" };
+  }
+  return { startTime: "", endTime: "" };
+}
+
+async function setEventTimes(ev, dateStr, startTime, endTime, applyToAll) {
+  if (!ev) return;
+  if (ev.kind === "milestone") {
+    const m = MILESTONES[ev.milestoneIndex];
+    if (!m) return;
+    m.time = startTime || "";
+    m.endTime = endTime || "";
+  } else if (ev.kind === "task") {
+    if (applyToAll) {
+      // Write to the task itself; clear any per-occurrence overrides.
+      STATE[ev.taskId].startTime = startTime || "";
+      STATE[ev.taskId].endTime = endTime || "";
+      STATE[ev.taskId].updated = new Date().toISOString();
+      // Drop any occurrence-time overrides for this task.
+      Object.keys(STATE.__occurrenceTimes || {}).forEach(k => {
+        if (k.startsWith("task:" + ev.taskId + ":")) delete STATE.__occurrenceTimes[k];
+      });
+    } else {
+      STATE.__occurrenceTimes = STATE.__occurrenceTimes || {};
+      const k = "task:" + ev.taskId + ":" + dateStr;
+      STATE.__occurrenceTimes[k] = { startTime: startTime || "", endTime: endTime || "" };
+    }
+  } else if (ev.kind === "recurring") {
+    STATE.__occurrenceTimes = STATE.__occurrenceTimes || {};
+    const k = ev.recurringIndex + ":" + dateStr;
+    STATE.__occurrenceTimes[k] = { startTime: startTime || "", endTime: endTime || "" };
+  }
+  await saveState();
+  renderMain();
+}
+
+// Add minutes to HH:MM, wrapping at 24h. Returns HH:MM string.
+function addMinutesToTime(hhmm, minutes) {
+  if (!hhmm) return "";
+  const [h, m] = hhmm.split(":").map(n => parseInt(n, 10));
+  if (isNaN(h)) return "";
+  const total = (h * 60 + (m || 0) + minutes + 24 * 60) % (24 * 60);
+  const newH = Math.floor(total / 60);
+  const newM = total % 60;
+  return String(newH).padStart(2, "0") + ":" + String(newM).padStart(2, "0");
+}
+
+// Wire a Start/End time input pair: when the user sets the start and end is
+// empty, auto-fill end to start + 1 hour. Returns a quick-pick duration row
+// (15 / 30 / 1h / 2h / All day) that you can append next to the inputs.
+function makeTimePair(startInput, endInput, opts = {}) {
+  const onChange = opts.onChange || null;
+  let selectedMin = null;
+  const presetBtns = [];
+  const syncActive = () => {
+    presetBtns.forEach(b => {
+      b.classList.toggle("is-active", b._pickMin === selectedMin);
+    });
+  };
+  const fireChange = () => {
+    if (onChange) onChange();
+    // Also dispatch DOM change so existing onchange handlers fire (e.g. the
+    // schedule modal's per-occurrence save-on-change).
+    try {
+      startInput.dispatchEvent(new Event("change"));
+      endInput.dispatchEvent(new Event("change"));
+    } catch {}
+  };
+  startInput.addEventListener("change", () => {
+    if (!startInput.value) return;
+    if (selectedMin != null) {
+      endInput.value = addMinutesToTime(startInput.value, selectedMin);
+      try { endInput.dispatchEvent(new Event("change")); } catch {}
+    } else if (!endInput.value) {
+      endInput.value = addMinutesToTime(startInput.value, 60);
+      try { endInput.dispatchEvent(new Event("change")); } catch {}
+    }
+  });
+  // If the user manually edits the end time, drop the "locked" duration so
+  // future start-time changes don't clobber their explicit value.
+  endInput.addEventListener("input", () => {
+    if (selectedMin != null) {
+      selectedMin = null;
+      syncActive();
+    }
+  });
+  const presets = [
+    { label: "15m", min: 15 },
+    { label: "30m", min: 30 },
+    { label: "1h",  min: 60 },
+    { label: "2h",  min: 120 },
+    { label: "3h",  min: 180 }
+  ];
+  const row = h("div", { class: "time-quickpicks" });
+  row.appendChild(h("span", { class: "time-quick-label" }, "Duration"));
+  presets.forEach(p => {
+    const btn = h("button", {
+      type: "button",
+      class: "time-quickpick-btn",
+      title: `Set end time to start + ${p.label}`,
+      onclick: () => {
+        if (!startInput.value) startInput.value = "09:00";
+        endInput.value = addMinutesToTime(startInput.value, p.min);
+        selectedMin = p.min;
+        syncActive();
+        fireChange();
+      }
+    }, p.label);
+    btn._pickMin = p.min;
+    presetBtns.push(btn);
+    row.appendChild(btn);
+  });
+  row.appendChild(h("button", {
+    type: "button",
+    class: "time-quickpick-btn time-quickpick-allday",
+    title: "Clear time → all-day event",
+    onclick: () => {
+      startInput.value = "";
+      endInput.value = "";
+      selectedMin = null;
+      syncActive();
+      fireChange();
+    }
+  }, "All day"));
+  return row;
+}
+
+// Format "HH:MM" → "10:30 AM" for display.
+function fmtTime(hhmm) {
+  if (!hhmm) return "";
+  const [h, m] = hhmm.split(":").map(n => parseInt(n, 10));
+  if (isNaN(h)) return "";
+  const am = h < 12;
+  const dispH = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+  return `${dispH}:${String(m || 0).padStart(2, "0")} ${am ? "AM" : "PM"}`;
+}
+// Format a time range, smart short form when end is omitted.
+function fmtTimeRange(start, end) {
+  if (!start && !end) return "";
+  if (start && !end) return fmtTime(start);
+  return fmtTime(start) + " – " + fmtTime(end);
+}
+
 // True when a calendar pill should use per-occurrence status/notes
 // (everything except a one-off / ranged non-repeating task).
 function eventIsOccurrence(ev) {
@@ -4356,6 +5465,30 @@ function renderShell() {
 
   const gs = globalStats();
   sidebar.appendChild(h("div", { class: "sidebar-divider" }));
+  // Admin Dashboard launcher — sits right above the Summary block so the
+  // user always has one click into the full analytics overlay.
+  const attentionCount = (() => {
+    const today = ymd(new Date());
+    let n = gs.urgent + gs.blocked + gs.bugsOpen;
+    Object.entries(STATE).forEach(([id, s]) => {
+      if (!TASK_INDEX[id]) return;
+      if (!passesArchiveFilter(s)) return;
+      if (s.status === "complete") return;
+      if (s.dueDate && s.dueDate < today) n++;
+    });
+    return n;
+  })();
+  sidebar.appendChild(h("button", {
+    class: "sidebar-dashboard-btn",
+    title: "Open the full admin dashboard with all analytics",
+    onclick: () => openDashboard()
+  }, [
+    h("span", { html: ICONS.dashboard || '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>' }),
+    h("span", {}, "Dashboard"),
+    attentionCount > 0
+      ? h("span", { class: "dash-badge" }, String(attentionCount))
+      : null
+  ].filter(Boolean)));
   sidebar.appendChild(h("div", { class: "sidebar-heading" }, lbl("sidebar.summary")));
   sidebar.appendChild(h("div", { class: "sidebar-stats" }, [
     h("div", { class: "stat-row" }, [
@@ -5045,8 +6178,7 @@ function renderRiskRow(r) {
           class: "risk-repeat-tag",
           title: label + " — each occurrence has its own status + notes"
         }, shortLabel);
-      })() : null,
-      h("span", { class: "risk-phase-tag", title: phaseTitle }, phaseNum)
+      })() : null
     ].filter(Boolean))
   ]);
   main.addEventListener("click", () => {
@@ -5055,6 +6187,12 @@ function renderRiskRow(r) {
     renderMain();
   });
   row.appendChild(main);
+  // Tiny phase tag in the row's top-right corner — for at-a-glance context
+  // when scrolling past phase sub-dividers.
+  row.appendChild(h("span", {
+    class: "risk-phase-tag-corner",
+    title: phaseTitle
+  }, phaseNum));
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -5812,6 +6950,11 @@ function renderBug(taskId, bug) {
    CALENDAR VIEW
    ============================================================================ */
 function renderCalendarView(main) {
+  // Anchor for day/week views (calCursor); month uses calMonth.
+  if (!UI.calCursor) UI.calCursor = ymd(new Date());
+  const cursorDate = new Date(UI.calCursor + "T00:00:00");
+  const view = UI.calView || "month";
+
   const [yearStr, monthStr] = UI.calMonth.split("-");
   const year = parseInt(yearStr, 10);
   const month = parseInt(monthStr, 10) - 1;
@@ -5820,14 +6963,29 @@ function renderCalendarView(main) {
   const days = daysUntil(GO_LIVE);
 
   // ---- Editorial hero (matches the Risk Radar aesthetic)
-  // Count events in the visible month.
+  // Count events in the visible window (depends on view).
   const monthLast = new Date(year, month + 1, 0);
   const monthStart = ymd(new Date(year, month, 1));
   const monthEnd = ymd(monthLast);
-  let monthEvents = 0;
-  for (let d = 1; d <= monthLast.getDate(); d++) {
-    monthEvents += eventsOnDate(ymd(new Date(year, month, d))).length;
+  let visibleCount = 0;
+  let windowLabel = "";
+  if (view === "month") {
+    for (let d = 1; d <= monthLast.getDate(); d++) {
+      visibleCount += eventsOnDate(ymd(new Date(year, month, d))).length;
+    }
+    windowLabel = monthName;
+  } else if (view === "week") {
+    const wkStart = startOfWeek(cursorDate);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(wkStart); d.setDate(d.getDate() + i);
+      visibleCount += eventsOnDate(ymd(d)).length;
+    }
+    windowLabel = weekRangeLabel(wkStart);
+  } else {
+    visibleCount = eventsOnDate(UI.calCursor).length;
+    windowLabel = cursorDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
   }
+
   main.appendChild(h("section", { class: "risk-hero" }, [
     h("div", { class: "risk-hero-text" }, [
       h("div", { class: "risk-hero-kicker" }, "SCHEDULE · " + (lbl("tabs.calendar") || "Calendar")),
@@ -5836,12 +6994,12 @@ function renderCalendarView(main) {
         html: `What&apos;s <em>coming</em> for July&nbsp;13.`
       }),
       h("p", { class: "risk-hero-sub" },
-        `${monthEvents} event${monthEvents === 1 ? "" : "s"} this month · ${days >= 0 ? days : 0} days to go-live`)
+        `${visibleCount} event${visibleCount === 1 ? "" : "s"} ${view === "month" ? "this month" : view === "week" ? "this week" : "today"} · ${days >= 0 ? days : 0} days to go-live`)
     ]),
     renderCountdownRing(days)
   ]));
 
-  // ---- Owner workload heatmap for tasks scheduled in the visible month
+  // ---- Owner workload heatmap (still scoped to the visible month)
   const monthRows = [];
   effectivePhases().forEach(p => {
     p.groups.forEach(g => {
@@ -5851,7 +7009,6 @@ function renderCalendarView(main) {
         if (!passesArchiveFilter(s)) return;
         const range = taskRange(s);
         if (!range) return;
-        // Visible if range intersects month window
         if (range.end < monthStart || range.start > monthEnd) return;
         monthRows.push({
           t, s, phaseId: p.id, phaseNum: p.num, phaseTitle: p.title,
@@ -5868,23 +7025,44 @@ function renderCalendarView(main) {
 
   const wrap = h("div", { class: "calendar-wrap calendar-card" });
 
-  // Header
+  // ---- Header (title + view selector + nav + actions)
+  const navPrev = () => {
+    if (view === "month") UI.calMonth = shiftMonth(UI.calMonth, -1);
+    else if (view === "week") UI.calCursor = ymdShift(UI.calCursor, -7);
+    else UI.calCursor = ymdShift(UI.calCursor, -1);
+    saveUI(); renderMain();
+  };
+  const navNext = () => {
+    if (view === "month") UI.calMonth = shiftMonth(UI.calMonth, 1);
+    else if (view === "week") UI.calCursor = ymdShift(UI.calCursor, 7);
+    else UI.calCursor = ymdShift(UI.calCursor, 1);
+    saveUI(); renderMain();
+  };
+  const goToday = () => {
+    const t = new Date();
+    UI.calMonth = ym(t);
+    UI.calCursor = ymd(t);
+    saveUI(); renderMain();
+  };
+
   wrap.appendChild(h("div", { class: "cal-header" }, [
-    h("div", { class: "cal-title" }, monthName),
-    h("button", {
-      class: "cal-today-btn",
-      onclick: () => { UI.calMonth = ym(new Date()); saveUI(); renderMain(); }
-    }, lbl("cal.today")),
+    h("div", { class: "cal-title" }, view === "month" ? monthName : windowLabel),
+    h("button", { class: "cal-today-btn", onclick: goToday }, lbl("cal.today")),
     h("div", { class: "cal-nav" }, [
-      h("button", {
-        class: "cal-nav-btn", html: ICONS.chevLeft,
-        onclick: () => { UI.calMonth = shiftMonth(UI.calMonth, -1); saveUI(); renderMain(); }
-      }),
-      h("button", {
-        class: "cal-nav-btn", html: ICONS.chevRight,
-        onclick: () => { UI.calMonth = shiftMonth(UI.calMonth, 1); saveUI(); renderMain(); }
-      })
+      h("button", { class: "cal-nav-btn", html: ICONS.chevLeft, onclick: navPrev }),
+      h("button", { class: "cal-nav-btn", html: ICONS.chevRight, onclick: navNext })
     ]),
+    // View selector — Day / Week / Month
+    h("div", { class: "cal-view-toggle" }, ["day","week","month"].map(v =>
+      h("button", {
+        class: "cal-view-btn" + (view === v ? " is-on" : ""),
+        onclick: () => {
+          UI.calView = v;
+          if (v !== "month" && !UI.calCursor) UI.calCursor = ymd(new Date());
+          saveUI(); renderMain();
+        }
+      }, v[0].toUpperCase() + v.slice(1))
+    )),
     h("button", {
       class: "btn btn-outline",
       onclick: () => openNewMilestoneEditor(),
@@ -5897,39 +7075,38 @@ function renderCalendarView(main) {
     })
   ]));
 
-  // Grid
-  const grid = h("div", { class: "cal-grid" });
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
-    grid.appendChild(h("div", { class: "cal-dow" }, d));
-  });
-
-  const firstDay = new Date(year, month, 1);
-  const firstWeekday = firstDay.getDay();
-  const lastDay = new Date(year, month + 1, 0);
-  const daysInMonth = lastDay.getDate();
-  const prevLastDay = new Date(year, month, 0).getDate();
-
-  const today = new Date();
-  const todayStr = ymd(today);
-
-  // Leading empty days (previous month)
-  for (let i = firstWeekday - 1; i >= 0; i--) {
-    const dayNum = prevLastDay - i;
-    const d = new Date(year, month - 1, dayNum);
-    grid.appendChild(renderCalDay(d, { otherMonth: true, todayStr }));
+  // ---- Body — switch by view
+  const todayStr = ymd(new Date());
+  if (view === "day") {
+    wrap.appendChild(renderTimedDay(UI.calCursor, todayStr));
+  } else if (view === "week") {
+    wrap.appendChild(renderTimedWeek(startOfWeek(cursorDate), todayStr));
+  } else {
+    // Existing month grid
+    const grid = h("div", { class: "cal-grid" });
+    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+      grid.appendChild(h("div", { class: "cal-dow" }, d));
+    });
+    const firstDay = new Date(year, month, 1);
+    const firstWeekday = firstDay.getDay();
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const prevLastDay = new Date(year, month, 0).getDate();
+    for (let i = firstWeekday - 1; i >= 0; i--) {
+      const dayNum = prevLastDay - i;
+      const d = new Date(year, month - 1, dayNum);
+      grid.appendChild(renderCalDay(d, { otherMonth: true, todayStr }));
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      grid.appendChild(renderCalDay(new Date(year, month, d), { todayStr }));
+    }
+    const totalCells = grid.children.length - 7;
+    const trailing = (7 - (totalCells % 7)) % 7;
+    for (let d = 1; d <= trailing; d++) {
+      grid.appendChild(renderCalDay(new Date(year, month + 1, d), { otherMonth: true, todayStr }));
+    }
+    wrap.appendChild(grid);
   }
-  // Current month
-  for (let d = 1; d <= daysInMonth; d++) {
-    grid.appendChild(renderCalDay(new Date(year, month, d), { todayStr }));
-  }
-  // Trailing days (next month)
-  const totalCells = grid.children.length - 7;
-  const trailing = (7 - (totalCells % 7)) % 7;
-  for (let d = 1; d <= trailing; d++) {
-    grid.appendChild(renderCalDay(new Date(year, month + 1, d), { otherMonth: true, todayStr }));
-  }
-
-  wrap.appendChild(grid);
 
   // Legend
   wrap.appendChild(h("div", { class: "cal-legend" }, [
@@ -6111,6 +7288,28 @@ function openTaskEditor(taskId) {
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Due / end date"), endIn])
   ]));
 
+  // ---- Time of day (optional). Empty = all-day.
+  const startTimeIn = h("input", { type: "time", value: s.startTime || "" });
+  const endTimeIn = h("input", { type: "time", value: s.endTime || "" });
+  const allDayHint = h("div", {
+    style: "font-size:11px;color:var(--muted);margin-top:-2px;"
+  }, (s.startTime || s.endTime)
+      ? "Has a time — shown at this slot in Day / Week views, with the time prefix in Month."
+      : "All-day task — shown pinned at the top of Day / Week views, no time prefix.");
+  const updateAllDayHint = () => {
+    allDayHint.textContent = (startTimeIn.value || endTimeIn.value)
+      ? "Has a time — shown at this slot in Day / Week views, with the time prefix in Month."
+      : "All-day task — shown pinned at the top of Day / Week views, no time prefix.";
+  };
+  startTimeIn.addEventListener("change", updateAllDayHint);
+  endTimeIn.addEventListener("change", updateAllDayHint);
+  form.appendChild(h("div", { class: "ef-dates" }, [
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Start time"), startTimeIn]),
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "End time"), endTimeIn])
+  ]));
+  form.appendChild(makeTimePair(startTimeIn, endTimeIn, { onChange: updateAllDayHint }));
+  form.appendChild(allDayHint);
+
   // Repeats: cadence dropdown — anchored on the Start date.
   const repeatIn = h("select", {});
   const fillRepeatLabels = () => {
@@ -6167,6 +7366,18 @@ function openTaskEditor(taskId) {
       }
       s.repeat = repeatIn.value;
       s.repeatDay = null; // legacy field — cadence is now derived from Start date
+      const newStartTime = startTimeIn.value || "";
+      const newEndTime = endTimeIn.value || "";
+      const timeChanged = (s.startTime || "") !== newStartTime || (s.endTime || "") !== newEndTime;
+      s.startTime = newStartTime;
+      s.endTime = newEndTime;
+      // Saving a task-level time wipes any per-occurrence overrides — acts as
+      // the "apply to all occurrences" path (per the user's bulk-edit ask).
+      if (timeChanged && STATE.__occurrenceTimes) {
+        Object.keys(STATE.__occurrenceTimes).forEach(k => {
+          if (k.startsWith("task:" + t.id + ":")) delete STATE.__occurrenceTimes[k];
+        });
+      }
       s.notes = notesIn.value;
       s.updated = new Date().toISOString();
       await saveState();
@@ -6212,6 +7423,19 @@ function openMilestoneEditor(index) {
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Type"), typeIn])
   ]));
 
+  // Optional time. Blank = all-day milestone (pinned to the all-day strip in
+  // Day / Week views). Both inputs blank → no time prefix in Month view.
+  const timeStartIn = h("input", { type: "time", value: m.time || "" });
+  const timeEndIn = h("input", { type: "time", value: m.endTime || "" });
+  form.appendChild(h("div", { class: "ef-dates" }, [
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Start time"), timeStartIn]),
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "End time"), timeEndIn])
+  ]));
+  form.appendChild(makeTimePair(timeStartIn, timeEndIn));
+  form.appendChild(h("div", {
+    style: "font-size:11px;color:var(--muted);margin-top:-2px;"
+  }, "Leave blank for an all-day milestone."));
+
   const save = h("button", {
     class: "btn btn-primary",
     onclick: async () => {
@@ -6219,6 +7443,8 @@ function openMilestoneEditor(index) {
       m.desc = descIn.value.trim();
       m.date = dateIn.value || m.date;
       m.type = typeIn.value;
+      m.time = timeStartIn.value || "";
+      m.endTime = timeEndIn.value || "";
       await saveState();
       closeModal();
       renderShell();
@@ -6343,6 +7569,17 @@ function openNewMilestoneEditor(defaultDate) {
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Type"), typeIn])
   ]));
 
+  const timeStartIn = h("input", { type: "time" });
+  const timeEndIn = h("input", { type: "time" });
+  form.appendChild(h("div", { class: "ef-dates" }, [
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Start time"), timeStartIn]),
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "End time"), timeEndIn])
+  ]));
+  form.appendChild(makeTimePair(timeStartIn, timeEndIn));
+  form.appendChild(h("div", {
+    style: "font-size:11px;color:var(--muted);margin-top:-2px;"
+  }, "Leave blank for an all-day milestone."));
+
   const create = h("button", {
     class: "btn btn-primary",
     onclick: async () => {
@@ -6354,6 +7591,8 @@ function openNewMilestoneEditor(defaultDate) {
         title,
         type: typeIn.value,
         desc: descIn.value.trim(),
+        time: timeStartIn.value || "",
+        endTime: timeEndIn.value || "",
         status: "scheduled",
         notes: ""
       });
@@ -7035,6 +8274,25 @@ function openEventUpdateModal(ev, dateStr) {
     )
   ]));
 
+  // Time inputs — for milestones edits the milestone directly, for tasks /
+  // recurring edits the per-occurrence override (or the task itself when
+  // not a repeat occurrence).
+  const evCurTimes = eventTimes(ev, dateStr);
+  const upStart = h("input", { type: "time", value: evCurTimes.startTime || "" });
+  const upEnd = h("input", { type: "time", value: evCurTimes.endTime || "" });
+  form.appendChild(h("div", { class: "ef-dates" }, [
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Start time"), upStart]),
+    h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "End time"), upEnd])
+  ]));
+  form.appendChild(makeTimePair(upStart, upEnd));
+  form.appendChild(h("div", {
+    style: "font-size:11px;color:var(--muted);margin-top:-2px;"
+  }, ev.isRepeatOccurrence
+      ? "This occurrence only — leaves other occurrences untouched."
+      : (ev.kind === "task"
+          ? "Applies to this task. Leave blank for an all-day task."
+          : "Leave blank for an all-day event.")));
+
   const notesArea = h("textarea", {
     class: "event-update-notes",
     placeholder: ev.isRepeatOccurrence
@@ -7050,6 +8308,15 @@ function openEventUpdateModal(ev, dateStr) {
   const save = h("button", {
     class: "btn btn-primary",
     onclick: async () => {
+      // Set time first; setEventTimes handles the per-occurrence vs task-level
+      // routing based on ev.isRepeatOccurrence.
+      const newStart = upStart.value || "";
+      const newEnd = upEnd.value || "";
+      const timeChanged = newStart !== (evCurTimes.startTime || "") ||
+                          newEnd !== (evCurTimes.endTime || "");
+      if (timeChanged) {
+        await setEventTimes(ev, dateStr, newStart, newEnd, !ev.isRepeatOccurrence);
+      }
       await setEventNotes(ev, dateStr, notesArea.value);
       closeModal();
       renderMain();
@@ -7202,6 +8469,213 @@ function hideEventTooltip() {
   tip.setAttribute("aria-hidden", "true");
 }
 
+// Date helpers for Day/Week views.
+function startOfWeek(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - d.getDay()); // Sunday-start
+  return d;
+}
+function ymdShift(dateStr, n) {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return ymd(d);
+}
+function weekRangeLabel(weekStart) {
+  const end = new Date(weekStart); end.setDate(end.getDate() + 6);
+  const startMonth = weekStart.toLocaleDateString("en-US", { month: "short" });
+  const endMonth = end.toLocaleDateString("en-US", { month: "short" });
+  if (startMonth === endMonth) {
+    return `${startMonth} ${weekStart.getDate()} – ${end.getDate()}, ${end.getFullYear()}`;
+  }
+  return `${startMonth} ${weekStart.getDate()} – ${endMonth} ${end.getDate()}, ${end.getFullYear()}`;
+}
+
+// Hour-range and timed-event helpers shared by Day + Week views.
+const TIMED_HOUR_START = 6;   // 6 AM
+const TIMED_HOUR_END = 22;    // 10 PM
+const TIMED_HOUR_COUNT = TIMED_HOUR_END - TIMED_HOUR_START; // 16
+const HOUR_PX = 44;           // visual height of one hour row
+function hhmmToHours(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(":").map(n => parseInt(n, 10));
+  if (isNaN(h)) return null;
+  return h + (m || 0) / 60;
+}
+function eventTopAndHeight(startHHMM, endHHMM) {
+  const startH = hhmmToHours(startHHMM);
+  if (startH == null) return null;
+  let endH = hhmmToHours(endHHMM);
+  if (endH == null || endH <= startH) endH = startH + 0.75; // default 45-min slot
+  const top = (Math.max(startH, TIMED_HOUR_START) - TIMED_HOUR_START) * HOUR_PX;
+  const bottom = (Math.min(endH, TIMED_HOUR_END) - TIMED_HOUR_START) * HOUR_PX;
+  return { top: Math.max(0, top), height: Math.max(20, bottom - top) };
+}
+// Render the all-day strip + hour grid for one day. Used by Day view directly
+// and Week view per column.
+function renderTimedDayColumn(dateStr, opts = {}) {
+  const all = eventsOnDate(dateStr);
+  const isToday = opts.todayStr === dateStr;
+  const allDayEvents = [];
+  const timedEvents = [];
+  all.forEach(ev => {
+    const t = eventTimes(ev, dateStr);
+    if (t.startTime) {
+      const pos = eventTopAndHeight(t.startTime, t.endTime);
+      timedEvents.push({ ev, t, pos });
+    } else {
+      allDayEvents.push({ ev, t });
+    }
+  });
+
+  const col = h("div", { class: "timed-col" + (isToday ? " is-today" : "") });
+
+  // All-day strip
+  const allDayStrip = h("div", { class: "timed-allday" });
+  if (allDayEvents.length === 0) {
+    allDayStrip.appendChild(h("div", { class: "timed-allday-empty" }, ""));
+  } else {
+    allDayEvents.forEach(({ ev, t }) => {
+      allDayStrip.appendChild(makeTimedPill(ev, dateStr, t, "allday"));
+    });
+  }
+  col.appendChild(allDayStrip);
+
+  // Hour grid with timed events absolutely positioned
+  const grid = h("div", { class: "timed-grid", "data-date": dateStr });
+  for (let i = 0; i < TIMED_HOUR_COUNT; i++) {
+    const slot = h("div", { class: "timed-slot" });
+    const hourAtSlot = TIMED_HOUR_START + i;
+    slot.addEventListener("click", () => {
+      // Click an empty slot → open schedule modal pre-anchored to that hour.
+      // For now, just open the schedule modal for the day.
+      showScheduleModal(dateStr);
+    });
+    grid.appendChild(slot);
+  }
+  // Now the timed events as absolutely-positioned children
+  timedEvents.forEach(({ ev, t, pos }) => {
+    if (!pos) return;
+    const pill = makeTimedPill(ev, dateStr, t, "timed");
+    pill.style.top = pos.top + "px";
+    pill.style.height = pos.height + "px";
+    grid.appendChild(pill);
+  });
+  col.appendChild(grid);
+
+  // "Now" indicator if today
+  if (isToday) {
+    const now = new Date();
+    const nowH = now.getHours() + now.getMinutes() / 60;
+    if (nowH >= TIMED_HOUR_START && nowH <= TIMED_HOUR_END) {
+      const nowLine = h("div", { class: "timed-now" });
+      nowLine.style.top = ((nowH - TIMED_HOUR_START) * HOUR_PX) + "px";
+      grid.appendChild(nowLine);
+    }
+  }
+
+  return col;
+}
+
+// Build the visual pill for a timed/all-day event in the day/week views.
+function makeTimedPill(ev, dateStr, times, mode) {
+  let cls = "timed-pill";
+  if (ev.kind === "milestone") cls += " is-milestone";
+  if (ev.kind === "recurring") cls += " is-recurring";
+  if (ev.kind === "task" && ev.complete) cls += " is-complete";
+  if (mode === "allday") cls += " is-allday";
+  const evMeta = eventStatusMeta(ev, dateStr);
+  if (evMeta && evMeta.key === "completed") cls += " is-status-completed";
+  if (evMeta && evMeta.key === "cancelled") cls += " is-status-cancelled";
+  const pill = h("div", {
+    class: cls,
+    title: ev.title,
+    onclick: (e) => {
+      e.stopPropagation();
+      hideEventTooltip();
+      if (ev.kind === "task") {
+        if (ev.isRepeatOccurrence) openEventUpdateModal(ev, dateStr);
+        else openTaskEditor(ev.taskId);
+      } else if (ev.kind === "milestone") {
+        openMilestoneEditor(ev.milestoneIndex);
+      } else {
+        openEventUpdateModal(ev, dateStr);
+      }
+    },
+    onmouseenter: (e) => showEventTooltip(e.currentTarget, ev, dateStr),
+    onmouseleave: hideEventTooltip,
+    oncontextmenu: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hideEventTooltip();
+      if (ev.kind === "task" && ev.taskId) openTaskContextMenu(e.clientX, e.clientY, ev.taskId);
+      else if (ev.kind === "milestone") openMilestoneContextMenu(e.clientX, e.clientY, ev.milestoneIndex, dateStr);
+      else if (ev.kind === "recurring") openRecurringContextMenu(e.clientX, e.clientY, ev.recurringIndex, dateStr);
+    }
+  });
+  if (mode === "timed" && times.startTime) {
+    pill.appendChild(h("div", { class: "timed-pill-time" },
+      fmtTimeRange(times.startTime, times.endTime)));
+  }
+  pill.appendChild(h("div", { class: "timed-pill-title" }, ev.title));
+  return pill;
+}
+
+// Day view — single column with all-day strip + hour grid
+function renderTimedDay(dateStr, todayStr) {
+  const wrap = h("div", { class: "timed-view timed-view-day" });
+  const labels = h("div", { class: "timed-labels" });
+  // Empty cell to align with the all-day strip header
+  labels.appendChild(h("div", { class: "timed-labels-allday" }, "All day"));
+  for (let h_ = TIMED_HOUR_START; h_ < TIMED_HOUR_END; h_++) {
+    const hh = h_ === 0 ? 12 : (h_ > 12 ? h_ - 12 : h_);
+    labels.appendChild(h("div", { class: "timed-hour-label" },
+      `${hh} ${h_ < 12 ? "AM" : "PM"}`));
+  }
+  wrap.appendChild(labels);
+  // Date header
+  const colWrap = h("div", { class: "timed-col-wrap" });
+  const d = new Date(dateStr + "T00:00:00");
+  colWrap.appendChild(h("div", {
+    class: "timed-col-header" + (dateStr === todayStr ? " is-today" : "")
+  }, [
+    h("span", { class: "timed-col-dow" }, d.toLocaleDateString("en-US", { weekday: "short" })),
+    h("span", { class: "timed-col-num" }, String(d.getDate()))
+  ]));
+  colWrap.appendChild(renderTimedDayColumn(dateStr, { todayStr }));
+  wrap.appendChild(colWrap);
+  return wrap;
+}
+
+// Week view — 7 columns with shared all-day strip + hour grid
+function renderTimedWeek(weekStart, todayStr) {
+  const wrap = h("div", { class: "timed-view timed-view-week" });
+  // Left labels column
+  const labels = h("div", { class: "timed-labels" });
+  labels.appendChild(h("div", { class: "timed-labels-allday" }, "All day"));
+  for (let h_ = TIMED_HOUR_START; h_ < TIMED_HOUR_END; h_++) {
+    const hh = h_ === 0 ? 12 : (h_ > 12 ? h_ - 12 : h_);
+    labels.appendChild(h("div", { class: "timed-hour-label" },
+      `${hh} ${h_ < 12 ? "AM" : "PM"}`));
+  }
+  wrap.appendChild(labels);
+  // 7 day columns
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i);
+    const dateStr = ymd(d);
+    const colWrap = h("div", { class: "timed-col-wrap" });
+    colWrap.appendChild(h("div", {
+      class: "timed-col-header" + (dateStr === todayStr ? " is-today" : "")
+    }, [
+      h("span", { class: "timed-col-dow" }, d.toLocaleDateString("en-US", { weekday: "short" })),
+      h("span", { class: "timed-col-num" }, String(d.getDate()))
+    ]));
+    colWrap.appendChild(renderTimedDayColumn(dateStr, { todayStr }));
+    wrap.appendChild(colWrap);
+  }
+  return wrap;
+}
+
 function renderCalDay(date, opts) {
   const dateStr = ymd(date);
   const dayNum = date.getDate();
@@ -7295,7 +8769,12 @@ function renderCalDay(date, opts) {
           };
           attrs.ondragend = (e) => e.currentTarget.classList.remove("is-dragging");
         }
-        return h("div", attrs, ev.title);
+        // Time prefix on month-view pill, à la Google Calendar.
+        const evTimes = eventTimes(ev, dateStr);
+        const label = evTimes.startTime
+          ? fmtTime(evTimes.startTime).replace(/:00 /, " ").toLowerCase() + " · " + ev.title
+          : ev.title;
+        return h("div", attrs, label);
       }),
       events.length > 3 ? h("div", { class: "cal-event-more" }, `+${events.length - 3} more`) : null
     ].filter(Boolean))
@@ -7453,6 +8932,20 @@ function buildEventUpdateRow(ev, dateStr, title, kindLabel, kindClass, refresh) 
     placeholder: "Notes / what transpired…",
     onblur: (e) => setEventNotes(ev, dateStr, e.target.value)
   }, eventNotes(ev, dateStr));
+  const curTimes = eventTimes(ev, dateStr);
+  const endT = h("input", {
+    type: "time", class: "sched-date-input", value: curTimes.endTime || "",
+    onchange: (e) => setEventTimes(ev, dateStr, startT.value, e.target.value, ev.kind === "milestone")
+  });
+  const startT = h("input", {
+    type: "time", class: "sched-date-input", value: curTimes.startTime || "",
+    onchange: (e) => {
+      if (e.target.value && !endT.value) {
+        endT.value = addMinutesToTime(e.target.value, 60);
+      }
+      setEventTimes(ev, dateStr, e.target.value, endT.value, ev.kind === "milestone");
+    }
+  });
   return h("div", { class: "sched-row" }, [
     h("div", { class: "sched-row-main" }, [
       h("span", { class: "sched-pill " + kindClass }, kindLabel),
@@ -7464,7 +8957,11 @@ function buildEventUpdateRow(ev, dateStr, title, kindLabel, kindClass, refresh) 
         style: `background: ${evMeta.color}20; color: ${evMeta.color};`,
         onclick: async () => { await cycleEventStatus(ev, dateStr); refresh(); },
         title: "Click to cycle status"
-      }, evMeta.label + " ↻")
+      }, evMeta.label + " ↻"),
+      h("label", { class: "sched-field-label" }, "Time"),
+      startT,
+      h("label", { class: "sched-field-label" }, "to"),
+      endT
     ]),
     notesArea
   ]);
@@ -7521,6 +9018,21 @@ function showScheduleModal(dateStr) {
         const ev = { kind: "task", taskId: tid, isRepeatOccurrence: isRepeat };
         const startInput = h("input", { type: "date", class: "sched-date-input", value: range.start });
         const endInput = h("input", { type: "date", class: "sched-date-input", value: range.end });
+        // Per-occurrence (or task-level for non-repeating) time inputs.
+        const curTimes = eventTimes(ev, dateStr);
+        const endTimeInput = h("input", {
+          type: "time", class: "sched-date-input", value: curTimes.endTime || "",
+          onchange: (e) => setEventTimes(ev, dateStr, startTimeInput.value, e.target.value, !isRepeat)
+        });
+        const startTimeInput = h("input", {
+          type: "time", class: "sched-date-input", value: curTimes.startTime || "",
+          onchange: (e) => {
+            if (e.target.value && !endTimeInput.value) {
+              endTimeInput.value = addMinutesToTime(e.target.value, 60);
+            }
+            setEventTimes(ev, dateStr, e.target.value, endTimeInput.value, !isRepeat);
+          }
+        });
         const cadenceLabel = isRepeat
           ? repeatOptionLabel(s.repeat, s.startDate || range.start)
           : "";
@@ -7568,6 +9080,10 @@ function showScheduleModal(dateStr) {
             isRepeat ? null : startInput,
             isRepeat ? null : h("label", { class: "sched-field-label" }, "End"),
             isRepeat ? null : endInput,
+            h("label", { class: "sched-field-label" }, isRepeat ? "Time (this day)" : "Time"),
+            startTimeInput,
+            h("label", { class: "sched-field-label" }, "to"),
+            endTimeInput,
             isRepeat ? null : h("button", {
               class: "btn btn-outline btn-sched-save",
               onclick: () => scheduleTask(tid, startInput.value, endInput.value).then(renderBody)
@@ -7588,6 +9104,8 @@ function showScheduleModal(dateStr) {
 
     const startNew = h("input", { type: "date", class: "sched-date-input", value: dateStr });
     const endNew = h("input", { type: "date", class: "sched-date-input", value: dateStr });
+    const startTimeNew = h("input", { type: "time", class: "sched-date-input" });
+    const endTimeNew = h("input", { type: "time", class: "sched-date-input" });
     const titleNew = h("input", {
       type: "text",
       class: "sched-title-input",
@@ -7664,7 +9182,16 @@ function showScheduleModal(dateStr) {
         return;
       }
       const sd = startNew.value || dateStr;
-      const ed = endNew.value || sd;
+      let ed = endNew.value || sd;
+      const isRepeating = repeatSel.value && repeatSel.value !== "none";
+      // Repeating tasks need a forward range so `taskRange` lets `repeatMatches`
+      // generate future occurrences. If the user didn't pick an end past the
+      // start, extend it ~1 year out from the start date.
+      if (isRepeating && ed <= sd) {
+        const d = new Date(sd + "T00:00:00");
+        d.setFullYear(d.getFullYear() + 1);
+        ed = d.toISOString().slice(0, 10);
+      }
       const phaseId = phaseSel.value;
       const groupId = groupSel.value;
       const id = "ct-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 10000).toString(36);
@@ -7673,21 +9200,32 @@ function showScheduleModal(dateStr) {
       rebuildTaskIndex();
       const t = TASK_INDEX[id];
       STATE[id] = defaultTaskState(t);
-      if (sd && ed && sd > ed) { STATE[id].startDate = ed; STATE[id].dueDate = sd; }
-      else {
+      if (isRepeating) {
+        // Anchor the cadence to the start date explicitly.
+        STATE[id].startDate = sd;
+        STATE[id].dueDate = ed;
+      } else if (sd && ed && sd > ed) {
+        STATE[id].startDate = ed;
+        STATE[id].dueDate = sd;
+      } else {
         STATE[id].startDate = (sd && ed && sd !== ed) ? sd : "";
         STATE[id].dueDate = ed || sd || "";
       }
-      if (repeatSel.value && repeatSel.value !== "none") {
+      if (isRepeating) {
         STATE[id].repeat = repeatSel.value;
       }
+      STATE[id].startTime = startTimeNew.value || "";
+      STATE[id].endTime = endTimeNew.value || "";
       STATE[id].updated = new Date().toISOString();
       UI.openPhases[phaseId] = true;
       saveUI();
       await saveState();
       titleNew.value = "";
       repeatSel.value = "none";
+      startTimeNew.value = "";
+      endTimeNew.value = "";
       renderBody();
+      renderMain();
       toast("Task added");
     };
 
@@ -7715,6 +9253,26 @@ function showScheduleModal(dateStr) {
           h("label", { class: "sched-field-label" }, "Repeats"),
           repeatSel
         ])
+      ]),
+      // Optional time strip — leave blank to mark all-day
+      h("div", { class: "sched-new-card-dates" }, [
+        h("div", { class: "sched-new-card-field" }, [
+          h("label", { class: "sched-field-label" }, "Start time"),
+          startTimeNew
+        ]),
+        h("div", { class: "sched-new-card-field" }, [
+          h("label", { class: "sched-field-label" }, "End time"),
+          endTimeNew
+        ]),
+        h("div", { class: "sched-new-card-field sched-new-card-allday-hint" }, [
+          h("label", { class: "sched-field-label" }, " "),
+          h("div", { style: "font-size:11px;color:var(--muted);font-style:italic;padding:6px 0;" },
+            "Leave blank for all-day")
+        ])
+      ]),
+      // Quick-pick durations + auto-default end to start + 1h
+      h("div", { class: "sched-new-card-quickpicks" }, [
+        makeTimePair(startTimeNew, endTimeNew)
       ]),
       // Phase + group + create button
       h("div", { class: "sched-new-card-meta" }, [
@@ -8154,6 +9712,1443 @@ async function importJSON(file) {
 }
 
 /* ============================================================================
+   ADMIN DASHBOARD
+   ============================================================================ */
+
+// ---------- Date window resolution ----------
+function resolveDashboardWindow(filter) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const out = { start: null, end: null, label: "" };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  switch (filter.timeRange) {
+    case "this_week": {
+      const dow = today.getDay(); // 0 = Sun
+      const mondayOffset = dow === 0 ? -6 : 1 - dow;
+      const start = addDays(today, mondayOffset);
+      const end = addDays(start, 6);
+      out.start = ymd(start); out.end = ymd(end);
+      out.label = "This week";
+      break;
+    }
+    case "this_month": {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      out.start = ymd(start); out.end = ymd(end);
+      out.label = "This month";
+      break;
+    }
+    case "last_30d":
+      out.start = ymd(addDays(today, -29));
+      out.end = ymd(today);
+      out.label = "Last 30 days";
+      break;
+    case "last_90d":
+      out.start = ymd(addDays(today, -89));
+      out.end = ymd(today);
+      out.label = "Last 90 days";
+      break;
+    case "project": {
+      // Earliest scheduled date to the latest end.
+      let min = null, max = null;
+      Object.entries(STATE).forEach(([id, s]) => {
+        if (!TASK_INDEX[id]) return;
+        if (!passesArchiveFilter(s)) return;
+        const r = taskRange(s);
+        if (!r) return;
+        if (!min || r.start < min) min = r.start;
+        if (!max || r.end > max) max = r.end;
+      });
+      MILESTONES.forEach(m => {
+        if (!m.date) return;
+        if (!min || m.date < min) min = m.date;
+        if (!max || m.date > max) max = m.date;
+      });
+      if (!min) min = ymd(addDays(today, -90));
+      if (!max) max = ymd(addDays(today, 90));
+      out.start = min; out.end = max;
+      out.label = "Project-to-date";
+      break;
+    }
+    case "custom":
+      out.start = filter.customStart || ymd(addDays(today, -30));
+      out.end = filter.customEnd || ymd(today);
+      if (out.start > out.end) { const t = out.start; out.start = out.end; out.end = t; }
+      out.label = `${fmtDateShort(out.start)} → ${fmtDateShort(out.end)}`;
+      break;
+    case "all":
+    default:
+      out.start = ymd(addDays(today, -365));
+      out.end = ymd(addDays(today, 365));
+      out.label = "All time";
+      break;
+  }
+  return out;
+}
+
+function dashboardTaskPasses(tid, s, filter) {
+  if (!TASK_INDEX[tid]) return false;
+  if (!passesArchiveFilter(s)) return false;
+  const t = TASK_INDEX[tid];
+  if (filter.phases && filter.phases.length) {
+    if (!filter.phases.includes(t.phaseId)) return false;
+  }
+  if (filter.statuses && filter.statuses.length) {
+    if (!filter.statuses.includes(s.status || "not_started")) return false;
+  }
+  return true;
+}
+
+// Break "HH:MM" into minutes since midnight.
+function timeStrToMinutes(s) {
+  if (!s) return null;
+  const [h, m] = s.split(":").map(n => parseInt(n, 10));
+  if (isNaN(h) || isNaN(m)) return null;
+  return h * 60 + m;
+}
+function taskDurationMinutes(s) {
+  const a = timeStrToMinutes(s.startTime);
+  const b = timeStrToMinutes(s.endTime);
+  if (a == null || b == null || b <= a) return 0;
+  return b - a;
+}
+
+// Enumerate the dates that a task is "active on" inside [winStart, winEnd].
+// For repeating tasks, only the matching cadence days count.
+// Returns array of YYYY-MM-DD strings.
+function taskOccurrencesInWindow(s, winStart, winEnd) {
+  const range = taskRange(s);
+  if (!range) return [];
+  const start = range.start > winStart ? range.start : winStart;
+  const end = range.end < winEnd ? range.end : winEnd;
+  if (start > end) return [];
+  const out = [];
+  const cur = new Date(start + "T00:00:00");
+  const stop = new Date(end + "T00:00:00");
+  while (cur <= stop) {
+    const d = ymd(cur);
+    if (s.repeat && s.repeat !== "none") {
+      const anchor = s.startDate || range.start;
+      if (repeatMatches(s.repeat, anchor, d)) out.push(d);
+    } else {
+      out.push(d);
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
+// ---------- Analytics ----------
+function computeDashboardMetrics(filter) {
+  const window = resolveDashboardWindow(filter);
+  const todayStr = ymd(new Date());
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  // Base filtered set — respects phases/statuses, skips archived.
+  const filteredTasks = [];
+  Object.entries(STATE).forEach(([tid, s]) => {
+    if (!dashboardTaskPasses(tid, s, filter)) return;
+    filteredTasks.push({ tid, s, t: TASK_INDEX[tid] });
+  });
+
+  // KPI rollups.
+  let total = 0, complete = 0, inProgress = 0, notStarted = 0, blocked = 0, urgent = 0;
+  let overdue = 0, dueThisWeek = 0, dueToday = 0, startingSoon = 0;
+  let bugsOpen = 0, bugsResolved = 0, bugsInProgress = 0, bugsWontFix = 0;
+  let bugsCritical = 0, bugsHigh = 0, bugsMedium = 0, bugsLow = 0;
+  const weekEnd = ymd(new Date(today.getTime() + 7 * 86400000));
+
+  const overdueList = [];
+  const blockedList = [];
+  const urgentList = [];
+  const dueSoonList = [];
+  const topBugMap = {};
+
+  filteredTasks.forEach(({ tid, s, t }) => {
+    total++;
+    const st = s.status || "not_started";
+    if (st === "complete") complete++;
+    else if (st === "in_progress") inProgress++;
+    else if (st === "blocked") blocked++;
+    else notStarted++;
+    if (s.urgent) urgent++;
+
+    const isDone = st === "complete";
+    if (s.dueDate && !isDone) {
+      if (s.dueDate < todayStr) {
+        overdue++;
+        overdueList.push({ tid, title: getTitle(t, s), dueDate: s.dueDate, status: st });
+      } else if (s.dueDate === todayStr) {
+        dueToday++;
+        dueSoonList.push({ tid, title: getTitle(t, s), dueDate: s.dueDate, status: st });
+      } else if (s.dueDate <= weekEnd) {
+        dueThisWeek++;
+        dueSoonList.push({ tid, title: getTitle(t, s), dueDate: s.dueDate, status: st });
+      }
+    }
+    if (st === "blocked") {
+      blockedList.push({ tid, title: getTitle(t, s), status: st, notes: s.notes || "" });
+    }
+    if (s.urgent && !isDone) {
+      urgentList.push({ tid, title: getTitle(t, s), status: st, dueDate: s.dueDate || "" });
+    }
+    // Starting soon (start within next 14d, not yet started)
+    if (s.startDate && !isDone && st === "not_started" && s.startDate > todayStr) {
+      const diff = (new Date(s.startDate + "T00:00:00") - today) / 86400000;
+      if (diff <= 14) startingSoon++;
+    }
+
+    (s.bugs || []).forEach(b => {
+      const bs = b.status || "open";
+      if (bs === "resolved") bugsResolved++;
+      else if (bs === "wont_fix") bugsWontFix++;
+      else if (bs === "in_progress") { bugsInProgress++; bugsOpen++; }
+      else { bugsOpen++; }
+      if (bs !== "resolved" && bs !== "wont_fix") {
+        const sev = b.severity || "medium";
+        if (sev === "critical") bugsCritical++;
+        else if (sev === "high") bugsHigh++;
+        else if (sev === "medium") bugsMedium++;
+        else bugsLow++;
+        if (!topBugMap[tid]) topBugMap[tid] = { tid, title: getTitle(t, s), count: 0 };
+        topBugMap[tid].count++;
+      }
+    });
+  });
+
+  // Sort attention lists.
+  overdueList.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  blockedList.sort((a, b) => a.title.localeCompare(b.title));
+  urgentList.sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
+  dueSoonList.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const topBugTasks = Object.values(topBugMap).sort((a, b) => b.count - a.count).slice(0, 5);
+
+  const pct = total ? Math.round((complete / total) * 100) : 0;
+
+  // Phase rollups (respect filter, except we always show all phases — ones
+  // filtered out just render empty/zeroed).
+  const phases = effectivePhases().map(p => {
+    let pt = 0, pc = 0, pip = 0, pb = 0, pn = 0;
+    p.groups.forEach(g => g.tasks.forEach(t => {
+      const s = STATE[t.id];
+      if (!s) return;
+      if (!dashboardTaskPasses(t.id, s, filter)) return;
+      pt++;
+      const st = s.status || "not_started";
+      if (st === "complete") pc++;
+      else if (st === "in_progress") pip++;
+      else if (st === "blocked") pb++;
+      else pn++;
+    }));
+    // Include custom tasks mapped to this phase.
+    (STATE.__customTasks || []).forEach(ct => {
+      if (ct.phaseId !== p.id) return;
+      const s = STATE[ct.id];
+      if (!s) return;
+      if (!dashboardTaskPasses(ct.id, s, filter)) return;
+      pt++;
+      const st = s.status || "not_started";
+      if (st === "complete") pc++;
+      else if (st === "in_progress") pip++;
+      else if (st === "blocked") pb++;
+      else pn++;
+    });
+    return {
+      id: p.id, num: p.num, title: p.title,
+      total: pt, complete: pc, inProgress: pip, blocked: pb, notStarted: pn,
+      pct: pt ? Math.round((pc / pt) * 100) : 0
+    };
+  });
+
+  // Velocity: completed tasks per ISO-week inside the window.
+  // A task counts on its `updated` date if status is "complete" and updated
+  // falls within [windowStart, windowEnd].
+  const velocityMap = {};
+  const heatmapMap = {};
+  const activityByPhase = {};
+  phases.forEach(p => { activityByPhase[p.id] = 0; });
+
+  // Seed weeks for the window so gaps render as zero bars.
+  const weekKey = (d) => {
+    const tmp = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const dow = tmp.getDay(); // 0-Sun
+    const mondayOffset = dow === 0 ? -6 : 1 - dow;
+    tmp.setDate(tmp.getDate() + mondayOffset);
+    return ymd(tmp);
+  };
+  {
+    const s = new Date(window.start + "T00:00:00");
+    const e = new Date(window.end + "T00:00:00");
+    const cur = new Date(weekKey(s) + "T00:00:00");
+    while (cur <= e) {
+      velocityMap[ymd(cur)] = 0;
+      cur.setDate(cur.getDate() + 7);
+    }
+  }
+  // Heatmap: seed every day in window (so empty days render).
+  {
+    const cur = new Date(window.start + "T00:00:00");
+    const e = new Date(window.end + "T00:00:00");
+    while (cur <= e) {
+      heatmapMap[ymd(cur)] = 0;
+      cur.setDate(cur.getDate() + 1);
+    }
+  }
+
+  filteredTasks.forEach(({ tid, s, t }) => {
+    // Velocity: completion event on `updated` when status is complete.
+    if ((s.status || "") === "complete" && s.updated) {
+      const upd = s.updated.slice(0, 10);
+      if (upd >= window.start && upd <= window.end) {
+        const wk = weekKey(new Date(upd + "T00:00:00"));
+        velocityMap[wk] = (velocityMap[wk] || 0) + 1;
+      }
+    }
+    // Heatmap: each day the task is "active" (on-range or repeat-match).
+    const dates = taskOccurrencesInWindow(s, window.start, window.end);
+    dates.forEach(d => {
+      heatmapMap[d] = (heatmapMap[d] || 0) + 1;
+    });
+    // Activity by phase inside window.
+    if (t && activityByPhase[t.phaseId] != null) {
+      activityByPhase[t.phaseId] += dates.length;
+    }
+  });
+
+  const velocity = Object.keys(velocityMap).sort().map(k => ({ weekStart: k, count: velocityMap[k] }));
+  // 4-week moving average for trend overlay.
+  const velocityMA = velocity.map((v, i) => {
+    const slice = velocity.slice(Math.max(0, i - 3), i + 1);
+    return slice.reduce((a, x) => a + x.count, 0) / slice.length;
+  });
+
+  // Upcoming milestones (next 8, any not-past).
+  const upcomingMilestones = MILESTONES
+    .filter(m => m.date)
+    .map(m => ({ ...m, daysUntil: daysUntil(m.date) }))
+    .filter(m => m.daysUntil >= -1)
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 8);
+
+  // Recent activity: most recent `updated` tasks in window.
+  const recent = filteredTasks
+    .filter(x => x.s.updated)
+    .map(x => ({
+      tid: x.tid,
+      title: getTitle(x.t, x.s),
+      status: x.s.status || "not_started",
+      updated: x.s.updated,
+      phaseId: x.t.phaseId
+    }))
+    .sort((a, b) => b.updated.localeCompare(a.updated))
+    .slice(0, 12);
+
+  // Scheduled time rollup per phase across window.
+  const hoursByPhase = phases.map(p => {
+    let mins = 0;
+    const acc = (tid, s) => {
+      if (!dashboardTaskPasses(tid, s, filter)) return;
+      const dur = taskDurationMinutes(s);
+      if (!dur) return;
+      const occ = taskOccurrencesInWindow(s, window.start, window.end);
+      mins += dur * occ.length;
+    };
+    const p0 = PHASES.find(x => x.id === p.id);
+    if (p0) p0.groups.forEach(g => g.tasks.forEach(tt => {
+      const s = STATE[tt.id]; if (s) acc(tt.id, s);
+    }));
+    (STATE.__customTasks || []).filter(ct => ct.phaseId === p.id).forEach(ct => {
+      const s = STATE[ct.id]; if (s) acc(ct.id, s);
+    });
+    return { phaseId: p.id, title: p.title, num: p.num, hours: mins / 60, minutes: mins };
+  });
+  const totalScheduledMinutes = hoursByPhase.reduce((a, x) => a + x.minutes, 0);
+
+  // Hours in the next 7 days & this month — always relative to today, ignoring window.
+  let hoursNext7 = 0, hoursNext30 = 0;
+  const sevenEnd = ymd(new Date(today.getTime() + 7 * 86400000));
+  const thirtyEnd = ymd(new Date(today.getTime() + 30 * 86400000));
+  filteredTasks.forEach(({ tid, s }) => {
+    const dur = taskDurationMinutes(s);
+    if (!dur) return;
+    const occ7 = taskOccurrencesInWindow(s, todayStr, sevenEnd);
+    const occ30 = taskOccurrencesInWindow(s, todayStr, thirtyEnd);
+    hoursNext7 += dur * occ7.length / 60;
+    hoursNext30 += dur * occ30.length / 60;
+  });
+
+  // Trend: compare completed-this-period vs. previous equal-length period.
+  let completedThisPeriod = 0, completedPrevPeriod = 0;
+  {
+    const startD = new Date(window.start + "T00:00:00");
+    const endD = new Date(window.end + "T00:00:00");
+    const len = (endD - startD) / 86400000 + 1;
+    const prevStart = ymd(new Date(startD.getTime() - len * 86400000));
+    const prevEnd = ymd(new Date(startD.getTime() - 86400000));
+    filteredTasks.forEach(({ s }) => {
+      if ((s.status || "") !== "complete" || !s.updated) return;
+      const upd = s.updated.slice(0, 10);
+      if (upd >= window.start && upd <= window.end) completedThisPeriod++;
+      else if (upd >= prevStart && upd <= prevEnd) completedPrevPeriod++;
+    });
+  }
+
+  return {
+    window,
+    total, complete, inProgress, notStarted, blocked, urgent, pct,
+    overdue, dueThisWeek, dueToday, startingSoon,
+    bugsOpen, bugsResolved, bugsInProgress, bugsWontFix,
+    bugsCritical, bugsHigh, bugsMedium, bugsLow,
+    overdueList, blockedList, urgentList, dueSoonList, topBugTasks,
+    phases, velocity, velocityMA, heatmapMap,
+    upcomingMilestones, recent,
+    hoursByPhase, totalScheduledMinutes, hoursNext7, hoursNext30,
+    completedThisPeriod, completedPrevPeriod
+  };
+}
+
+// ---------- SVG chart helpers ----------
+function dashSvg(tag, attrs = {}, children = []) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    el.setAttribute(k, v);
+  }
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c == null) return;
+    if (typeof c === "string" || typeof c === "number") {
+      el.appendChild(document.createTextNode(String(c)));
+    } else el.appendChild(c);
+  });
+  return el;
+}
+
+// Velocity bar chart w/ moving-average overlay.
+function renderVelocityChart(velocity, movingAvg) {
+  const totalCompletions = velocity.reduce((a, v) => a + v.count, 0);
+
+  // Empty state: no completions in the window — show a calm placeholder
+  // instead of a misleading flat-zero chart that wastes vertical space.
+  if (!totalCompletions) {
+    return h("div", {
+      class: "dash-empty",
+      style: "min-height: 140px; display:flex; align-items:center; justify-content:center;"
+    }, "No completions recorded in this window yet");
+  }
+
+  const W = 640, H = 180;
+  const padL = 32, padR = 12, padT = 10, padB = 28;
+  const iw = W - padL - padR;
+  const ih = H - padT - padB;
+  const n = velocity.length || 1;
+  const maxV = Math.max(1, ...velocity.map(v => v.count), ...movingAvg);
+  const barW = iw / n * 0.7;
+  const gap = iw / n * 0.3;
+
+  const svg = dashSvg("svg", {
+    class: "dash-chart-svg",
+    viewBox: `0 0 ${W} ${H}`,
+    preserveAspectRatio: "xMidYMid meet"
+  });
+
+  // Build integer-valued ticks from 0..maxV and dedupe. When maxV is small
+  // (e.g. 1 or 2) we show fewer ticks; when larger, aim for ~4.
+  const desired = Math.min(4, Math.max(1, maxV));
+  const step = Math.max(1, Math.ceil(maxV / desired));
+  const tickVals = [];
+  for (let v = 0; v <= maxV; v += step) tickVals.push(v);
+  if (tickVals[tickVals.length - 1] !== maxV) tickVals.push(maxV);
+
+  tickVals.forEach(val => {
+    const y = padT + ih - (val / maxV) * ih;
+    svg.appendChild(dashSvg("line", {
+      x1: padL, x2: W - padR, y1: y, y2: y,
+      stroke: "var(--line)", "stroke-width": 1,
+      "stroke-dasharray": val === 0 ? "0" : "2 3"
+    }));
+    svg.appendChild(dashSvg("text", {
+      x: padL - 6, y: y + 3, "font-size": 9, fill: "var(--muted)", "text-anchor": "end"
+    }, String(val)));
+  });
+
+  // Bars.
+  velocity.forEach((v, i) => {
+    const h = (v.count / maxV) * ih;
+    const x = padL + i * (iw / n) + gap / 2;
+    const y = padT + ih - h;
+    if (h <= 0) return;
+    svg.appendChild(dashSvg("rect", {
+      x, y, width: barW, height: h,
+      rx: 2, fill: "var(--citrus)", opacity: 0.85
+    }));
+  });
+
+  // Moving avg line.
+  if (velocity.length > 1) {
+    const maPoints = movingAvg.map((v, i) => {
+      const cx = padL + i * (iw / n) + (iw / n) / 2;
+      const cy = padT + ih - (v / maxV) * ih;
+      return `${cx},${cy}`;
+    }).join(" ");
+    svg.appendChild(dashSvg("polyline", {
+      points: maPoints, fill: "none",
+      stroke: "var(--ink)", "stroke-width": 1.6,
+      "stroke-linejoin": "round", "stroke-linecap": "round",
+      opacity: 0.72
+    }));
+  }
+
+  // X-axis labels — pick year-aware format so multi-year spans are clear.
+  // If all weeks share a year, show "Apr 14"; otherwise show "Apr '25".
+  const years = new Set(velocity.map(v => v.weekStart.slice(0, 4)));
+  const labelOf = (iso) => {
+    const d = new Date(iso + "T00:00:00");
+    const mon = d.toLocaleDateString("en-US", { month: "short" });
+    if (years.size > 1) return `${mon} '${String(d.getFullYear()).slice(2)}`;
+    return `${mon} ${d.getDate()}`;
+  };
+  const idxs = n <= 5
+    ? velocity.map((_, i) => i)
+    : [0, Math.floor(n / 3), Math.floor(2 * n / 3), n - 1];
+  idxs.forEach(i => {
+    const v = velocity[i];
+    if (!v) return;
+    const cx = padL + i * (iw / n) + (iw / n) / 2;
+    svg.appendChild(dashSvg("text", {
+      x: cx, y: H - 8, "font-size": 9, fill: "var(--muted)", "text-anchor": "middle"
+    }, labelOf(v.weekStart)));
+  });
+
+  return svg;
+}
+
+// GitHub-style heatmap. Columns = weeks, rows = days (Mon-Sun).
+function renderHeatmap(heatmapMap, windowStart, windowEnd) {
+  const cells = [];
+  const start = new Date(windowStart + "T00:00:00");
+  const end = new Date(windowEnd + "T00:00:00");
+  // Align start to the Monday of its week.
+  const startDow = start.getDay();
+  const mondayOffset = startDow === 0 ? -6 : 1 - startDow;
+  const gridStart = new Date(start);
+  gridStart.setDate(gridStart.getDate() + mondayOffset);
+
+  const todayStr = ymd(new Date());
+  const counts = Object.values(heatmapMap);
+  const maxC = Math.max(1, ...counts);
+  const bucket = (c) => {
+    if (!c) return 0;
+    const pct = c / maxC;
+    if (pct < 0.25) return 1;
+    if (pct < 0.5) return 2;
+    if (pct < 0.8) return 3;
+    return 4;
+  };
+
+  const cur = new Date(gridStart);
+  const monthLabels = [];
+  let prevMonth = -1;
+  let colIdx = 0;
+  while (cur <= end) {
+    for (let dow = 0; dow < 7; dow++) {
+      const dStr = ymd(cur);
+      const inWindow = dStr >= windowStart && dStr <= windowEnd;
+      const c = inWindow ? (heatmapMap[dStr] || 0) : -1;
+      const level = c === -1 ? -1 : bucket(c);
+      cells.push({
+        date: dStr, count: c, level,
+        isToday: dStr === todayStr,
+        col: colIdx, row: dow
+      });
+      // Month label on the Monday that starts a new month.
+      if (dow === 0 && cur.getMonth() !== prevMonth) {
+        monthLabels.push({ col: colIdx, label: cur.toLocaleDateString("en-US", { month: "short" }) });
+        prevMonth = cur.getMonth();
+      }
+      cur.setDate(cur.getDate() + 1);
+      if (cur > end && dow < 6) {
+        // Pad rest of column with out-of-window cells so grid stays rectangular.
+        for (let r = dow + 1; r < 7; r++) {
+          cells.push({ date: null, count: -1, level: -1, col: colIdx, row: r });
+        }
+        break;
+      }
+    }
+    colIdx++;
+  }
+
+  const wrap = h("div", { class: "dash-heatmap-wrap" });
+  const inner = h("div", { class: "dash-heatmap-inner" });
+
+  const dayLabels = h("div", { class: "dash-heatmap-daylabels" });
+  ["Mon", "", "Wed", "", "Fri", "", ""].forEach(l =>
+    dayLabels.appendChild(h("span", {}, l || " "))
+  );
+
+  const colWrap = h("div", { class: "dash-heatmap-col-wrap" });
+  const monthRow = h("div", { class: "dash-heatmap-monthrow" });
+  const colW = 12 + 3; // cell + gap
+  monthLabels.forEach(m => {
+    monthRow.appendChild(h("span", {
+      style: `left: ${m.col * colW}px`
+    }, m.label));
+  });
+
+  const grid = h("div", { class: "dash-heatmap-grid" });
+  cells.forEach(c => {
+    const cls = "dash-heatmap-cell"
+      + (c.level > 0 ? ` l${c.level}` : "")
+      + (c.isToday ? " is-today" : "");
+    const cell = h("div", {
+      class: cls,
+      title: c.date ? `${fmtDate(c.date)} · ${c.count >= 0 ? c.count : 0} task${c.count === 1 ? "" : "s"}` : ""
+    });
+    if (c.level < 0) cell.style.visibility = "hidden";
+    grid.appendChild(cell);
+  });
+
+  colWrap.appendChild(monthRow);
+  colWrap.appendChild(grid);
+  inner.appendChild(dayLabels);
+  inner.appendChild(colWrap);
+  wrap.appendChild(inner);
+
+  // Legend
+  const legend = h("div", { class: "dash-heatmap-scale" }, [
+    h("span", {}, "Less"),
+    h("i", { class: "dash-heatmap-cell" }),
+    h("i", { class: "dash-heatmap-cell l1" }),
+    h("i", { class: "dash-heatmap-cell l2" }),
+    h("i", { class: "dash-heatmap-cell l3" }),
+    h("i", { class: "dash-heatmap-cell l4" }),
+    h("span", {}, "More")
+  ]);
+  wrap.appendChild(legend);
+  return wrap;
+}
+
+// Progress ring SVG for the hero KPI.
+function renderProgressRing(pct, label, subLabel) {
+  const size = 96, stroke = 10;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (c * pct) / 100;
+  const svg = dashSvg("svg", {
+    width: size, height: size, viewBox: `0 0 ${size} ${size}`
+  }, [
+    dashSvg("circle", {
+      cx: size / 2, cy: size / 2, r, fill: "none",
+      stroke: "var(--bg-3)", "stroke-width": stroke
+    }),
+    dashSvg("circle", {
+      cx: size / 2, cy: size / 2, r, fill: "none",
+      stroke: "var(--citrus)", "stroke-width": stroke,
+      "stroke-linecap": "round",
+      "stroke-dasharray": c,
+      "stroke-dashoffset": offset,
+      transform: `rotate(-90 ${size / 2} ${size / 2})`
+    })
+  ]);
+  const text = h("div", { class: "dash-kpi-ring-text" }, [
+    h("div", { class: "dash-kpi-val" }, [
+      String(pct), h("span", { class: "dash-kpi-unit" }, "%")
+    ]),
+    h("div", { class: "dash-kpi-meta" }, label),
+    subLabel ? h("div", { class: "dash-kpi-meta" }, subLabel) : null
+  ].filter(Boolean));
+  return h("div", { class: "dash-kpi-ring" }, [svg, text]);
+}
+
+// Donut chart for bug status.
+function renderDonut(segments, totalLabel) {
+  const size = 110, stroke = 16;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const svg = dashSvg("svg", {
+    width: size, height: size, viewBox: `0 0 ${size} ${size}`
+  });
+  svg.appendChild(dashSvg("circle", {
+    cx: size / 2, cy: size / 2, r, fill: "none",
+    stroke: "var(--bg-3)", "stroke-width": stroke
+  }));
+  const total = segments.reduce((a, s) => a + s.value, 0);
+  let accPct = 0;
+  if (total > 0) {
+    segments.forEach(seg => {
+      if (!seg.value) return;
+      const pct = seg.value / total;
+      const segLen = c * pct;
+      const gap = c - segLen;
+      const rot = accPct * 360 - 90;
+      svg.appendChild(dashSvg("circle", {
+        cx: size / 2, cy: size / 2, r, fill: "none",
+        stroke: seg.color, "stroke-width": stroke,
+        "stroke-dasharray": `${segLen} ${gap}`,
+        transform: `rotate(${rot} ${size / 2} ${size / 2})`
+      }));
+      accPct += pct;
+    });
+  }
+  // Centered total.
+  svg.appendChild(dashSvg("text", {
+    x: size / 2, y: size / 2 - 3, "text-anchor": "middle",
+    "font-family": "var(--font-display)", "font-size": 22, "font-weight": 600,
+    fill: "var(--ink)"
+  }, String(total)));
+  svg.appendChild(dashSvg("text", {
+    x: size / 2, y: size / 2 + 13, "text-anchor": "middle",
+    "font-size": 9, fill: "var(--muted)",
+    "letter-spacing": "0.08em"
+  }, totalLabel));
+  return svg;
+}
+
+// Small inline sparkline for KPI trend.
+function renderSparkline(values, color) {
+  if (!values.length) return null;
+  const W = 110, H = 26;
+  const max = Math.max(1, ...values);
+  const step = values.length > 1 ? W / (values.length - 1) : 0;
+  const pts = values.map((v, i) =>
+    `${i * step},${H - (v / max) * (H - 2) - 1}`
+  ).join(" ");
+  const svg = dashSvg("svg", {
+    class: "dash-kpi-spark",
+    viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none"
+  }, [
+    dashSvg("polyline", {
+      points: pts, fill: "none",
+      stroke: color || "var(--citrus)", "stroke-width": 1.6,
+      "stroke-linejoin": "round", "stroke-linecap": "round"
+    })
+  ]);
+  return svg;
+}
+
+// ---------- UI: filter bar ----------
+function renderDashboardFilters(host, filter, rerender) {
+  host.innerHTML = "";
+
+  // -- Line 1: When + optional custom range -----------------------------------
+  const line1 = h("div", { class: "dash-filter-line" });
+  const ranges = [
+    ["all", "All time"],
+    ["this_week", "Week"],
+    ["this_month", "Month"],
+    ["last_30d", "30d"],
+    ["last_90d", "90d"],
+    ["project", "Project"],
+    ["custom", "Custom"]
+  ];
+  const rangeGroup = h("div", { class: "dash-filter-group" }, [
+    h("span", { class: "dash-filter-label" }, "When")
+  ]);
+  ranges.forEach(([v, label]) => {
+    rangeGroup.appendChild(h("button", {
+      class: "dash-chip" + (filter.timeRange === v ? " is-active" : ""),
+      onclick: () => { filter.timeRange = v; rerender(); }
+    }, label));
+  });
+  line1.appendChild(rangeGroup);
+
+  if (filter.timeRange === "custom") {
+    const wrap = h("div", { class: "dash-custom-range" });
+    wrap.appendChild(h("input", {
+      type: "date", value: filter.customStart || "",
+      onchange: (e) => { filter.customStart = e.target.value; rerender(); }
+    }));
+    wrap.appendChild(h("span", {}, "→"));
+    wrap.appendChild(h("input", {
+      type: "date", value: filter.customEnd || "",
+      onchange: (e) => { filter.customEnd = e.target.value; rerender(); }
+    }));
+    line1.appendChild(wrap);
+  }
+
+  host.appendChild(line1);
+
+  // -- Line 2: Status + Phases + Reset ---------------------------------------
+  const line2 = h("div", { class: "dash-filter-line" });
+
+  // Status multi-select
+  const statuses = [
+    ["not_started", "Not started"],
+    ["in_progress", "In progress"],
+    ["complete", "Complete"],
+    ["blocked", "Blocked"]
+  ];
+  const statGroup = h("div", { class: "dash-filter-group" }, [
+    h("span", { class: "dash-filter-label" }, "Status")
+  ]);
+  statGroup.appendChild(h("button", {
+    class: "dash-chip" + (!filter.statuses.length ? " is-active" : ""),
+    onclick: () => { filter.statuses = []; rerender(); }
+  }, "All"));
+  statuses.forEach(([v, label]) => {
+    const on = filter.statuses.includes(v);
+    statGroup.appendChild(h("button", {
+      class: "dash-chip" + (on ? ` is-active is-status-${v}` : ""),
+      onclick: () => {
+        if (on) filter.statuses = filter.statuses.filter(x => x !== v);
+        else filter.statuses = [...filter.statuses, v];
+        rerender();
+      }
+    }, label));
+  });
+  line2.appendChild(statGroup);
+
+  // Phase multi-select — shown as compact numeric chips.
+  const phaseGroup = h("div", { class: "dash-filter-group" }, [
+    h("span", { class: "dash-filter-label" }, "Phases")
+  ]);
+  phaseGroup.appendChild(h("button", {
+    class: "dash-chip" + (!filter.phases.length ? " is-active" : ""),
+    onclick: () => { filter.phases = []; rerender(); }
+  }, "All"));
+  effectivePhases().forEach(p => {
+    const on = filter.phases.includes(p.id);
+    phaseGroup.appendChild(h("button", {
+      class: "dash-chip" + (on ? " is-active is-phase" : ""),
+      title: `${p.num} — ${p.title}`,
+      onclick: () => {
+        if (on) filter.phases = filter.phases.filter(x => x !== p.id);
+        else filter.phases = [...filter.phases, p.id];
+        rerender();
+      }
+    }, `${p.num}`));
+  });
+  line2.appendChild(phaseGroup);
+
+  // Spacer pushes the reset action to the far right of line 2.
+  line2.appendChild(h("div", { class: "dash-filter-spacer" }));
+
+  const hasFilter = filter.timeRange !== "all"
+    || (filter.phases && filter.phases.length)
+    || (filter.statuses && filter.statuses.length);
+  if (hasFilter) {
+    line2.appendChild(h("button", {
+      class: "dash-filter-reset",
+      title: "Clear all filters",
+      onclick: () => {
+        filter.timeRange = "all";
+        filter.phases = [];
+        filter.statuses = [];
+        filter.customStart = "";
+        filter.customEnd = "";
+        rerender();
+      }
+    }, "Reset"));
+  }
+
+  host.appendChild(line2);
+}
+
+// ---------- UI: body sections ----------
+function dashKpiCard(opts) {
+  const { title, sub, value, unit, meta, tone, col, onclick } = opts;
+  const card = h("div", {
+    class: "dash-card dash-kpi"
+      + (tone ? ` is-${tone}` : "")
+      + (onclick ? " is-clickable" : "")
+      + (col ? ` dash-col-${col}` : " dash-col-3"),
+    onclick: onclick || null
+  }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, title),
+      sub ? h("span", { class: "dash-card-sub" }, sub) : null
+    ].filter(Boolean)),
+    h("div", { class: "dash-kpi-val" }, [
+      String(value),
+      unit ? h("span", { class: "dash-kpi-unit" }, unit) : null
+    ].filter(Boolean)),
+    meta ? h("div", { class: "dash-kpi-meta" }, meta) : null
+  ].filter(Boolean));
+  return card;
+}
+
+function dashSectionHead(label) {
+  return h("div", { class: "dash-section-head" }, [
+    h("h3", {}, label),
+    h("div", { class: "line" })
+  ]);
+}
+
+function renderAttentionList(items, emptyMsg, pillFn, onItemClick, maxItems) {
+  if (!items.length) {
+    return h("div", { class: "dash-empty" }, emptyMsg);
+  }
+  const list = h("div", { class: "dash-item-list" });
+  const cap = typeof maxItems === "number" ? maxItems : 8;
+  items.slice(0, cap).forEach(it => {
+    const pill = pillFn(it);
+    list.appendChild(h("div", {
+      class: "dash-item",
+      onclick: () => onItemClick(it)
+    }, [
+      h("span", { class: `dash-item-dot is-${it.status || "not_started"}` }),
+      h("span", { class: "dash-item-title" }, it.title),
+      pill ? pill : null
+    ].filter(Boolean)));
+  });
+  return list;
+}
+
+function jumpToTask(tid) {
+  const t = TASK_INDEX[tid];
+  if (!t) return;
+  UI.view = "tasks";
+  UI.phaseFilter = t.phaseId || null;
+  UI.activeNavPhase = UI.phaseFilter;
+  UI.openPhases = UI.openPhases || {};
+  UI.openPhases[t.phaseId] = true;
+  saveUI();
+  closeDashboard();
+  renderShell();
+  // Scroll into view after render. Tasks use id="task-<id>".
+  setTimeout(() => {
+    const el = document.getElementById("task-" + tid);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("is-dash-flash");
+      setTimeout(() => el.classList.remove("is-dash-flash"), 1500);
+    }
+  }, 140);
+}
+
+function renderDashboardBody(host, m, filter) {
+  host.innerHTML = "";
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  // ---- Section: Overview KPIs ----
+  host.appendChild(dashSectionHead("Overview"));
+
+  // Progress ring card (4-col). Shares a row with 4 KPI tiles (2-col each).
+  // The row stretches all 5 cards to the same height.
+  const delta = m.completedThisPeriod - m.completedPrevPeriod;
+  const deltaLabel = delta > 0
+    ? h("span", { class: "delta-up" }, `▲ ${delta} vs. previous period`)
+    : delta < 0
+      ? h("span", { class: "delta-down" }, `▼ ${Math.abs(delta)} vs. previous period`)
+      : h("span", { class: "delta-flat" }, "— same as previous period");
+  const progressCard = h("div", {
+    class: "dash-card dash-kpi dash-col-4"
+  }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Progress"),
+      h("span", { class: "dash-card-sub" }, `${m.complete}/${m.total} tasks complete`)
+    ]),
+    renderProgressRing(m.pct, `${m.completedThisPeriod} completed in window`, ""),
+    h("div", { class: "dash-kpi-meta" }, [deltaLabel])
+  ]);
+
+  const kpiRow1 = h("div", { class: "dash-row" }, [
+    progressCard,
+    dashKpiCard({
+      title: "Overdue", value: m.overdue, tone: m.overdue > 0 ? "danger" : "good",
+      sub: "past due",
+      meta: m.overdue > 0 ? `${m.overdueList.length} need attention` : "All on track",
+      col: 2
+    }),
+    dashKpiCard({
+      title: "Due this week", value: m.dueThisWeek + m.dueToday, tone: "warn",
+      sub: m.dueToday ? `${m.dueToday} today` : "next 7 days",
+      meta: m.startingSoon ? `${m.startingSoon} starting soon` : "",
+      col: 2
+    }),
+    dashKpiCard({
+      title: "Blocked", value: m.blocked, tone: "blocked",
+      sub: "status = blocked",
+      meta: m.blocked ? "Unblock to unlock flow" : "Nothing blocked",
+      col: 2
+    }),
+    dashKpiCard({
+      title: "Open bugs", value: m.bugsOpen, tone: m.bugsOpen > 0 ? "danger" : "good",
+      sub: m.bugsCritical
+        ? `${m.bugsCritical} critical`
+        : (m.bugsHigh ? `${m.bugsHigh} high` : ""),
+      meta: m.bugsResolved ? `${m.bugsResolved} resolved total` : "",
+      col: 2
+    })
+  ]);
+  host.appendChild(kpiRow1);
+
+  const kpiRow2 = h("div", { class: "dash-row" }, [
+    dashKpiCard({
+      title: "In progress", value: m.inProgress, tone: "citrus",
+      sub: "active work",
+      meta: m.urgent ? `${m.urgent} flagged urgent` : "",
+      col: 3
+    }),
+    dashKpiCard({
+      title: "Not started", value: m.notStarted, tone: "info",
+      sub: "in backlog",
+      meta: m.total ? `${Math.round(m.notStarted / m.total * 100)}% of filtered set` : "",
+      col: 3
+    }),
+    dashKpiCard({
+      title: "Next 7 days", value: Math.round(m.hoursNext7), unit: "h",
+      sub: "scheduled time",
+      meta: m.hoursNext7 ? `${Math.round(m.hoursNext7 / 7 * 10) / 10}h/day avg` : "No scheduled time",
+      col: 3
+    }),
+    dashKpiCard({
+      title: "Total tasks", value: m.total, tone: "",
+      sub: "in current filter",
+      meta: filter.phases.length || filter.statuses.length
+        ? "(filter active)"
+        : "(all phases)",
+      col: 3
+    })
+  ]);
+  host.appendChild(kpiRow2);
+
+  // ---- Section: Progress & Velocity (+ upcoming milestones stacked) ----
+  host.appendChild(dashSectionHead("Progress & velocity"));
+
+  // Phase progress card — sits in the left half of a split row.
+  const phaseCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Progress by phase"),
+      h("span", { class: "dash-card-sub" }, "Click a phase to filter tasks")
+    ]),
+    (() => {
+      const list = h("div", { class: "dash-phase-list" });
+      if (!m.phases.length) {
+        list.appendChild(h("div", { class: "dash-empty" }, "No phases in this filter"));
+        return list;
+      }
+      m.phases.forEach(p => {
+        if (!p.total) {
+          list.appendChild(h("div", { class: "dash-phase-row" }, [
+            h("div", { class: "dash-phase-head" }, [
+              h("div", {}, [
+                h("span", { class: "dash-phase-num" }, p.num),
+                h("span", { class: "dash-phase-title" }, p.title)
+              ]),
+              h("span", { class: "dash-phase-count" }, "—")
+            ])
+          ]));
+          return;
+        }
+        const row = h("div", {
+          class: "dash-phase-row",
+          onclick: () => {
+            UI.view = "tasks";
+            UI.phaseFilter = p.id;
+            UI.activeNavPhase = p.id;
+            saveUI();
+            closeDashboard();
+            renderShell();
+          }
+        }, [
+          h("div", { class: "dash-phase-head" }, [
+            h("div", {}, [
+              h("span", { class: "dash-phase-num" }, p.num),
+              h("span", { class: "dash-phase-title" }, p.title)
+            ]),
+            h("span", { class: "dash-phase-count" }, `${p.complete}/${p.total} · ${p.pct}%`)
+          ]),
+          h("div", { class: "dash-phase-bar" }, [
+            p.complete ? h("div", {
+              class: "dash-phase-seg is-complete",
+              style: `flex: ${p.complete} 0 auto`,
+              title: `${p.complete} complete`
+            }) : null,
+            p.inProgress ? h("div", {
+              class: "dash-phase-seg is-in_progress",
+              style: `flex: ${p.inProgress} 0 auto`,
+              title: `${p.inProgress} in progress`
+            }) : null,
+            p.blocked ? h("div", {
+              class: "dash-phase-seg is-blocked",
+              style: `flex: ${p.blocked} 0 auto`,
+              title: `${p.blocked} blocked`
+            }) : null,
+            p.notStarted ? h("div", {
+              class: "dash-phase-seg is-not_started",
+              style: `flex: ${p.notStarted} 0 auto`,
+              title: `${p.notStarted} not started`
+            }) : null
+          ].filter(Boolean))
+        ]);
+        list.appendChild(row);
+      });
+      return list;
+    })(),
+    h("div", { class: "dash-chart-legend" }, [
+      h("span", {}, [h("i", { style: "background:var(--leaf)" }), "Complete"]),
+      h("span", {}, [h("i", { style: "background:var(--citrus)" }), "In progress"]),
+      h("span", {}, [h("i", { style: "background:var(--danger)" }), "Blocked"]),
+      h("span", {}, [h("i", { style: "background:var(--line-2)" }), "Not started"])
+    ])
+  ]);
+  // Velocity card — sits at the top of the right stack.
+  const velocityCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Completion velocity"),
+      h("span", { class: "dash-card-sub" }, `${m.window.label} · ${m.velocity.reduce((a, v) => a + v.count, 0)} completed`)
+    ]),
+    renderVelocityChart(m.velocity, m.velocityMA),
+    h("div", { class: "dash-chart-legend" }, [
+      h("span", {}, [h("i", { style: "background:var(--citrus)" }), "Per week"]),
+      h("span", {}, [h("i", { class: "is-line", style: "background:var(--ink)" }), "4-week moving avg"])
+    ])
+  ]);
+
+  // Upcoming milestones — sits below velocity so the two stacked cards
+  // match the phase list's natural height.
+  const milestoneCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Upcoming milestones"),
+      h("span", { class: "dash-card-sub" }, `${m.upcomingMilestones.length} scheduled`)
+    ]),
+    (() => {
+      if (!m.upcomingMilestones.length) {
+        return h("div", { class: "dash-empty" }, "No upcoming milestones");
+      }
+      const list = h("div", {});
+      m.upcomingMilestones.forEach(ms => {
+        const days = ms.daysUntil;
+        let tag = "", cls = "";
+        if (days < 0) { tag = "Past"; cls = "is-past"; }
+        else if (days === 0) { tag = "Today"; cls = "is-now"; }
+        else if (days === 1) { tag = "Tomorrow"; cls = "is-soon"; }
+        else if (days <= 7) { tag = `${days}d`; cls = "is-soon"; }
+        else { tag = `${days}d`; }
+        list.appendChild(h("div", { class: "dash-milestone-row" }, [
+          h("div", { class: "dash-milestone-title", title: ms.title }, ms.title),
+          h("span", { class: "dash-milestone-date" }, fmtDateShort(ms.date)),
+          h("span", { class: `dash-milestone-countdown ${cls}` }, tag)
+        ]));
+      });
+      return list;
+    })()
+  ]);
+
+  const splitRow = h("div", { class: "dash-split-row" }, [
+    phaseCard,
+    h("div", { class: "dash-split-stack" }, [velocityCard, milestoneCard])
+  ]);
+  host.appendChild(splitRow);
+
+  // ---- Section: Workload heatmap (forward-looking, clipped to today) ----
+  host.appendChild(dashSectionHead("Workload"));
+  // Clip past months — the workload view is about "what's coming up", and
+  // rendering a full year of past empty cells just makes the card needlessly
+  // wide. If the filter is entirely in the past (e.g. "Last 30d"), fall back
+  // to the real window since there's no future to show.
+  const todayStrForHeat = ymd(new Date());
+  const heatStart = m.window.end < todayStrForHeat
+    ? m.window.start
+    : (m.window.start > todayStrForHeat ? m.window.start : todayStrForHeat);
+  const heatmapCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Task density"),
+      h("span", { class: "dash-card-sub" },
+        m.window.end < todayStrForHeat
+          ? "Scheduled + recurring tasks per day"
+          : `Today → ${fmtDateShort(m.window.end)}`)
+    ]),
+    renderHeatmap(m.heatmapMap, heatStart, m.window.end)
+  ]);
+  host.appendChild(heatmapCard);
+
+  // ---- Section: Needs attention (3 columns, all same height) ----
+  host.appendChild(dashSectionHead("Needs attention"));
+  const attentionWrap = h("div", { class: "dash-row dash-row-three" });
+
+  attentionWrap.appendChild(h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Overdue"),
+      h("span", { class: "dash-card-sub" }, `${m.overdueList.length}`)
+    ]),
+    renderAttentionList(m.overdueList, "Nothing overdue ✓",
+      (it) => h("span", { class: "dash-item-pill is-overdue" }, `${Math.abs(daysUntil(it.dueDate))}d late`),
+      (it) => jumpToTask(it.tid)
+    )
+  ]));
+
+  attentionWrap.appendChild(h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Blocked"),
+      h("span", { class: "dash-card-sub" }, `${m.blockedList.length}`)
+    ]),
+    renderAttentionList(m.blockedList, "No blockers",
+      (it) => h("span", { class: "dash-item-pill is-blocked" }, "blocked"),
+      (it) => jumpToTask(it.tid)
+    )
+  ]));
+
+  const urgentListEl = renderAttentionList(m.urgentList, "Nothing flagged",
+    (it) => {
+      if (it.dueDate) {
+        const d = daysUntil(it.dueDate);
+        const label = d < 0 ? `${Math.abs(d)}d late` : d === 0 ? "today" : `${d}d`;
+        return h("span", {
+          class: "dash-item-pill " + (d < 0 ? "is-overdue" : "is-urgent")
+        }, label);
+      }
+      return h("span", { class: "dash-item-pill is-urgent" }, "urgent");
+    },
+    (it) => jumpToTask(it.tid),
+    // Show more urgent items since the capped list scrolls within the card.
+    30
+  );
+  // Cap the list height so one busy column doesn't make the attention row tower
+  // over Overdue / Blocked. Long lists become scrollable inside the card.
+  if (urgentListEl.classList.contains("dash-item-list") && m.urgentList.length > 6) {
+    urgentListEl.classList.add("is-capped");
+  }
+  attentionWrap.appendChild(h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Flagged urgent"),
+      h("span", { class: "dash-card-sub" },
+        m.urgentList.length > 6 ? `${m.urgentList.length} · scroll ↕` : `${m.urgentList.length}`)
+    ]),
+    urgentListEl
+  ]));
+
+  host.appendChild(attentionWrap);
+
+  // ---- Section: Bugs + time budget (3 columns, all same height) ----
+  host.appendChild(dashSectionHead("Bugs & time budget"));
+  const bugsRow = h("div", { class: "dash-row dash-row-three" });
+
+  const bugCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Bug health"),
+      h("span", { class: "dash-card-sub" }, `${m.bugsOpen + m.bugsResolved + m.bugsWontFix} total`)
+    ]),
+    h("div", { class: "dash-donut-wrap" }, [
+      renderDonut([
+        { label: "Open", value: m.bugsOpen - m.bugsInProgress, color: "var(--danger)" },
+        { label: "In progress", value: m.bugsInProgress, color: "var(--sun)" },
+        { label: "Resolved", value: m.bugsResolved, color: "var(--leaf)" },
+        { label: "Won't fix", value: m.bugsWontFix, color: "var(--muted)" }
+      ], "Bugs"),
+      h("div", { class: "dash-donut-legend" }, [
+        h("div", { class: "dash-donut-legend-row" }, [
+          h("i", { style: "background:var(--danger)" }),
+          h("span", {}, "Open"),
+          h("span", { class: "v" }, String(m.bugsOpen - m.bugsInProgress))
+        ]),
+        h("div", { class: "dash-donut-legend-row" }, [
+          h("i", { style: "background:var(--sun)" }),
+          h("span", {}, "In progress"),
+          h("span", { class: "v" }, String(m.bugsInProgress))
+        ]),
+        h("div", { class: "dash-donut-legend-row" }, [
+          h("i", { style: "background:var(--leaf)" }),
+          h("span", {}, "Resolved"),
+          h("span", { class: "v" }, String(m.bugsResolved))
+        ]),
+        h("div", { class: "dash-donut-legend-row" }, [
+          h("i", { style: "background:var(--muted)" }),
+          h("span", {}, "Won't fix"),
+          h("span", { class: "v" }, String(m.bugsWontFix))
+        ])
+      ])
+    ]),
+    (() => {
+      const openSum = m.bugsCritical + m.bugsHigh + m.bugsMedium + m.bugsLow;
+      if (!openSum) return null;
+      const bar = h("div", { class: "dash-bug-sev-bar" }, [
+        m.bugsCritical ? h("div", { class: "dash-bug-sev-seg is-critical", style: `flex:${m.bugsCritical}` }) : null,
+        m.bugsHigh ? h("div", { class: "dash-bug-sev-seg is-high", style: `flex:${m.bugsHigh}` }) : null,
+        m.bugsMedium ? h("div", { class: "dash-bug-sev-seg is-medium", style: `flex:${m.bugsMedium}` }) : null,
+        m.bugsLow ? h("div", { class: "dash-bug-sev-seg is-low", style: `flex:${m.bugsLow}` }) : null
+      ].filter(Boolean));
+      return h("div", {}, [
+        h("div", { class: "dash-chart-legend" }, [
+          h("span", {}, [h("i", { style: "background:var(--danger)" }), `Critical ${m.bugsCritical}`]),
+          h("span", {}, [h("i", { style: "background:var(--sun)" }), `High ${m.bugsHigh}`]),
+          h("span", {}, [h("i", { style: "background:var(--info)" }), `Medium ${m.bugsMedium}`]),
+          h("span", {}, [h("i", { style: "background:var(--muted)" }), `Low ${m.bugsLow}`])
+        ]),
+        bar
+      ]);
+    })()
+  ].filter(Boolean));
+  bugsRow.appendChild(bugCard);
+
+  const topBugsCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Tasks with most open bugs"),
+      h("span", { class: "dash-card-sub" }, "Top 5")
+    ]),
+    (() => {
+      if (!m.topBugTasks.length) {
+        return h("div", { class: "dash-empty" }, "No open bugs ✓");
+      }
+      const list = h("div", { class: "dash-item-list" });
+      m.topBugTasks.forEach(it => {
+        list.appendChild(h("div", {
+          class: "dash-item",
+          onclick: () => jumpToTask(it.tid)
+        }, [
+          h("span", { class: "dash-item-title" }, it.title),
+          h("span", { class: "dash-item-pill is-bug" }, `${it.count} bug${it.count === 1 ? "" : "s"}`)
+        ]));
+      });
+      return list;
+    })()
+  ]);
+  bugsRow.appendChild(topBugsCard);
+
+  const timeCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Scheduled time per phase"),
+      h("span", { class: "dash-card-sub" }, `${Math.round(m.totalScheduledMinutes / 60 * 10) / 10}h total`)
+    ]),
+    (() => {
+      const rows = m.hoursByPhase.filter(p => p.minutes > 0);
+      if (!rows.length) {
+        return h("div", { class: "dash-empty" }, "No scheduled time-of-day set on tasks");
+      }
+      const maxMin = Math.max(...rows.map(r => r.minutes));
+      const wrap = h("div", {});
+      rows.forEach(r => {
+        const hLabel = r.hours >= 1
+          ? `${Math.round(r.hours * 10) / 10}h`
+          : `${Math.round(r.minutes)}m`;
+        wrap.appendChild(h("div", { class: "dash-time-row" }, [
+          h("span", { class: "dash-time-title", title: `${r.num} · ${r.title}` },
+            r.title.length > 14 ? r.title.slice(0, 13) + "…" : r.title),
+          h("div", { class: "dash-time-bar-wrap" }, [
+            h("div", {
+              class: "dash-time-bar-fill",
+              style: `width: ${(r.minutes / maxMin) * 100}%`
+            })
+          ]),
+          h("span", { class: "dash-time-value" }, hLabel)
+        ]));
+      });
+      return wrap;
+    })()
+  ]);
+  bugsRow.appendChild(timeCard);
+  host.appendChild(bugsRow);
+
+  // ---- Section: Recent activity ----
+  host.appendChild(dashSectionHead("Recent activity"));
+  const recentCard = h("div", { class: "dash-card" }, [
+    h("div", { class: "dash-card-title" }, [
+      h("span", {}, "Last 12 updates"),
+      h("span", { class: "dash-card-sub" }, "Tasks most recently changed")
+    ]),
+    (() => {
+      if (!m.recent.length) {
+        return h("div", { class: "dash-empty" }, "No recent updates inside this filter");
+      }
+      const list = h("div", { class: "dash-item-list" });
+      m.recent.forEach(it => {
+        const when = new Date(it.updated);
+        const diffMs = Date.now() - when.getTime();
+        const diffMin = Math.round(diffMs / 60000);
+        let whenStr = "";
+        if (diffMin < 1) whenStr = "just now";
+        else if (diffMin < 60) whenStr = `${diffMin}m ago`;
+        else if (diffMin < 60 * 24) whenStr = `${Math.round(diffMin / 60)}h ago`;
+        else whenStr = `${Math.round(diffMin / 60 / 24)}d ago`;
+        const statusLabel = STATUS_LABELS[it.status] || it.status;
+        list.appendChild(h("div", {
+          class: "dash-item",
+          onclick: () => jumpToTask(it.tid)
+        }, [
+          h("span", { class: `dash-item-dot is-${it.status}` }),
+          h("span", { class: "dash-item-title" }, it.title),
+          h("span", { class: "dash-item-meta" }, statusLabel),
+          h("span", { class: "dash-item-meta" }, whenStr)
+        ]));
+      });
+      return list;
+    })()
+  ]);
+  host.appendChild(recentCard);
+}
+
+// ---------- Open / close ----------
+function openDashboard() {
+  // Lazy-create the overlay element once.
+  let overlay = document.getElementById("dash-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "dash-overlay";
+    overlay.className = "dash-overlay";
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeDashboard();
+    });
+  }
+  overlay.innerHTML = "";
+
+  // Persisted filter state.
+  UI.dashboard = UI.dashboard || {};
+  const filter = {
+    timeRange: UI.dashboard.timeRange || "all",
+    customStart: UI.dashboard.customStart || "",
+    customEnd: UI.dashboard.customEnd || "",
+    phases: Array.isArray(UI.dashboard.phases) ? [...UI.dashboard.phases] : [],
+    statuses: Array.isArray(UI.dashboard.statuses) ? [...UI.dashboard.statuses] : []
+  };
+
+  const body = h("div", { class: "dash-body" });
+  const filtersHost = h("div", { class: "dash-filters" });
+
+  const rerender = () => {
+    const m = computeDashboardMetrics(filter);
+    renderDashboardFilters(filtersHost, filter, rerender);
+    renderDashboardBody(body, m, filter);
+    // Update subtitle text.
+    const sub = overlay.querySelector(".dash-subtitle");
+    if (sub) {
+      sub.textContent = `${m.window.label} · ${m.total} tasks in filter · updated ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+    }
+    // Persist.
+    UI.dashboard = {
+      timeRange: filter.timeRange,
+      customStart: filter.customStart,
+      customEnd: filter.customEnd,
+      phases: [...filter.phases],
+      statuses: [...filter.statuses]
+    };
+    saveUI();
+  };
+
+  const modal = h("div", { class: "dash-modal" }, [
+    h("div", { class: "dash-header" }, [
+      h("div", { class: "dash-header-top" }, [
+        h("div", {}, [
+          h("h2", { class: "dash-title" }, "Admin Dashboard"),
+          h("div", { class: "dash-subtitle" }, "")
+        ]),
+        h("button", {
+          class: "dash-close",
+          onclick: closeDashboard,
+          title: "Close (Esc)",
+          html: ICONS.x
+        })
+      ]),
+      filtersHost
+    ]),
+    body
+  ]);
+  overlay.appendChild(modal);
+
+  rerender();
+  overlay.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeDashboard() {
+  const overlay = document.getElementById("dash-overlay");
+  if (!overlay) return;
+  overlay.classList.remove("is-open");
+  overlay.innerHTML = "";
+  document.body.style.overflow = "";
+}
+
+/* ============================================================================
    MODAL SYSTEM
    ============================================================================ */
 function openModal({ title, body, footer }) {
@@ -8475,6 +11470,8 @@ async function init() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       hideContextMenu();
+      const dashOverlay = document.getElementById("dash-overlay");
+      if (dashOverlay && dashOverlay.classList.contains("is-open")) { closeDashboard(); return; }
       const overlay = $("#modal-overlay");
       if (overlay.classList.contains("is-open")) { closeModal(); return; }
       if ($("#lock-screen").classList.contains("is-on")) return;
