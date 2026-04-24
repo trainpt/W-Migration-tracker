@@ -236,7 +236,12 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .nav-link.is-complete .nav-num,
 .nav-link.is-complete .nav-progress { color: var(--leaf); opacity: 0.85; }
 .nav-link.is-complete:hover { background: var(--leaf-soft); filter: brightness(0.97); }
-.nav-link.is-active { background: var(--citrus-soft); color: var(--citrus-deep); }
+.nav-link.is-active {
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--citrus);
+}
 .nav-link.is-active.is-complete { background: var(--citrus-soft); color: var(--citrus-deep); }
 .nav-link.is-active.is-complete .nav-num,
 .nav-link.is-active.is-complete .nav-progress { color: var(--citrus); opacity: 1; }
@@ -1074,14 +1079,52 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .cal-day:hover { background: var(--bg-2); }
 .cal-day.is-other-month { background: var(--bg-3); color: var(--muted); }
-.cal-day.is-today { background: var(--citrus-soft); }
-.cal-day.is-today .cal-daynum { color: var(--citrus-deep); font-weight: 700; }
+.cal-day.is-today .cal-daynum {
+  color: white;
+  font-weight: 700;
+  background: var(--citrus);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
 .cal-day.is-weekend { background: #FAF7F0; }
 .cal-day.is-weekend.is-other-month { background: #EDE7D9; }
 .cal-daynum {
   font-size: 12px; font-weight: 500;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
+}
+/* Weekday abbreviation stacked above the date in the first row (Google style) */
+.cal-dow-inline {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  line-height: 1;
+  text-align: center;
+}
+.calendar-card .cal-dow-inline {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+/* Center-align the weekday+date stack on first-row cells */
+.cal-day:has(.cal-dow-inline) {
+  text-align: center;
+}
+/* Non-today daynum is a block-level div; make it inline-block so the parent's
+   text-align: center actually centers it. Today's daynum stays inline-flex
+   (the circle badge) via its higher-specificity :is-today rule. */
+.cal-day:has(.cal-dow-inline):not(.is-today) .cal-daynum {
+  display: inline-block;
+}
+.cal-day:has(.cal-dow-inline) .cal-events {
+  text-align: left;
 }
 .cal-events {
   margin-top: 4px;
@@ -1109,6 +1152,18 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .cal-event.is-complete { background: var(--leaf-soft); color: var(--leaf); }
 .cal-event.is-overdue { background: var(--danger-soft); color: var(--danger); }
+.cal-event.is-ooo { background: var(--leaf); color: #fff; font-weight: 600; }
+.cal-event.is-focus { background: var(--blocked-soft); color: var(--blocked); }
+.cal-event.is-lunch { background: var(--sun-soft); color: var(--sun); }
+.cal-event.is-routine { background: var(--bg-3); color: var(--ink-3); }
+.cal-event.is-past { opacity: 0.45; filter: saturate(0.7); }
+.cal-event.is-past:hover { opacity: 0.85; filter: saturate(1); }
+.cal-event.is-past-today { opacity: 0.6; filter: saturate(0.8); }
+.cal-event.is-past-today:hover { opacity: 0.9; filter: saturate(1); }
+.timed-pill.is-past { opacity: 0.45; filter: saturate(0.7); }
+.timed-pill.is-past:hover { opacity: 0.9; filter: saturate(1); }
+.timed-pill.is-past-today { opacity: 0.6; filter: saturate(0.8); }
+.timed-pill.is-past-today:hover { opacity: 0.9; filter: saturate(1); }
 .cal-event[draggable="true"] { cursor: grab; }
 .cal-event[draggable="true"]:active { cursor: grabbing; }
 .cal-event.is-range-locked { cursor: pointer; }
@@ -1163,6 +1218,10 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .cal-tooltip .tt-pill.is-priority { background: var(--sun-soft); color: var(--sun); }
 .cal-tooltip .tt-pill.is-milestone { background: var(--danger-soft); color: var(--danger); }
 .cal-tooltip .tt-pill.is-recurring { background: var(--info-soft); color: var(--info); }
+.cal-tooltip .tt-pill.is-ooo { background: var(--leaf-soft); color: var(--leaf); }
+.cal-tooltip .tt-pill.is-focus { background: var(--blocked-soft); color: var(--blocked); }
+.cal-tooltip .tt-pill.is-lunch { background: var(--sun-soft); color: var(--sun); }
+.cal-tooltip .tt-pill.is-routine { background: var(--bg-3); color: var(--ink-3); }
 .cal-tooltip .tt-desc {
   color: var(--ink-2);
   margin-bottom: 6px;
@@ -1685,6 +1744,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 
 .cal-legend {
   display: flex; gap: 16px;
+  align-items: center;
   margin-top: 18px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
@@ -1700,9 +1760,44 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border-radius: 3px;
 }
 .legend-dot.milestone { background: var(--danger-soft); border: 1px solid var(--danger); }
-.legend-dot.task { background: var(--citrus-soft); border: 1px solid var(--citrus); }
 .legend-dot.recurring { background: var(--info-soft); border: 1px solid var(--info); }
 .legend-dot.complete { background: var(--leaf-soft); border: 1px solid var(--leaf); }
+.legend-dot.ooo { background: var(--leaf-soft); border: 1px solid var(--leaf); }
+.legend-dot.focus { background: var(--blocked-soft); border: 1px solid var(--blocked); }
+.legend-dot.lunch { background: var(--sun-soft); border: 1px solid var(--sun); }
+.legend-dot.routine { background: var(--bg-3); border: 1px solid var(--muted); }
+
+/* Legend chip — a legend item that's clickable to toggle visibility */
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.legend-chip:hover { background: var(--bg-2); border-color: var(--line-2); }
+.legend-chip.is-hidden {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.legend-chip.is-hidden:hover { opacity: 0.75; }
+
+/* Task swatch is a horizontal pill (rectangle) — matches the actual calendar
+   pill shape for ranged tasks, so the legend reads "task = duration bar". */
+.legend-swatch.task {
+  display: inline-block;
+  width: 22px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--citrus-soft);
+  border: 1px solid var(--citrus);
+}
 
 .cal-upcoming {
   margin-top: 22px;
@@ -3635,15 +3730,33 @@ kbd {
   padding: 8px 10px;
 }
 .calendar-card .cal-day { background: var(--surface); }
-.calendar-card .cal-day.is-today { background: var(--citrus-soft); }
 .calendar-card .cal-day.is-weekend { background: var(--bg-2); }
 .calendar-card .cal-day.is-other-month { background: var(--bg-3); color: var(--muted); opacity: 0.85; }
+.calendar-card .cal-day.has-ooo,
+.cal-day.has-ooo {
+  background: var(--leaf-soft);
+}
+.calendar-card .cal-day.has-ooo.is-weekend,
+.cal-day.has-ooo.is-weekend {
+  background: #D9E7DC;
+}
 .calendar-card .cal-daynum {
   font-family: var(--font-display);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
-.calendar-card .cal-day.is-today .cal-daynum { color: var(--danger); font-weight: 700; }
+.calendar-card .cal-day.is-today .cal-daynum {
+  color: white;
+  font-weight: 700;
+  background: var(--citrus);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
 .calendar-card .cal-event {
   border-left: 3px solid var(--citrus);
   border-radius: 4px;
@@ -3664,6 +3777,127 @@ kbd {
 }
 .calendar-card .cal-event.is-overdue {
   background: var(--danger-soft); color: var(--danger); border-left-color: var(--danger);
+}
+/* OOO-specific styling (solid green bold) — other types keep their own soft styles */
+.calendar-card .cal-event.is-ooo {
+  background: var(--leaf); color: #fff; border-left: 0;
+  font-weight: 600;
+}
+.calendar-card .cal-event.is-ooo .evt-inner::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.95) 0 3px, rgba(255,255,255,0.35) 3px);
+}
+
+/* Generic milestone-pill layout (applies to any type — any pill with .evt-inner).
+   Fixed height, but keep overflow: hidden so long titles still truncate with
+   ellipsis on single-day pills. The range-start pill below opens overflow
+   back up for the floated label. */
+.calendar-card .cal-event:has(.evt-inner) {
+  padding: 0 8px;
+  border-radius: 3px;
+  margin-top: -2px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 20px;
+}
+.calendar-card .cal-event .evt-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  /* Truncate with ellipsis when the pill is overflow: hidden (non-range pills) */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+/* Open up overflow only on range-start pills so the absolute-positioned label
+   can float past the pill's right edge into the next cell. */
+.calendar-card .cal-event.is-range-start:not(.is-range-end):has(.evt-inner) {
+  overflow: visible;
+}
+.calendar-card .cal-event.is-range-start:not(.is-range-end):has(.evt-inner) .evt-inner {
+  overflow: visible;
+  text-overflow: clip;
+}
+/* Range-start milestone: raise z-index so its floated label sits over the
+   neighbor, and extend by 1 extra px to bridge the grid's 1px gap. */
+.calendar-card .cal-event.is-range-start:not(.is-range-end):has(.evt-inner) {
+  z-index: 2;
+  margin-right: -9px;
+}
+.calendar-card .cal-event.is-range-locked:has(.evt-inner) {
+  margin-left: -8px;
+  margin-right: -9px;
+}
+.cal-day.has-range-start,
+.calendar-card .cal-day.has-range-start {
+  overflow: visible;
+  z-index: 2;
+}
+.cal-day.has-range-start .cal-events {
+  overflow: visible;
+}
+/* Float the label to center on the cell boundary */
+.calendar-card .cal-event.is-range-start:not(.is-range-end) .evt-inner {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+}
+.calendar-card .cal-event.is-range-end:not(.is-range-start) .evt-inner,
+.calendar-card .cal-event.is-range-locked .evt-inner {
+  display: none;
+}
+/* OOO label specifically gets its own solid-green background so it visually
+   reads as a continuation of the bold OOO band even when it floats */
+.calendar-card .cal-event.is-ooo.is-range-start:not(.is-range-end) .evt-inner {
+  background: var(--leaf);
+  padding: 0 8px;
+  height: 20px;
+  border-radius: 3px;
+}
+.calendar-card .cal-event.is-focus {
+  background: var(--blocked-soft); color: var(--blocked); border-left-color: var(--blocked);
+}
+.calendar-card .cal-event.is-lunch {
+  background: var(--sun-soft); color: var(--sun); border-left-color: var(--sun);
+}
+.calendar-card .cal-event.is-routine {
+  background: var(--bg-3); color: var(--ink-3); border-left-color: var(--muted);
+}
+/* Multi-day milestone range — connect the pills edge-to-edge across cells.
+   .cal-day has padding: 7px 8px 6px and overflow: hidden, so pulling the pill
+   out by -8px on each side makes it touch the cell boundary. Only a 1px grid
+   line separates the two pills, reading as a continuous band. */
+.calendar-card .cal-event.is-range-start:not(.is-range-end) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -8px;
+  padding-right: 8px;
+}
+.calendar-card .cal-event.is-range-end:not(.is-range-start) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+  margin-left: -8px;
+  padding-left: 8px;
+}
+.calendar-card .cal-event.is-range-locked {
+  border-radius: 0;
+  border-left: 0;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 .calendar-card .cal-legend {
   margin-top: 14px;
@@ -3696,6 +3930,40 @@ kbd {
 }
 .cal-view-btn:hover { color: var(--ink); background: var(--surface); }
 .cal-view-btn.is-on { background: var(--ink); color: white; }
+.cal-header .btn-outline.is-on {
+  background: var(--citrus-soft);
+  border-color: var(--citrus);
+  color: var(--citrus-deep);
+}
+
+.cal-legend-filter {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.cal-legend-filter:hover {
+  border-color: var(--citrus);
+  color: var(--citrus-deep);
+}
+.cal-legend-filter.is-on {
+  background: var(--citrus);
+  border-color: var(--citrus-deep);
+  color: white;
+}
+.cal-legend-filter.is-on:hover { background: var(--citrus-deep); color: white; }
+.cal-legend-filter svg { width: 12px; height: 12px; }
 
 .timed-view {
   display: grid;
@@ -3718,7 +3986,7 @@ kbd {
   border-bottom: 1px solid var(--line);
 }
 .timed-labels-allday {
-  min-height: 36px;
+  height: 60px;
   display: flex; align-items: center; justify-content: flex-end;
   padding: 0 8px;
   font-size: 9px; font-weight: 600;
@@ -3767,13 +4035,24 @@ kbd {
   min-width: 0;
 }
 .timed-col.is-today { background: rgba(232,118,58,0.03); }
+.timed-col.has-ooo {
+  background: var(--leaf-soft);
+  /* Small white inset on both sides so adjacent OOO columns visually separate */
+  box-shadow: inset 3px 0 0 var(--surface), inset -3px 0 0 var(--surface);
+}
+.timed-col.has-ooo.is-today { background: #DEE9DA; }
+.timed-col.has-ooo .timed-slot { background: transparent; }
 .timed-allday {
-  min-height: 36px;
+  /* Fixed height so every column's grid starts at the same Y, which keeps
+     column bottoms (and OOO green tints) aligned across the week view. */
+  height: 60px;
   border-bottom: 1px solid var(--line);
   padding: 4px 6px;
   display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px;
-  align-content: center;
+  align-content: flex-start;
   background: var(--bg-2);
+  /* overflow kept visible so multi-day OOO pills can cross column boundaries
+     via negative margins. Columns almost never have >2 all-day events. */
 }
 .timed-allday-empty { display: none; }
 .timed-grid {
@@ -3818,6 +4097,96 @@ kbd {
   background: var(--info-soft);
   color: var(--info);
   border-left-color: var(--info);
+}
+.timed-pill.is-ooo {
+  background: var(--leaf);
+  color: #fff;
+  border-left: 0;
+  font-weight: 600;
+}
+/* All-day milestone pill in week view: fills the column, fixed height so
+   range-start and range-end pills match for clean visual merging. */
+.timed-pill.is-allday:has(.evt-inner) {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 8px;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: visible;
+}
+.timed-pill.is-allday .evt-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.timed-pill.is-allday.is-ooo .evt-inner::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0 3px, rgba(255,255,255,0.35) 3px);
+}
+/* Open up overflow on columns containing a range-start so the label can
+   float past the column boundary */
+.timed-col.has-range-start,
+.timed-col.has-range-start .timed-allday {
+  overflow: visible;
+}
+.timed-col.has-range-start {
+  position: relative;
+  z-index: 2;
+}
+/* Multi-day milestone band: stretch pills edge-to-edge across cell padding
+   + the col-wrap's 1px separator so adjacent columns merge visually. */
+.timed-pill.is-allday.is-range-start:not(.is-range-end):has(.evt-inner) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -7px;
+}
+.timed-pill.is-allday.is-range-end:not(.is-range-start):has(.evt-inner) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -6px;
+}
+.timed-pill.is-allday.is-range-locked:has(.evt-inner) {
+  border-radius: 0;
+  margin-left: -6px;
+  margin-right: -7px;
+}
+/* Float the label across the boundary for true centering (week view only). */
+.timed-view-week .timed-pill.is-allday.is-range-start:not(.is-range-end) .evt-inner {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+}
+.timed-pill.is-allday.is-range-end:not(.is-range-start) .evt-inner,
+.timed-pill.is-allday.is-range-locked .evt-inner {
+  display: none;
+}
+/* OOO label specifically keeps its own solid-green background in week view */
+.timed-view-week .timed-pill.is-allday.is-ooo.is-range-start:not(.is-range-end) .evt-inner {
+  background: var(--leaf);
+  padding: 0 8px;
+  height: 20px;
+  border-radius: 3px;
+}
+.timed-pill.is-focus {
+  background: var(--blocked-soft); color: var(--blocked); border-left-color: var(--blocked);
+}
+.timed-pill.is-lunch {
+  background: var(--sun-soft); color: var(--sun); border-left-color: var(--sun);
+}
+.timed-pill.is-routine {
+  background: var(--bg-3); color: var(--ink-3); border-left-color: var(--muted);
 }
 .timed-pill.is-complete,
 .timed-pill.is-status-completed {
@@ -4036,6 +4405,334 @@ kbd {
     animation: none;
   }
 }
+
+/* ==========================================================
+   Calendar Import Wizard
+   ========================================================== */
+.modal.is-wizard {
+  max-width: 1400px;
+  width: 96vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal.is-wizard .modal-body {
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.iw-summary {
+  padding: 10px 22px;
+  font-size: 12px;
+  color: var(--ink-3);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+.iw-summary strong { color: var(--ink); }
+.iw-summary .iw-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-3);
+  color: var(--ink-2);
+}
+.iw-summary .iw-pill.iw-pill-warn { background: var(--sun-soft); color: var(--sun); }
+.iw-summary .iw-pill.iw-pill-danger { background: var(--danger-soft); color: var(--danger); }
+
+.iw-toolbar {
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--surface);
+}
+.iw-toolbar .iw-search {
+  flex: 1 1 240px;
+  min-width: 180px;
+  padding: 7px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  background: var(--bg-2);
+}
+.iw-toolbar .iw-search:focus { background: var(--surface); }
+.iw-toolbar .iw-date {
+  padding: 7px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  background: var(--bg-2);
+  color: var(--ink);
+  width: 140px;
+}
+.iw-toolbar .iw-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.iw-toolbar .iw-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--line);
+}
+.iw-toolbar .iw-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+.iw-toolbar select.iw-select {
+  padding: 7px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  background: var(--bg-2);
+}
+.iw-toolbar .iw-btn-sm {
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: all 0.12s ease;
+}
+.iw-toolbar .iw-btn-sm:hover { border-color: var(--citrus); color: var(--citrus-deep); }
+.iw-toolbar .iw-btn-sm.iw-danger-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.iw-table-wrap {
+  flex: 1;
+  overflow: auto;
+  background: var(--bg-2);
+}
+.iw-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  table-layout: fixed;
+}
+.iw-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-3);
+  color: var(--ink-2);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.iw-table thead th.iw-th-resizable { position: sticky; }
+.iw-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 3;
+  background: transparent;
+  transition: background 0.12s ease;
+}
+.iw-resizer:hover,
+.iw-resizer.is-dragging { background: var(--citrus); }
+.iw-th-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.iw-table tbody tr {
+  background: var(--surface);
+  transition: background 0.1s ease;
+}
+.iw-table tbody tr:hover { background: var(--bg-2); }
+.iw-table tbody tr.iw-row-dupe { background: var(--danger-soft); }
+.iw-table tbody tr.iw-row-dupe:hover { background: #f5d0d5; }
+.iw-table tbody tr.iw-row-replace { background: var(--leaf-soft); }
+.iw-table tbody tr.iw-row-replace:hover { background: #d4e4d7; }
+.iw-table tbody tr.iw-row-unchecked { opacity: 0.55; }
+.iw-table tbody tr.iw-row-expand { background: var(--bg-2); }
+.iw-table tbody tr.iw-row-expand:hover { background: var(--bg-2); }
+.iw-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  overflow: hidden;
+}
+.iw-table td.iw-col-check { text-align: center; }
+.iw-table td.iw-col-actions { text-align: right; white-space: nowrap; }
+.iw-table input[type="date"],
+.iw-table input[type="time"],
+.iw-table input[type="text"],
+.iw-table select {
+  width: 100%;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 5px;
+  font-size: 13px;
+  color: var(--ink);
+}
+.iw-table input[type="text"]:hover,
+.iw-table input[type="date"]:hover,
+.iw-table input[type="time"]:hover,
+.iw-table select:hover {
+  border-color: var(--line-2);
+  background: var(--surface);
+}
+.iw-table input[type="text"]:focus,
+.iw-table input[type="date"]:focus,
+.iw-table input[type="time"]:focus,
+.iw-table select:focus {
+  border-color: var(--citrus);
+  background: var(--surface);
+  outline: none;
+}
+.iw-table .iw-time-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 0;
+}
+.iw-table .iw-time-group input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  padding: 4px 4px;
+  font-size: 12px;
+}
+.iw-table .iw-time-group .iw-time-arrow { flex: 0 0 auto; }
+.iw-table .iw-date-range {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  min-width: 0;
+}
+.iw-table .iw-date-range input { flex: 1 1 0; min-width: 0; width: auto; font-size: 12px; padding: 4px 4px; }
+.iw-table .iw-date-range .iw-date-arrow { flex: 0 0 auto; font-size: 10px; color: var(--muted); }
+.iw-table .iw-allday { font-size: 10px; color: var(--muted); font-style: italic; }
+.iw-table .iw-title-input { font-weight: 500; }
+
+.iw-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.iw-badge-dupe { background: var(--danger-soft); color: var(--danger); }
+.iw-badge-replace { background: var(--leaf-soft); color: var(--leaf); }
+.iw-badge-rec { background: var(--blocked-soft); color: var(--blocked); }
+.iw-badge-past { background: var(--bg-3); color: var(--muted); }
+
+.iw-row-btn {
+  width: 26px; height: 26px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 5px;
+  color: var(--muted);
+  transition: all 0.1s ease;
+}
+.iw-row-btn:hover { background: var(--bg-3); color: var(--ink); }
+.iw-row-btn.iw-row-del:hover { background: var(--danger-soft); color: var(--danger); }
+
+.iw-expand-row td {
+  padding: 0 8px 10px;
+  background: var(--bg-2);
+}
+.iw-expand-wrap {
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin: 4px 30px 4px 42px;
+}
+.iw-expand-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.iw-expand-wrap textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  background: var(--bg-2);
+}
+.iw-expand-wrap textarea:focus { background: var(--surface); border-color: var(--citrus); outline: none; }
+.iw-raw-toggle {
+  font-size: 10px;
+  color: var(--citrus-deep);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.iw-raw-toggle:hover { text-decoration: underline; }
+
+.iw-empty {
+  padding: 48px 22px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.iw-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+}
+.iw-footer-info {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.iw-footer-info strong { color: var(--ink); font-size: 13px; }
+.iw-footer-actions { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -4142,7 +4839,7 @@ const PHASES = [
     window: "Apr 2026 · ongoing",
     desc: "Cross-team debrief cadence to surface newly identified requirements, escalate risks, and align on scope between IM, Delight, VEP, and product. Records of alignment meetings, action items, and scope risks that emerged between discovery and feature dev.",
     groups: [
-      { id: "apr21-debrief", title: "Apr 21 Onsite Debrief (Gomez / Brewer / Vemprala / Pradhan)", tasks: [
+      { id: "apr21-debrief", title: "Apr 21 Onsite Debrief (Gomez / Brewer / Vemprala / Pradhan / Torrez / Martin / Carlos V)", tasks: [
         { id: "sy-meeting", title: "Hold Apr 21 internal debrief",
           desc: "Daniel Gomez, Ella Brewer, Chaitanya Vemprala, Sabeen Pradhan, Jackie Torrez, Martin Carlos, Carlos V. Reviewed feedback and operational gaps from on-site visits. Gemini notes archived.",
           defaultStatus: "complete" },
@@ -4181,7 +4878,7 @@ const PHASES = [
         { id: "f-bp", title: "Bulk Actions: Break Penalty Premium", desc: "Released.", defaultStatus: "complete" },
         { id: "f-bl", title: "Bulk Actions: Add Break / Lunch", desc: "Planning." },
         { id: "f-nb", title: "Bulk Actions: NPT Bulk Actions", desc: "Discovery. Wonderful wants to retain manual-trigger control for harvesting; Rosa wants schedule-triggered for nursery. Apr 21 debrief: scope aligned with Delight — bulk insert NPT, breaks, lunches to replicate legacy functionality.", defaultStatus: "in_progress" },
-        { id: "f-qc", title: "QC Tracking & Reporting", desc: "Standalone QC app, additional tracked variables, photos on records (future). Dev starts late March.", priority: "priority" },
+        { id: "f-qc", title: "QC Tracking & Reporting", desc: "Standalone QC app, additional tracked variables, photos on records (future). Dev starts late March." },
         { id: "f-rep", title: "Reporting Templates & Recreation", desc: "Wonderful has custom calculated fields in legacy reports. Recreation begins earlier than typical implementation. Requires data in system first." },
         { id: "f-ukg", title: "UKG Integration", desc: "FTP integration overhaul. Needs feature flag for daily import." }
       ]}
@@ -4201,7 +4898,8 @@ const PHASES = [
         { id: "w-pickup", title: "Pick-up multiplier (scan 2x/3x/4x to claim %)", desc: "Rare: when someone picks up where someone left off, they scan the picker-up barcode multiple times to claim that percentage of the piece." },
         { id: "w-sg", title: "Site Groups (district-wide mayordomos) — 3-layer location selection", desc: "Mayordomos in charge of districts — need a site-group layer above ranches so they can view district-wide. Apr 21: Sabeen confirmed this is a NEW requirement not in 3.0. Harvesting users first select a county/site group, then ranch, then block. Wonderful was adamant this must exist.", urgent: true },
         { id: "w-cs", title: "Crew Scheduler (range-open + block flexibility)", desc: "Leave range open in crew scheduler. Wonderful dislikes the current open-ended behavior where any employee can work in any block any ranch. Needs validation.", priority: "priority" },
-        { id: "w-lock", title: "Locking devices to contractor/employer", desc: "Must lock devices so they can only be used by one contractor." }
+        { id: "w-lock", title: "Locking devices to contractor/employer", desc: "Must lock devices so they can only be used by one contractor." },
+        { id: "w-delete-badge", title: "Badge to delete last production record (up to 5 at once)", desc: "Scan barcode up to 5 times to delete up to 5 prior production records." }
       ]},
       { id: "nursery-shop", title: "Nursery & Shop (Rosa)", tasks: [
         { id: "n-clock", title: "Clock into Activity/Job (not Location) for Nursery", desc: "Nursery employees don't clock into location, they clock into activity/job. No 'Block' field — it's called 'Project'. They cannot change Ranch." },
@@ -4220,7 +4918,9 @@ const PHASES = [
         { id: "x-nolunch", title: "No automatic lunch (they don't stop)", desc: "Harvest workers don't take a lunch even if they go over 6 hours. System must not auto-insert lunch." },
         { id: "x-live-lunch", title: "Keep live lunches (no delayed)", desc: "They want to keep live lunches." },
         { id: "x-docs", title: "Document storage on employee profiles", desc: "Upload file into someone's org profile (arbitration agreements, meal waivers) with metadata: uploaded/created/signed/completed dates. Currently on a flash drive. Need a report for who has/hasn't signed." },
-        { id: "x-modifiers", title: "Crop modifiers / pack styles discussion", desc: "Wonderful doesn't like setting up piece rates per location. Introduce pack styles? They may not want it while working in bins. Consider open-ended piece rates.", priority: "priority" }
+        { id: "x-modifiers", title: "Crop modifiers / pack styles discussion", desc: "Wonderful doesn't like setting up piece rates per location. Introduce pack styles? They may not want it while working in bins. Consider open-ended piece rates.", priority: "priority" },
+        { id: "x-crew-summary", title: "Crew summary page — limited permissions", desc: "Device users CAN see timecard data on crew summary, but CANNOT access individual employee profiles or personal info. Today crew summary is binary on/off — need more granular permission." },
+        { id: "x-h2a", title: "H2A Employee support", desc: "H2A employees (H2A Employee, H2A Foreman, H2A Forklift, H2A Row Boss, H2A Bus Driver) appear in Pay Groups test tracker. Confirm with Harrison if these are contractually required." }
       ]}
     ]
   },
@@ -4259,7 +4959,7 @@ const PHASES = [
         { id: "c-alt", title: "Import ALT IDs for all employees", desc: "Every employee in PickTrace must have their DataTech-assigned employee number in the ALT ID field. Edit profile → add → save. Step 1 of the DataTech Import SOP.", priority: "priority" },
         { id: "c-grower", title: "Configure Grower ID = 500", desc: "Wonderful's Grower ID in DataTech." },
         { id: "c-crops", title: "Configure Crop IDs: Oranges 2000, Lemons 2001, Mandarins 2002, Clementines 2003, Minneola 2004, Grapefruit 2005", desc: "Verify that Cost Center = Crop ID is acceptable to Wonderful. Today in 3.0 Cost Center can be Crop ID but this needs explicit sign-off." },
-        { id: "c-jobs", title: "Configure Job codes: 4000-4023, 4050", desc: "Foreman 4000, Assistant 4001, Picking 4002, Dropping Fruit 4003, Forklift 4004, Tractor 4005, Hauling 4006, NPT-Training 4007, NPT-Switching 4008, R&R 4009, NPT-Wait 4010, Drenching 4011, Hourly Picking 4012, Reporting Time Pay 4022, NPT Misc 4020, Block Change 4021, QC 4023, Malla 4050." },
+        { id: "c-jobs", title: "Configure Job codes: 4000-4023, 4050", desc: "Foreman 4000, Assistant 4001, Picking 4002, Dropping Fruit 4003, Forklift 4004, Tractor 4005, Hauling 4006, NPT-Training 4007, NPT-Switching 4008, R&R 4009, NPT-Wait 4010, Drenching 4011, Hourly Picking 4012, Reporting Time Pay 4022, NPT Misc 4020, Block Change 4021, QC 4023, Malla 4050, Bus Driving 4015 (test tracker only — needs DataTech confirmation). Lluvia (show-up/rain pay) code TBD — confirm if same as 4022 or separate." },
         { id: "c-rtp", title: "Reporting Time Pay (Job 4022) — wire PHASE1/RH/OT/DT", desc: "Per the Jobs screenshot: PHASE1=4022; RH=wcRT; OT=wcRTOT; DT=wcRTDT. Site = MASTER EMPLOYEES & JOBS. Rate = 0. Required to avoid the 'letters in numbers field' error in DataTech when half-day show-up pay is paid (common on rain days).", priority: "priority" },
         { id: "c-wage", title: "Configure Wage Types: RH, OT, DT, PW, PO, PD, SA, BO, GP", desc: "Regular Hourly / Overtime / Double-time for hourly and piecework, plus Salary, Bonus, Guaranteed Piecework." },
         { id: "c-flag", title: "Turn on feature flag: daily import", desc: "Enable the daily import feature flag in the account config." },
@@ -4375,8 +5075,9 @@ const PHASES = [
    MILESTONES (shown on calendar)
    ============================================================================ */
 const MILESTONES_DEFAULT = [
+  { date: "2026-02-28", title: "Discovery & requirements complete", type: "milestone", desc: "Feb 2026: FLC model, daily billing cadence, legacy feature inventory, and feature gap analysis finalized; monthly progress check cadence established." },
   { date: "2026-04-15", title: "Delight Grooming call", type: "meeting", desc: "Wonderful Citrus NPT scripts review with Rosa + Rogelio" },
-  { date: "2026-04-21", title: "Internal Onsite Debrief (Gomez/Brewer/Vemprala/Pradhan)", type: "meeting", desc: "Reviewed feedback from on-site visits; surfaced chain-command/badge, 3-layer site group, nursery device lock, pay groups, and foreman allocation as newly identified requirements. Gemini transcript archived." },
+  { date: "2026-04-21", title: "Internal Onsite Debrief (Gomez/Brewer/Vemprala/Pradhan/Torrez/Martin/Carlos V)", type: "meeting", desc: "Reviewed feedback from on-site visits; surfaced chain-command/badge, 3-layer site group, nursery device lock, pay groups, and foreman allocation as newly identified requirements. Gemini transcript archived." },
   { date: "2026-04-23", title: "Harrison alignment meeting (2 PM)", type: "meeting", desc: "Daniel Gomez, Chaitanya Vemprala, Harrison, Pascal. Confirm scope + contract obligations on all newly identified requirements." },
   { date: "2026-04-24", title: "⚠ Scope-confirmation gate — mark at-risk if Harrison unconfirmed", type: "critical", desc: "Ella's deadline: if Harrison has not confirmed scope by EOD Friday, project formally flips to at-risk. 8 weeks / 4 sprints remain until end-of-June R&D lock." },
   { date: "2026-05-01", title: "Feature dev mid-point", type: "milestone", desc: "Track A + Track B should be 50% through dev" },
@@ -4847,8 +5548,42 @@ function defaultUI() {
     tasksView: "list",        // "list" | "matrix"
     matrixSelected: null,     // taskId selected in matrix view
     archiveFilter: "active",  // "active" (default) | "archived" | "all"
-    phaseFilter: null         // null = all phases; otherwise phaseId
+    phaseFilter: null,        // null = all phases; otherwise phaseId
+    calWonderfulOnly: false,  // calendar filter: hide gcal-imports unless title contains "wonderful"
+    calTypeFilters: {}        // { [typeKey]: false } — any key set false hides that type on the calendar
   };
+}
+
+/* Seed milestone titles (lowercased) — used as the retroactive "native" set
+   for milestones that were created before `source` tagging existed. */
+const SEED_MILESTONE_TITLES = new Set(
+  (typeof MILESTONES_DEFAULT !== "undefined" ? MILESTONES_DEFAULT : [])
+    .map(m => (m.title || "").trim().toLowerCase())
+);
+
+/* Collapse the 7 milestone types into the 5 chip buckets used by the legend
+   filter. meeting / milestone / critical all fall under "meeting". */
+function milestoneFilterKey(type) {
+  if (type === "ooo" || type === "focus" || type === "lunch" || type === "routine") return type;
+  return "meeting";
+}
+
+/* Calendar filter — combines "Wonderful only" + per-type toggles. Hides if
+   any filter wants it hidden. */
+function passesCalendarFilter(m) {
+  if (!m) return true;
+  // Per-type visibility (applies regardless of wonderful filter)
+  if (UI.calTypeFilters) {
+    const typeKey = milestoneFilterKey(m.type || "meeting");
+    if (UI.calTypeFilters[typeKey] === false) return false;
+  }
+  if (!UI.calWonderfulOnly) return true;
+  const title = (m.title || "").trim().toLowerCase();
+  if (title.includes("wonderful")) return true;
+  if (m.source === "manual") return true;
+  if (m.source === "gcal") return false;
+  // Legacy (no source): only pass if it's a known seed milestone
+  return SEED_MILESTONE_TITLES.has(title);
 }
 
 // Returns true if the given task state should be visible under the current
@@ -5065,10 +5800,53 @@ function allBugsWithContext() {
   return bugs;
 }
 
+/* Compute merge-range flags for a milestone rendered on dateStr.
+   Two cases:
+   1. Native range — milestone has dateEnd spanning multiple days.
+   2. Virtual range — a DIFFERENT milestone with identical title+type sits on
+      the adjacent day. Groups same-title same-type events on consecutive days
+      into a visual band (matches OOO behavior for Focus time, Lunch, etc). */
+function milestoneRangeInfo(m, dateStr) {
+  const rangeStart = m.date;
+  const rangeEnd = m.dateEnd || m.date;
+  // Native multi-day
+  if (rangeEnd > rangeStart) {
+    return {
+      isRange: true,
+      isStart: dateStr === rangeStart,
+      isEnd:   dateStr === rangeEnd,
+      isMid:   dateStr > rangeStart && dateStr < rangeEnd
+    };
+  }
+  // Virtual range via adjacent same-title, same-type milestone
+  const prev = addDays(dateStr, -1);
+  const next = addDays(dateStr, 1);
+  const sameOn = (d) => MILESTONES.some(o =>
+    o !== m && o.title === m.title && (o.type || "meeting") === (m.type || "meeting") &&
+    d >= o.date && d <= (o.dateEnd || o.date) &&
+    passesCalendarFilter(o)
+  );
+  const hasPrev = sameOn(prev);
+  const hasNext = sameOn(next);
+  if (hasPrev || hasNext) {
+    return { isRange: true, isStart: !hasPrev, isEnd: !hasNext, isMid: hasPrev && hasNext };
+  }
+  return { isRange: false, isStart: false, isEnd: false, isMid: false };
+}
+
 function eventsOnDate(dateStr) {
   const events = [];
   MILESTONES.forEach((m, i) => {
-    if (m.date === dateStr) events.push({ ...m, kind: "milestone", milestoneIndex: i });
+    const rangeStart = m.date;
+    const rangeEnd = m.dateEnd || m.date;
+    if (dateStr < rangeStart || dateStr > rangeEnd) return;
+    if (!passesCalendarFilter(m)) return;
+    events.push({
+      ...m,
+      kind: "milestone",
+      milestoneIndex: i,
+      ...milestoneRangeInfo(m, dateStr)
+    });
   });
   const d = new Date(dateStr + "T00:00:00");
   const dow = d.getDay();
@@ -5076,6 +5854,8 @@ function eventsOnDate(dateStr) {
     const t = TASK_INDEX[tid];
     if (!t) return;
     if (!passesArchiveFilter(s)) return;
+    // Sidebar phase filter — hide task pills whose phase doesn't match
+    if (UI.phaseFilter && t.phaseId !== UI.phaseFilter) return;
     const range = taskRange(s);
     if (!range) return;
     if (dateStr < range.start || dateStr > range.end) return;
@@ -5575,17 +6355,21 @@ function renderShell() {
   effectivePhases().forEach(p => {
     const st = phaseStats(p);
     const isDone = st.total > 0 && st.complete === st.total;
-    const isActiveFilter = UI.view === "tasks" && UI.phaseFilter === p.id;
+    const filtersApply = UI.view === "tasks" || UI.view === "calendar";
+    const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
     const link = h("button", {
       class: "nav-link"
         + (isActiveFilter ? " is-active" : "")
         + (isDone ? " is-complete" : ""),
       title: isActiveFilter
         ? "Showing only this phase — click to clear filter"
-        : "Filter Tasks view to this phase",
+        : (UI.view === "calendar"
+            ? "Filter Calendar tasks to this phase"
+            : "Filter Tasks view to this phase"),
       onclick: () => {
-        // Toggle phase filter; clicking the active phase clears the filter.
-        UI.view = "tasks";
+        // Toggle phase filter. On Tasks/Calendar views stay put and just
+        // flip the filter; on any other view, jump to Tasks.
+        if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
         UI.phaseFilter = isActiveFilter ? null : p.id;
         UI.activeNavPhase = UI.phaseFilter;
         saveUI();
@@ -7234,6 +8018,40 @@ function renderCalendarView(main) {
     renderCountdownRing(days)
   ]));
 
+  // ---- Active phase filter chip (set via sidebar nav) — mirrors the Tasks view
+  const activeCalPhase = UI.phaseFilter
+    ? effectivePhases().find(p => p.id === UI.phaseFilter)
+    : null;
+  if (activeCalPhase) {
+    let phaseTaskCount = 0;
+    Object.entries(STATE).forEach(([tid, s]) => {
+      const t = TASK_INDEX[tid];
+      if (!t || t.phaseId !== activeCalPhase.id) return;
+      if (!passesArchiveFilter(s)) return;
+      if (!taskRange(s)) return;
+      phaseTaskCount++;
+    });
+    main.appendChild(h("div", { class: "phase-filter-bar" }, [
+      h("span", { class: "phase-filter-kicker" }, "FILTERED BY PHASE"),
+      h("button", {
+        class: "phase-filter-chip",
+        onclick: () => {
+          UI.phaseFilter = null;
+          UI.activeNavPhase = null;
+          saveUI();
+          renderShell();
+        },
+        title: "Clear filter"
+      }, [
+        h("span", { class: "phase-filter-num" }, activeCalPhase.num),
+        h("span", { class: "phase-filter-name" }, activeCalPhase.title),
+        h("span", { class: "phase-filter-x" }, "×")
+      ]),
+      h("span", { class: "phase-filter-meta" },
+        `${phaseTaskCount} scheduled task${phaseTaskCount === 1 ? "" : "s"} · milestones unaffected`)
+    ]));
+  }
+
   // ---- Owner workload heatmap (still scoped to the visible month)
   const monthRows = [];
   effectivePhases().forEach(p => {
@@ -7317,25 +8135,27 @@ function renderCalendarView(main) {
   } else if (view === "week") {
     wrap.appendChild(renderTimedWeek(startOfWeek(cursorDate), todayStr));
   } else {
-    // Existing month grid
+    // Existing month grid — Google-style, no separate weekday header row.
+    // Weekday label is rendered inside each cell in the first row (topRow: true).
     const grid = h("div", { class: "cal-grid" });
-    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
-      grid.appendChild(h("div", { class: "cal-dow" }, d));
-    });
     const firstDay = new Date(year, month, 1);
     const firstWeekday = firstDay.getDay();
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const prevLastDay = new Date(year, month, 0).getDate();
+    let cellIdx = 0;
     for (let i = firstWeekday - 1; i >= 0; i--) {
       const dayNum = prevLastDay - i;
       const d = new Date(year, month - 1, dayNum);
-      grid.appendChild(renderCalDay(d, { otherMonth: true, todayStr }));
+      grid.appendChild(renderCalDay(d, { otherMonth: true, todayStr, topRow: cellIdx < 7 }));
+      cellIdx++;
     }
     for (let d = 1; d <= daysInMonth; d++) {
-      grid.appendChild(renderCalDay(new Date(year, month, d), { todayStr }));
+      grid.appendChild(renderCalDay(new Date(year, month, d), { todayStr, topRow: cellIdx < 7 }));
+      cellIdx++;
     }
-    const totalCells = grid.children.length - 7;
+    // No separate weekday header row now, so totalCells = grid.children.length
+    const totalCells = grid.children.length;
     const trailing = (7 - (totalCells % 7)) % 7;
     for (let d = 1; d <= trailing; d++) {
       grid.appendChild(renderCalDay(new Date(year, month + 1, d), { otherMonth: true, todayStr }));
@@ -7343,12 +8163,48 @@ function renderCalendarView(main) {
     wrap.appendChild(grid);
   }
 
-  // Legend
+  // Legend / filter chips — each chip toggles visibility of its type.
+  // Leftmost items are non-toggleable (tasks, complete state, recurring);
+  // middle items are milestone-type toggles stored in UI.calTypeFilters.
+  if (!UI.calTypeFilters) UI.calTypeFilters = {};
+  const typeChip = (key, label, swatchCls) => {
+    const isHidden = UI.calTypeFilters[key] === false;
+    return h("button", {
+      class: "legend-chip" + (isHidden ? " is-hidden" : ""),
+      title: isHidden ? `${label} hidden — click to show` : `${label} visible — click to hide`,
+      onclick: () => {
+        UI.calTypeFilters[key] = isHidden ? true : false;
+        saveUI();
+        renderMain();
+      }
+    }, [
+      h("span", { class: "legend-dot " + swatchCls }),
+      h("span", {}, label)
+    ]);
+  };
   wrap.appendChild(h("div", { class: "cal-legend" }, [
-    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot milestone" }), h("span", {}, lbl("cal.legendMilestone"))]),
-    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot task" }), h("span", {}, lbl("cal.legendTaskDue"))]),
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-swatch task" }), h("span", {}, lbl("cal.legendTaskDue"))]),
     h("div", { class: "legend-item" }, [h("span", { class: "legend-dot complete" }), h("span", {}, lbl("cal.legendComplete"))]),
-    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot recurring" }), h("span", {}, lbl("cal.legendRecurring"))])
+    h("div", { class: "legend-item" }, [h("span", { class: "legend-dot recurring" }), h("span", {}, lbl("cal.legendRecurring"))]),
+    typeChip("meeting",   "Milestone",   "milestone"),
+    typeChip("ooo",       "OOO",         "ooo"),
+    typeChip("focus",     "Focus",       "focus"),
+    typeChip("lunch",     "Lunch",       "lunch"),
+    typeChip("routine",   "Routine",     "routine"),
+    h("button", {
+      class: "cal-legend-filter" + (UI.calWonderfulOnly ? " is-on" : ""),
+      onclick: () => {
+        UI.calWonderfulOnly = !UI.calWonderfulOnly;
+        saveUI();
+        renderMain();
+      },
+      title: UI.calWonderfulOnly
+        ? "Showing only native tasks/milestones and events with \"Wonderful\" in the title. Click to show everything."
+        : "Filter calendar: hide Google Calendar imports that don't contain \"Wonderful\"."
+    }, [
+      h("span", { html: ICONS.search }),
+      h("span", {}, UI.calWonderfulOnly ? "Wonderful only ✓" : "Wonderful only")
+    ])
   ]));
 
   main.appendChild(wrap);
@@ -7648,11 +8504,11 @@ function openMilestoneEditor(index) {
   ]));
 
   const dateIn = h("input", { type: "date", value: m.date || "" });
-  const typeIn = h("select", {}, [
-    h("option", m.type === "milestone" ? { value: "milestone", selected: true } : { value: "milestone" }, "Milestone"),
-    h("option", m.type === "critical" ? { value: "critical", selected: true } : { value: "critical" }, "Critical"),
-    h("option", m.type === "meeting" ? { value: "meeting", selected: true } : { value: "meeting" }, "Meeting")
-  ]);
+  const typeIn = h("select", {},
+    MILESTONE_TYPE_META.map(t =>
+      h("option", m.type === t.key ? { value: t.key, selected: true } : { value: t.key }, t.label)
+    )
+  );
   form.appendChild(h("div", { class: "ef-dates" }, [
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Date"), dateIn]),
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Type"), typeIn])
@@ -7794,11 +8650,11 @@ function openNewMilestoneEditor(defaultDate) {
   ]));
 
   const dateIn = h("input", { type: "date", value: today });
-  const typeIn = h("select", {}, [
-    h("option", { value: "milestone", selected: true }, "Milestone"),
-    h("option", { value: "critical" }, "Critical"),
-    h("option", { value: "meeting" }, "Meeting")
-  ]);
+  const typeIn = h("select", {},
+    MILESTONE_TYPE_META.map((t, i) =>
+      h("option", i === 0 ? { value: t.key, selected: true } : { value: t.key }, t.label)
+    )
+  );
   form.appendChild(h("div", { class: "ef-dates" }, [
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Date"), dateIn]),
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Type"), typeIn])
@@ -7829,7 +8685,8 @@ function openNewMilestoneEditor(defaultDate) {
         time: timeStartIn.value || "",
         endTime: timeEndIn.value || "",
         status: "scheduled",
-        notes: ""
+        notes: "",
+        source: "manual"
       });
       await saveState();
       closeModal();
@@ -8576,8 +9433,12 @@ function showEventTooltip(targetEl, ev, dateStr) {
   let taskRec = null;
   let stateRec = null;
   if (ev.kind === "milestone") {
-    meta.appendChild(h("span", { class: "tt-pill is-milestone" },
-      ev.type === "critical" ? "Critical milestone" : "Milestone"));
+    const typeMeta = MILESTONE_TYPE_META.find(t => t.key === ev.type);
+    const pillLabel = ev.type === "critical"
+      ? "Critical milestone"
+      : (typeMeta ? typeMeta.label : "Milestone");
+    const pillCls = typeMeta ? typeMeta.cls : "is-milestone";
+    meta.appendChild(h("span", { class: "tt-pill " + pillCls }, pillLabel));
     const evMeta = eventStatusMeta(ev, dateStr);
     meta.appendChild(h("span", {
       class: "tt-pill",
@@ -8762,8 +9623,26 @@ function renderTimedDayColumn(dateStr, opts = {}) {
       allDayEvents.push({ ev, t });
     }
   });
+  // Ranged milestones (OOO, or any same-title adjacent-day grouping) surface
+  // to the top of the all-day strip so the merged band sits above other pills.
+  allDayEvents.sort((a, b) => {
+    const aw = (a.ev.kind === "milestone" && (a.ev.isRange || a.ev.type === "ooo")) ? 0 : 1;
+    const bw = (b.ev.kind === "milestone" && (b.ev.isRange || b.ev.type === "ooo")) ? 0 : 1;
+    return aw - bw;
+  });
 
-  const col = h("div", { class: "timed-col" + (isToday ? " is-today" : "") });
+  const oooActive = all.find(ev => ev.kind === "milestone" && ev.type === "ooo");
+  const hasOOO = !!oooActive;
+  // Any milestone range-start (native or virtual) opens column overflow for label floating
+  const hasRangeStart = all.some(ev =>
+    ev.kind === "milestone" && ev.isRange && ev.isStart && !ev.isEnd
+  );
+  const col = h("div", {
+    class: "timed-col"
+      + (isToday ? " is-today" : "")
+      + (hasOOO ? " has-ooo" : "")
+      + (hasRangeStart ? " has-range-start" : "")
+  });
 
   // All-day strip
   const allDayStrip = h("div", { class: "timed-allday" });
@@ -8813,12 +9692,37 @@ function renderTimedDayColumn(dateStr, opts = {}) {
 }
 
 // Build the visual pill for a timed/all-day event in the day/week views.
+// True if `times.endTime` (or startTime, if no end) on today has already passed.
+// Returns false for past/future dates and all-day events.
+function isEventTimePast(times, dateStr, todayStr) {
+  if (dateStr !== todayStr) return false;
+  const boundary = times && (times.endTime || times.startTime);
+  if (!boundary) return false;
+  const [H, M] = boundary.split(":").map(Number);
+  if (Number.isNaN(H)) return false;
+  const now = new Date();
+  return (now.getHours() * 60 + now.getMinutes()) > (H * 60 + (M || 0));
+}
+
 function makeTimedPill(ev, dateStr, times, mode) {
   let cls = "timed-pill";
-  if (ev.kind === "milestone") cls += " is-milestone";
+  if (ev.kind === "milestone") {
+    cls += " " + (MILESTONE_TYPE_CLS[ev.type] || "is-milestone");
+  }
   if (ev.kind === "recurring") cls += " is-recurring";
   if (ev.kind === "task" && ev.complete) cls += " is-complete";
   if (mode === "allday") cls += " is-allday";
+  // Multi-day range classes mirror the month-view convention so CSS can
+  // connect pills across columns with negative margins + hide labels
+  // on end/mid cells, centering the label across the boundary.
+  if (ev.isRange) {
+    if (ev.isStart) cls += " is-range-start";
+    if (ev.isEnd) cls += " is-range-end";
+    if (ev.isMid) cls += " is-range-locked";
+  }
+  const todayStrLocal = ymd(new Date());
+  if (dateStr < todayStrLocal) cls += " is-past";
+  else if (isEventTimePast(times, dateStr, todayStrLocal)) cls += " is-past-today";
   const evMeta = eventStatusMeta(ev, dateStr);
   if (evMeta && evMeta.key === "completed") cls += " is-status-completed";
   if (evMeta && evMeta.key === "cancelled") cls += " is-status-cancelled";
@@ -8851,7 +9755,14 @@ function makeTimedPill(ev, dateStr, times, mode) {
     pill.appendChild(h("div", { class: "timed-pill-time" },
       fmtTimeRange(times.startTime, times.endTime)));
   }
-  pill.appendChild(h("div", { class: "timed-pill-title" }, ev.title));
+  // All-day milestone pills wrap title in .evt-inner so CSS can float the
+  // label across a range boundary (matches month-view convention — works for
+  // OOO, Focus, Lunch, and any other same-title adjacent-day grouping).
+  if (mode === "allday" && ev.kind === "milestone") {
+    pill.appendChild(h("span", { class: "evt-inner" }, ev.title));
+  } else {
+    pill.appendChild(h("div", { class: "timed-pill-title" }, ev.title));
+  }
   return pill;
 }
 
@@ -8915,6 +9826,19 @@ function renderCalDay(date, opts) {
   const dateStr = ymd(date);
   const dayNum = date.getDate();
   const events = eventsOnDate(dateStr);
+  // Sort priority (mirrors Google Calendar month view):
+  //   1. Any ranged milestone band (OOO, or virtual ranges from adjacent
+  //      same-title milestones like Focus time / Lunch) at the top
+  //   2. Single-day OOO
+  //   3. All-day single events
+  //   4. Timed events by start time
+  const sortKey = (ev) => {
+    if (ev.kind === "milestone" && (ev.isRange || ev.type === "ooo")) return 0;
+    const times = eventTimes(ev, dateStr);
+    if (!times.startTime) return 2;
+    return 3 + (parseInt(times.startTime.replace(":", ""), 10) || 0) / 10000;
+  };
+  events.sort((a, b) => sortKey(a) - sortKey(b));
   const dow = date.getDay();
   const isWeekend = dow === 0 || dow === 6;
 
@@ -8922,19 +9846,42 @@ function renderCalDay(date, opts) {
   if (opts.otherMonth) classes.push("is-other-month");
   if (dateStr === opts.todayStr) classes.push("is-today");
   if (isWeekend) classes.push("is-weekend");
+  // Tint the whole cell when an OOO milestone is active on this day — mirrors
+  // Google Calendar's faint green column fill.
+  const oooHere = events.find(ev => ev.kind === "milestone" && ev.type === "ooo");
+  if (oooHere) classes.push("has-ooo");
+  // Cell contains the *start* of ANY multi-day milestone range (native or
+  // virtual via adjacent same-title events) → open overflow so the label can
+  // float past the cell's right edge and center over the boundary.
+  if (events.some(ev => ev.kind === "milestone" && ev.isRange && ev.isStart && !ev.isEnd)) {
+    classes.push("has-range-start");
+  }
+
+  const dowLabel = opts.topRow
+    ? h("div", { class: "cal-dow-inline" },
+        date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase())
+    : null;
 
   const cell = h("div", {
     class: classes.join(" "),
     "data-date": dateStr,
     onclick: () => showScheduleModal(dateStr)
   }, [
+    dowLabel,
     h("div", { class: "cal-daynum" }, dayNum),
     h("div", { class: "cal-events" }, [
       ...events.slice(0, 3).map(ev => {
         let cls = "cal-event";
-        if (ev.kind === "milestone" || ev.type === "critical") cls += " is-milestone";
+        if (ev.kind === "milestone") {
+          cls += " " + (MILESTONE_TYPE_CLS[ev.type] || "is-milestone");
+        } else if (ev.type === "critical") {
+          cls += " is-milestone";
+        }
         if (ev.kind === "recurring") cls += " is-recurring";
         if (ev.kind === "task" && ev.complete) cls += " is-complete";
+        const pillTimes = eventTimes(ev, dateStr);
+        if (dateStr < opts.todayStr) cls += " is-past";
+        else if (isEventTimePast(pillTimes, dateStr, opts.todayStr)) cls += " is-past-today";
         // Per-event status (flagged / completed / cancelled) — works for milestones
         // and per-occurrence recurring; tasks use their existing status path.
         if (ev.kind !== "task") {
@@ -9005,10 +9952,15 @@ function renderCalDay(date, opts) {
           attrs.ondragend = (e) => e.currentTarget.classList.remove("is-dragging");
         }
         // Time prefix on month-view pill, à la Google Calendar.
-        const evTimes = eventTimes(ev, dateStr);
-        const label = evTimes.startTime
-          ? fmtTime(evTimes.startTime).replace(/:00 /, " ").toLowerCase() + " · " + ev.title
+        const label = pillTimes.startTime
+          ? fmtTime(pillTimes.startTime).replace(/:00 /, " ").toLowerCase() + " · " + ev.title
           : ev.title;
+        // Milestone labels always get wrapped in a span so CSS can float the
+        // label across a range's cell boundary. Tasks/recurring stay as
+        // text nodes so their own range styling isn't affected.
+        if (ev.kind === "milestone") {
+          return h("div", attrs, [h("span", { class: "evt-inner" }, label)]);
+        }
         return h("div", attrs, label);
       }),
       events.length > 3 ? h("div", { class: "cal-event-more" }, `+${events.length - 3} more`) : null
@@ -9047,6 +9999,7 @@ function getUpcoming(days) {
   const end = new Date(now); end.setDate(end.getDate() + days);
   const out = [];
   MILESTONES.forEach(m => {
+    if (!passesCalendarFilter(m)) return;
     const d = new Date(m.date + "T00:00:00");
     if (d >= now && d <= end) out.push({ date: m.date, title: m.title, kind: "milestone" });
   });
@@ -9054,6 +10007,7 @@ function getUpcoming(days) {
     const t = TASK_INDEX[tid];
     if (!t) return;
     if (!passesArchiveFilter(s)) return;
+    if (UI.phaseFilter && t.phaseId !== UI.phaseFilter) return;
     const range = taskRange(s);
     if (!range) return;
     const startD = new Date(range.start + "T00:00:00");
@@ -9218,6 +10172,11 @@ function showScheduleModal(dateStr) {
       .filter(x => {
         if (!x.range) return false;
         if (dateStr < x.range.start || dateStr > x.range.end) return false;
+        // Honor sidebar phase filter so the day modal matches the calendar view.
+        if (UI.phaseFilter) {
+          const t = TASK_INDEX[x.tid];
+          if (!t || t.phaseId !== UI.phaseFilter) return false;
+        }
         if (x.s.repeat && x.s.repeat !== "none") {
           const anchor = x.s.startDate || x.range.start;
           return repeatMatches(x.s.repeat, anchor, dateStr);
@@ -9225,7 +10184,10 @@ function showScheduleModal(dateStr) {
         return true;
       });
 
-    const milestonesHere = MILESTONES.filter(m => m.date === dateStr);
+    const milestonesHere = MILESTONES.filter(m => {
+      const rs = m.date, re = m.dateEnd || m.date;
+      return dateStr >= rs && dateStr <= re && passesCalendarFilter(m);
+    });
     const recurringHere = RECURRING.filter(r =>
       r.dayOfWeek === dow && dateStr >= r.startDate && dateStr <= r.endDate
     );
@@ -9941,31 +10903,137 @@ async function importJSON(file) {
   }
 }
 
-function icsEventToMilestone(ev) {
-  const dtstart = ev["DTSTART"];
-  if (!dtstart) return null;
-  const allDay = dtstart.params.includes("VALUE=DATE") || !dtstart.value.includes("T");
-  const v = dtstart.value.replace("Z", "");
-  const date = v.slice(0,4) + "-" + v.slice(4,6) + "-" + v.slice(6,8);
-  if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) return null;
-  const time = allDay ? "" : v.slice(9,11) + ":" + v.slice(11,13);
-  let endTime = "";
-  const dtend = ev["DTEND"];
-  if (dtend && !allDay) {
-    const ve = dtend.value.replace("Z", "");
-    endTime = ve.slice(9,11) + ":" + ve.slice(11,13);
+/* ---- ICS description cleanup: strip Google Meet / Zoom boilerplate between
+   `-::~:~::…-` delimiter pairs, collapse extra blanks. Preserves inner content. */
+function cleanIcsDescription(raw) {
+  if (!raw) return "";
+  // Delimiter shape: `-::` … any run of `~` and `:` … `::-`
+  const delim = /-::[~:]+::-/g;
+  const parts = raw.split(delim);
+  // delimiters come in pairs; odd-indexed parts are the Meet/Zoom boilerplate
+  const cleaned = parts.filter((_, i) => i % 2 === 0).join("").trim();
+  return cleaned.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function icsDecode(s) {
+  return (s || "").replace(/\\n/g,"\n").replace(/\\,/g,",").replace(/\\;/g,";").replace(/\\\\/g,"\\");
+}
+
+/* ---- Parse one ICS DT field into { date, time, allDay } in the browser's
+   local timezone. Values ending in Z are UTC (converted); TZID=… values and
+   floating values are treated as local (close enough for same-TZ users; a
+   proper cross-TZ fix would need IANA offset math). */
+function parseIcsDtField(dtField) {
+  if (!dtField || !dtField.value) return null;
+  const params = dtField.params || "";
+  const raw = dtField.value;
+  const allDay = /VALUE=DATE(?!-TIME)/.test(params) || !raw.includes("T");
+  const pad = n => String(n).padStart(2, "0");
+
+  if (allDay) {
+    const date = raw.slice(0,4) + "-" + raw.slice(4,6) + "-" + raw.slice(6,8);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+    return { date, time: "", allDay: true };
   }
-  const decode = s => (s || "").replace(/\\n/g,"\n").replace(/\\,/g,",").replace(/\\;/g,";").replace(/\\\\/g,"\\");
-  const title = decode(ev["SUMMARY"]?.value).trim() || "Untitled Event";
-  const notes = decode(ev["DESCRIPTION"]?.value || "");
-  const status = (ev["STATUS"]?.value || "").toUpperCase() === "CANCELLED" ? "cancelled" : "scheduled";
-  return { date, title, type: "meeting", desc: "", notes, time, endTime, status };
+
+  const isUtc = raw.endsWith("Z");
+  const v = raw.replace("Z", "");
+  if (v.length < 13) return null;
+  const Y  = +v.slice(0, 4);
+  const Mo = +v.slice(4, 6);
+  const D  = +v.slice(6, 8);
+  const H  = +v.slice(9, 11);
+  const Mi = +v.slice(11, 13);
+  if ([Y, Mo, D, H, Mi].some(Number.isNaN)) return null;
+
+  const d = isUtc
+    ? new Date(Date.UTC(Y, Mo - 1, D, H, Mi))
+    : new Date(Y, Mo - 1, D, H, Mi);
+
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return { date, time, allDay: false };
+}
+
+/* ---- Shape an ICS VEVENT into a wizard row.
+   For all-day multi-day events (OOO / conference / PTO) we store the inclusive
+   end date on `dateEnd` so the calendar can render the full strip.
+   ICS semantic: DTEND for VALUE=DATE is exclusive → inclusive end = dtend − 1. */
+function icsEventToRow(ev) {
+  const dt = parseIcsDtField(ev["DTSTART"]);
+  if (!dt) return null;
+  const dte = parseIcsDtField(ev["DTEND"]);
+  const rawDesc = icsDecode(ev["DESCRIPTION"] && ev["DESCRIPTION"].value || "");
+  const title = icsDecode(ev["SUMMARY"] && ev["SUMMARY"].value || "").trim() || "Untitled Event";
+
+  // Multi-day span detection. Two cases:
+  //   (1) Classic all-day: both DTSTART and DTEND use VALUE=DATE. DTEND is
+  //       exclusive, so inclusive end = DTEND − 1 day.
+  //   (2) Timed "virtual all-day": DTSTART/DTEND are UTC times that resolve
+  //       to local midnight on different dates (Google encodes OOO like this:
+  //       DTSTART:20260430T070000Z → 00:00 PDT, DTEND:20260502T070000Z →
+  //       00:00 PDT two days later). Promote to all-day multi-day.
+  let dateEnd = "";
+  let multiDay = false;
+  let allDay = dt.allDay;
+  let time = dt.time;
+  let endTime = dte && !dt.allDay ? dte.time : "";
+
+  const computeInclusiveEnd = (endDateStr) => {
+    const endD = new Date(endDateStr + "T00:00:00");
+    endD.setDate(endD.getDate() - 1);
+    return ymd(endD);
+  };
+
+  if (dt.allDay && dte && dte.allDay) {
+    const inclusiveEnd = computeInclusiveEnd(dte.date);
+    if (inclusiveEnd > dt.date) { dateEnd = inclusiveEnd; multiDay = true; }
+  } else if (dte && !dt.allDay && !dte.allDay
+             && dt.time === "00:00" && dte.time === "00:00"
+             && dte.date > dt.date) {
+    const inclusiveEnd = computeInclusiveEnd(dte.date);
+    if (inclusiveEnd > dt.date) {
+      dateEnd = inclusiveEnd;
+      multiDay = true;
+      // Promote to all-day — the "midnight-to-midnight" encoding is semantically an all-day block
+      allDay = true;
+      time = "";
+      endTime = "";
+    }
+  }
+
+  // Auto-categorize using ICS signals + title
+  const signals = {
+    allDay,
+    multiDay,
+    busystatus: ev["X-MICROSOFT-CDO-BUSYSTATUS"] && ev["X-MICROSOFT-CDO-BUSYSTATUS"].value,
+    transp: ev["TRANSP"] && ev["TRANSP"].value
+  };
+  const type = autoCategorizeType(title, signals);
+
+  return {
+    uid: (ev["UID"] && ev["UID"].value) || (dt.date + "|" + title),
+    date: dt.date,
+    dateEnd,
+    time,
+    endTime,
+    allDay,
+    title,
+    type,
+    notes: cleanIcsDescription(rawDesc),
+    rawNotes: rawDesc,
+    status: ((ev["STATUS"] && ev["STATUS"].value) || "").toUpperCase() === "CANCELLED" ? "cancelled" : "scheduled",
+    selected: true,
+    isDuplicate: false,
+    showRaw: false,
+    expanded: false,
+    _deleted: false
+  };
 }
 
 async function importGoogleCalendar(file) {
   try {
     const text = await file.text();
-    // Unfold RFC 5545 line continuations
     const unfolded = text.replace(/\r\n[ \t]/g,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
     const lines = unfolded.split("\n");
 
@@ -9980,49 +11048,569 @@ async function importGoogleCalendar(file) {
       const keyPart = raw.slice(0, ci);
       const val     = raw.slice(ci + 1);
       const baseKey = keyPart.split(";")[0].toUpperCase();
-      cur[baseKey]  = { params: keyPart.toUpperCase(), value: val };
+      if (cur[baseKey] === undefined) {
+        cur[baseKey] = { params: keyPart.toUpperCase(), value: val };
+      }
     }
 
     if (!events.length) { toast("No events found in file", "warn"); return; }
 
-    const milestones = [];
-    let skipped = 0;
+    const todayStr = ymd(new Date());
+    let recurringSkipped = 0, pastSkipped = 0;
+    const rows = [];
     for (const ev of events) {
-      if (ev["RRULE"]) { skipped++; continue; }
-      const m = icsEventToMilestone(ev);
-      if (m) milestones.push(m);
+      if (ev["RRULE"]) { recurringSkipped++; continue; }
+      const r = icsEventToRow(ev);
+      if (!r) continue;
+      if (r.date < todayStr) { pastSkipped++; continue; }
+      rows.push(r);
     }
 
-    if (!milestones.length) {
-      toast("No importable events" + (skipped ? ` · ${skipped} recurring skipped` : ""), "warn");
+    if (!rows.length) {
+      const bits = [];
+      if (recurringSkipped) bits.push(`${recurringSkipped} recurring`);
+      if (pastSkipped) bits.push(`${pastSkipped} past`);
+      toast("No future events to import" + (bits.length ? ` · ${bits.join(" · ")} skipped` : ""), "warn");
       return;
     }
 
-    const confirmMsg = `Import ${milestones.length} event${milestones.length !== 1 ? "s" : ""} as calendar milestones?`
-      + (skipped ? `\n\n${skipped} recurring event${skipped !== 1 ? "s" : ""} were skipped (repeating events are not supported).` : "");
-    if (!confirm(confirmMsg)) return;
-
-    // Deduplicate by date + title
-    const existing = new Set((STATE.__milestones || []).map(m => m.date + "|" + m.title));
-    let added = 0, dupes = 0;
-    for (const m of milestones) {
-      const key = m.date + "|" + m.title;
-      if (existing.has(key)) { dupes++; continue; }
-      existing.add(key);
-      STATE.__milestones.push(m);
-      added++;
-    }
-
-    await saveState();
-    renderShell();
-    const result = added + " event" + (added !== 1 ? "s" : "") + " imported"
-      + (dupes ? ` · ${dupes} duplicate${dupes !== 1 ? "s" : ""} skipped` : "")
-      + (skipped ? ` · ${skipped} recurring skipped` : "");
-    toast(result, "success");
+    recomputeImportDuplicates(rows, false);
+    openImportWizard(rows, { recurringSkipped, pastSkipped });
   } catch (e) {
     console.error(e);
     toast("Import failed — check that this is a valid .ics file", "warn");
   }
+}
+
+/* ---- Routine/low-signal event patterns (case-insensitive substring).
+   Used by the wizard's "Hide routine" button and the Settings cleanup. */
+const ROUTINE_PATTERNS = [
+  "sprint kick off",   // matches "Sprint Kick Off 🚀" and "[New] Sprint Kick Off 🚀"
+  "all hands meeting",
+  "focus time",        // matches "✍ Focus time"
+  "lunch"              // matches "🛡 🍱 Lunch"
+];
+function isRoutineTitle(title) {
+  const t = (title || "").toLowerCase();
+  return ROUTINE_PATTERNS.some(p => t.includes(p));
+}
+
+/* ---- Auto-categorize event type from title (and optional ICS signals).
+   ICS signals take precedence; otherwise falls back to substring match. */
+const TYPE_PATTERNS = [
+  { type: "ooo",     patterns: ["out of office", "ooo", "pto", "vacation", "holiday"] },
+  { type: "focus",   patterns: ["focus time"] },
+  { type: "lunch",   patterns: ["lunch"] },
+  { type: "routine", patterns: ["sprint kick off", "all hands meeting"] }
+];
+function autoCategorizeType(title, signals) {
+  // Signals from ICS: { allDay, multiDay, busystatus, transp }
+  if (signals) {
+    const bs = (signals.busystatus || "").toUpperCase();
+    if (bs === "OOF" || bs === "OUTOFOFFICE") return "ooo";
+    // Multi-day all-day events are typically OOO / PTO / conferences
+    if (signals.allDay && signals.multiDay) return "ooo";
+  }
+  const t = (title || "").toLowerCase();
+  for (const { type, patterns } of TYPE_PATTERNS) {
+    if (patterns.some(p => t.includes(p))) return type;
+  }
+  return "meeting";
+}
+
+/* Display metadata for milestone types — used by wizard dropdown, calendar
+   pill class, and legend/filter chip. */
+const MILESTONE_TYPE_META = [
+  { key: "meeting",   label: "Meeting",       cls: "is-milestone" },
+  { key: "milestone", label: "Milestone",     cls: "is-milestone" },
+  { key: "critical",  label: "Critical",      cls: "is-milestone" },
+  { key: "ooo",       label: "Out of office", cls: "is-ooo" },
+  { key: "focus",     label: "Focus time",    cls: "is-focus" },
+  { key: "lunch",     label: "Lunch",         cls: "is-lunch" },
+  { key: "routine",   label: "Routine",       cls: "is-routine" }
+];
+const MILESTONE_TYPE_CLS = Object.fromEntries(MILESTONE_TYPE_META.map(m => [m.key, m.cls]));
+
+/* ---- Settings utility: re-run autoCategorizeType on every stored milestone
+   based on its current title. Useful to retroactively tag imports that
+   predated auto-categorization with their correct type (ooo/focus/lunch/etc). */
+async function recategorizeMilestones() {
+  const list = STATE.__milestones || [];
+  let changed = 0;
+  const before = {};
+  for (const m of list) {
+    const newType = autoCategorizeType(m.title, {
+      allDay: !m.time && !m.endTime,
+      multiDay: !!m.dateEnd,
+      busystatus: "",
+      transp: ""
+    });
+    if (newType !== m.type) {
+      before[m.type || "(none)"] = (before[m.type || "(none)"] || 0) + 1;
+      m.type = newType;
+      changed++;
+    }
+  }
+  if (!changed) { toast("All milestones already categorized", "warn"); return; }
+  await saveState();
+  renderShell();
+  toast(`Re-categorized ${changed} milestone${changed === 1 ? "" : "s"}`, "success");
+}
+
+/* ---- Settings utility: delete any existing milestones whose title matches
+   the routine patterns. Confirms first, reports count. */
+async function removeRoutineMilestones() {
+  const list = STATE.__milestones || [];
+  const matchCount = list.reduce((n, m) => n + (isRoutineTitle(m.title) ? 1 : 0), 0);
+  if (!matchCount) { toast("No routine events found in tracker", "warn"); return; }
+  if (!confirm(`Remove ${matchCount} routine event${matchCount === 1 ? "" : "s"} (Sprint Kick Off / All Hands / Focus time / Lunch) from the tracker? This cannot be undone.`)) return;
+  // Mutate in place so MILESTONES (same reference) stays synchronized
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (isRoutineTitle(list[i].title)) list.splice(i, 1);
+  }
+  await saveState();
+  closeModal();
+  renderShell();
+  toast(`Removed ${matchCount} routine event${matchCount === 1 ? "" : "s"}`, "success");
+}
+
+/* ---- Mark rows as duplicates based on current milestones.
+   matchByTitle = true: match on title only (for replace-in-place);
+   matchByTitle = false: match on date + title (classic dedupe). */
+function recomputeImportDuplicates(rows, matchByTitle) {
+  const existing = STATE.__milestones || [];
+  if (matchByTitle) {
+    const titles = new Set(existing.map(m => (m.title || "").trim().toLowerCase()));
+    for (const r of rows) {
+      const key = (r.title || "").trim().toLowerCase();
+      r.isDuplicate = titles.has(key);
+      r.selected = true; // replace mode: default to selected
+    }
+  } else {
+    const keys = new Set(existing.map(m => m.date + "|" + m.title));
+    for (const r of rows) {
+      const isDup = keys.has(r.date + "|" + r.title);
+      r.isDuplicate = isDup;
+      r.selected = !isDup;
+    }
+  }
+}
+
+/* ---- Wizard: review/edit/remove candidate events before import. */
+function openImportWizard(rows, meta) {
+  const today = new Date();
+  const twoYearsOut = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
+  // Column defs — widths are mutable (drag handles update them in place)
+  const cols = [
+    { key: "check",   width: 44,  resizable: false, label: "" },
+    { key: "date",    width: 160, resizable: true,  label: "Date" },
+    { key: "time",    width: 230, resizable: true,  label: "Time" },
+    { key: "title",   width: 380, resizable: true,  label: "Title" },
+    { key: "type",    width: 140, resizable: true,  label: "Type" },
+    { key: "flags",   width: 100, resizable: true,  label: "Flags" },
+    { key: "actions", width: 80,  resizable: false, label: "" }
+  ];
+  const state = {
+    search: "",
+    from: ymd(today),
+    to: ymd(twoYearsOut),
+    hideDupes: false,
+    matchByTitle: false
+  };
+
+  const getVisible = () => {
+    const q = state.search.trim().toLowerCase();
+    return rows.filter(r => {
+      if (r._deleted) return false;
+      if (state.from && r.date < state.from) return false;
+      if (state.to && r.date > state.to) return false;
+      if (state.hideDupes && r.isDuplicate) return false;
+      if (q) {
+        const hay = (r.title + " " + (r.notes || "")).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    }).sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
+  };
+
+  let rerenderBody, rerenderFooter, rerenderSummary;
+
+  const summaryEl = h("div", { class: "iw-summary" });
+  rerenderSummary = () => {
+    summaryEl.innerHTML = "";
+    const total = rows.filter(r => !r._deleted).length;
+    const selected = rows.filter(r => !r._deleted && r.selected).length;
+    const dupes = rows.filter(r => !r._deleted && r.isDuplicate).length;
+    const dupLabel = state.matchByTitle ? "replace" : "duplicate";
+    const mainEl = h("span", {
+      html: `<strong>${total}</strong> event${total === 1 ? "" : "s"} · <strong>${selected}</strong> selected` +
+            (dupes ? ` · <strong>${dupes}</strong> ${dupLabel}${dupes === 1 ? "" : "s"}` : "")
+    });
+    summaryEl.appendChild(mainEl);
+    if (meta.recurringSkipped) summaryEl.appendChild(h("span", { class: "iw-pill iw-pill-warn" }, `${meta.recurringSkipped} recurring hidden`));
+    if (meta.pastSkipped) summaryEl.appendChild(h("span", { class: "iw-pill" }, `${meta.pastSkipped} past hidden`));
+  };
+
+  // Toolbar
+  const searchIn = h("input", { class: "iw-search", type: "text", placeholder: "Search title or notes…" });
+  searchIn.addEventListener("input", (e) => { state.search = e.target.value; rerenderBody(); rerenderFooter(); });
+
+  const fromIn = h("input", { class: "iw-date", type: "date", value: state.from });
+  fromIn.addEventListener("change", (e) => { state.from = e.target.value; rerenderBody(); rerenderFooter(); });
+  const toIn = h("input", { class: "iw-date", type: "date", value: state.to });
+  toIn.addEventListener("change", (e) => { state.to = e.target.value; rerenderBody(); rerenderFooter(); });
+
+  const hideDupesCb = h("input", { type: "checkbox" });
+  hideDupesCb.addEventListener("change", (e) => { state.hideDupes = e.target.checked; rerenderBody(); rerenderFooter(); });
+
+  const matchTitleCb = h("input", { type: "checkbox" });
+  matchTitleCb.addEventListener("change", (e) => {
+    state.matchByTitle = e.target.checked;
+    recomputeImportDuplicates(rows, state.matchByTitle);
+    rerenderBody(); rerenderFooter(); rerenderSummary();
+  });
+
+  const bulkType = h("select", { class: "iw-select" },
+    [h("option", { value: "" }, "Set type…")].concat(
+      MILESTONE_TYPE_META.map(t => h("option", { value: t.key }, t.label.toLowerCase()))
+    )
+  );
+  const applyBulkType = h("button", { class: "iw-btn-sm" }, "Apply to selected");
+  applyBulkType.addEventListener("click", () => {
+    if (!bulkType.value) { toast("Choose a type first", "warn"); return; }
+    const visible = getVisible();
+    let n = 0;
+    for (const r of visible) { if (r.selected) { r.type = bulkType.value; n++; } }
+    toast(`Set type on ${n} row${n === 1 ? "" : "s"}`, "success");
+    rerenderBody();
+  });
+
+  const bulkDel = h("button", { class: "iw-btn-sm iw-danger-btn" }, "Remove selected");
+  bulkDel.addEventListener("click", () => {
+    const visible = getVisible();
+    let n = 0;
+    for (const r of visible) { if (r.selected) { r._deleted = true; n++; } }
+    if (!n) { toast("Nothing selected", "warn"); return; }
+    toast(`${n} row${n === 1 ? "" : "s"} removed`);
+    rerenderBody();
+    rerenderFooter();
+    rerenderSummary();
+  });
+
+  const skipRoutine = h("button", {
+    class: "iw-btn-sm",
+    title: "Hide routine events (Sprint Kick Off, All Hands, Focus time, Lunch) — they won't be imported and any toggle can't bring them back"
+  }, "Hide routine");
+  skipRoutine.addEventListener("click", () => {
+    let n = 0;
+    for (const r of rows) {
+      if (r._deleted) continue;
+      if (isRoutineTitle(r.title)) {
+        r._deleted = true;
+        n++;
+      }
+    }
+    if (!n) { toast("No routine events to hide", "warn"); return; }
+    toast(`Hid ${n} routine event${n === 1 ? "" : "s"}`);
+    rerenderBody();
+    rerenderFooter();
+    rerenderSummary();
+  });
+
+  const toolbar = h("div", { class: "iw-toolbar" }, [
+    searchIn,
+    h("span", { class: "iw-label" }, "From"), fromIn,
+    h("span", { class: "iw-label" }, "To"), toIn,
+    h("span", { class: "iw-sep" }),
+    h("label", { class: "iw-check" }, [hideDupesCb, h("span", {}, "Hide duplicates")]),
+    h("label", {
+      class: "iw-check",
+      title: "Match existing milestones by title only; importing will replace them with these values"
+    }, [matchTitleCb, h("span", {}, "Replace existing (title match)")]),
+    h("span", { class: "iw-sep" }),
+    bulkType, applyBulkType, skipRoutine, bulkDel
+  ]);
+
+  // Table
+  const tableWrap = h("div", { class: "iw-table-wrap" });
+
+  rerenderBody = () => {
+    tableWrap.innerHTML = "";
+    const visible = getVisible();
+
+    if (!visible.length) {
+      tableWrap.appendChild(h("div", { class: "iw-empty" }, "No events match the current filters."));
+      return;
+    }
+
+    const masterCb = h("input", { type: "checkbox" });
+    masterCb.checked = visible.every(r => r.selected);
+    masterCb.addEventListener("change", () => {
+      const next = masterCb.checked;
+      for (const r of visible) r.selected = next;
+      rerenderBody();
+      rerenderFooter();
+    });
+
+    // Colgroup drives column widths (table-layout: fixed). Build once, keep a
+    // reference to each <col> so drag handles update widths live.
+    const colEls = cols.map(c => {
+      const el = document.createElement("col");
+      el.style.width = c.width + "px";
+      return el;
+    });
+    const colgroup = document.createElement("colgroup");
+    colEls.forEach(c => colgroup.appendChild(c));
+
+    const makeResizer = (idx) => {
+      const handle = h("div", { class: "iw-resizer", title: "Drag to resize" });
+      handle.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const startX = e.clientX;
+        const startW = cols[idx].width;
+        handle.classList.add("is-dragging");
+        document.body.style.cursor = "col-resize";
+        const onMove = (ev) => {
+          const w = Math.max(60, startW + (ev.clientX - startX));
+          cols[idx].width = w;
+          if (colEls[idx]) colEls[idx].style.width = w + "px";
+        };
+        const onUp = () => {
+          handle.classList.remove("is-dragging");
+          document.body.style.cursor = "";
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+      });
+      return handle;
+    };
+
+    const headerCells = cols.map((c, i) => {
+      const content = c.key === "check" ? masterCb : c.label;
+      const th = h("th", { class: c.resizable ? "iw-th-resizable" : "" }, [
+        h("span", { class: "iw-th-wrap" }, [content])
+      ]);
+      if (c.resizable) th.appendChild(makeResizer(i));
+      return th;
+    });
+    const thead = h("thead", {}, [h("tr", {}, headerCells)]);
+
+    const tbody = h("tbody", {});
+
+    for (const r of visible) {
+      const trClass = [
+        r.isDuplicate ? (state.matchByTitle ? "iw-row-replace" : "iw-row-dupe") : "",
+        !r.selected ? "iw-row-unchecked" : ""
+      ].filter(Boolean).join(" ");
+
+      const selCb = h("input", { type: "checkbox" });
+      selCb.checked = r.selected;
+
+      const dateIn = h("input", { type: "date", value: r.date });
+      dateIn.addEventListener("change", () => { if (dateIn.value) r.date = dateIn.value; });
+      // For multi-day events, also expose a date-end input so user can tweak it
+      let dateEndIn = null;
+      if (r.dateEnd) {
+        dateEndIn = h("input", { type: "date", value: r.dateEnd, title: "End date (inclusive)" });
+        dateEndIn.addEventListener("change", () => { r.dateEnd = dateEndIn.value || ""; });
+      }
+      const dateCell = dateEndIn
+        ? h("div", { class: "iw-date-range" }, [dateIn, h("span", { class: "iw-date-arrow" }, "→"), dateEndIn])
+        : dateIn;
+
+      let timeCell;
+      if (r.allDay) {
+        const switchBtn = h("button", { class: "iw-raw-toggle", title: "Switch to timed" }, "set time");
+        switchBtn.addEventListener("click", () => {
+          r.allDay = false;
+          r.time = r.time || "09:00";
+          r.endTime = r.endTime || "10:00";
+          rerenderBody();
+        });
+        timeCell = h("div", { class: "iw-time-group" }, [h("span", { class: "iw-allday" }, "all-day"), switchBtn]);
+      } else {
+        const startIn = h("input", { type: "time", value: r.time || "" });
+        startIn.addEventListener("change", () => { r.time = startIn.value; });
+        const endIn = h("input", { type: "time", value: r.endTime || "" });
+        endIn.addEventListener("change", () => { r.endTime = endIn.value; });
+        timeCell = h("div", { class: "iw-time-group" }, [startIn, h("span", { class: "iw-time-arrow" }, "→"), endIn]);
+      }
+
+      const titleIn = h("input", { class: "iw-title-input", type: "text", value: r.title });
+      titleIn.addEventListener("input", () => { r.title = titleIn.value; });
+
+      const typeSel = h("select", {},
+        MILESTONE_TYPE_META.map(t => h("option", { value: t.key }, t.label.toLowerCase()))
+      );
+      typeSel.value = r.type || "meeting";
+      typeSel.addEventListener("change", () => { r.type = typeSel.value; });
+
+      const flagsTd = h("td", { class: "iw-col-flags" }, []);
+      if (r.isDuplicate) {
+        if (state.matchByTitle) {
+          flagsTd.appendChild(h("span", {
+            class: "iw-badge iw-badge-replace",
+            title: "An existing milestone matches this title — importing will replace it"
+          }, "Replace"));
+        } else {
+          flagsTd.appendChild(h("span", {
+            class: "iw-badge iw-badge-dupe",
+            title: "A milestone with this date + title already exists"
+          }, "Dupe"));
+        }
+      }
+
+      const expandBtn = h("button", {
+        class: "iw-row-btn",
+        title: r.expanded ? "Collapse notes" : "Edit notes",
+        html: ICONS.chevron
+      });
+      expandBtn.addEventListener("click", () => { r.expanded = !r.expanded; rerenderBody(); });
+
+      const delBtn = h("button", { class: "iw-row-btn iw-row-del", title: "Remove row", html: ICONS.x });
+      delBtn.addEventListener("click", () => {
+        r._deleted = true;
+        rerenderBody();
+        rerenderFooter();
+        rerenderSummary();
+      });
+
+      const tr = h("tr", { class: trClass }, [
+        h("td", { class: "iw-col-check" }, [selCb]),
+        h("td", { class: "iw-col-date" }, [dateCell]),
+        h("td", { class: "iw-col-time" }, [timeCell]),
+        h("td", {}, [titleIn]),
+        h("td", { class: "iw-col-type" }, [typeSel]),
+        flagsTd,
+        h("td", { class: "iw-col-actions" }, [expandBtn, delBtn])
+      ]);
+
+      selCb.addEventListener("change", () => {
+        r.selected = selCb.checked;
+        tr.classList.toggle("iw-row-unchecked", !r.selected);
+        masterCb.checked = visible.every(x => x.selected);
+        rerenderFooter();
+        rerenderSummary();
+      });
+
+      tbody.appendChild(tr);
+
+      if (r.expanded) {
+        const notesTa = h("textarea", { placeholder: "Notes" });
+        notesTa.value = r.showRaw ? r.rawNotes : r.notes;
+        notesTa.addEventListener("input", () => {
+          if (r.showRaw) r.rawNotes = notesTa.value;
+          else r.notes = notesTa.value;
+        });
+        const rawToggle = h("button", { class: "iw-raw-toggle" }, r.showRaw ? "show cleaned" : "show raw");
+        rawToggle.addEventListener("click", () => { r.showRaw = !r.showRaw; rerenderBody(); });
+        const wrap = h("div", { class: "iw-expand-wrap" }, [
+          h("div", { class: "iw-expand-label" }, [
+            h("span", {}, r.showRaw ? "Notes (raw)" : "Notes (cleaned)"),
+            rawToggle
+          ]),
+          notesTa
+        ]);
+        tbody.appendChild(h("tr", { class: "iw-expand-row" }, [
+          h("td", { colspan: 7 }, [wrap])
+        ]));
+      }
+    }
+
+    const table = h("table", { class: "iw-table" }, [thead, tbody]);
+    table.insertBefore(colgroup, thead);
+    tableWrap.appendChild(table);
+  };
+
+  // Footer
+  const footer = h("div", { class: "iw-footer" });
+  rerenderFooter = () => {
+    footer.innerHTML = "";
+    const totalSelected = rows.filter(r => !r._deleted && r.selected).length;
+    const visible = getVisible();
+    const visSelected = visible.filter(r => r.selected).length;
+
+    const info = h("div", { class: "iw-footer-info" }, []);
+    info.appendChild(document.createTextNode("Will import: "));
+    info.appendChild(h("strong", {}, String(totalSelected)));
+    info.appendChild(document.createTextNode(` event${totalSelected === 1 ? "" : "s"} · ${visSelected} visible selected`));
+
+    const cancelBtn = h("button", { class: "btn btn-outline" }, "Cancel");
+    cancelBtn.addEventListener("click", closeModal);
+
+    const repCount = state.matchByTitle
+      ? rows.filter(r => !r._deleted && r.selected && r.isDuplicate).length
+      : 0;
+    const importLabel = state.matchByTitle && repCount
+      ? `Import ${totalSelected} (${repCount} replace)`
+      : `Import ${totalSelected} event${totalSelected === 1 ? "" : "s"}`;
+    const importBtn = h("button", { class: "btn btn-primary" }, importLabel);
+    if (!totalSelected) importBtn.setAttribute("disabled", "");
+    importBtn.addEventListener("click", () => performImportFromWizard(rows, state.matchByTitle));
+
+    footer.appendChild(info);
+    footer.appendChild(h("div", { class: "iw-footer-actions" }, [cancelBtn, importBtn]));
+  };
+
+  rerenderSummary();
+  rerenderBody();
+
+  openModal({ title: "Review calendar import", body: [summaryEl, toolbar, tableWrap] });
+  // Expand the modal to wizard size and slot the footer into the modal chrome
+  const modalEl = document.querySelector("#modal-overlay .modal");
+  if (modalEl) {
+    modalEl.classList.add("is-wizard");
+    const mb = modalEl.querySelector(".modal-body");
+    if (mb) mb.appendChild(footer);
+    rerenderFooter();
+  }
+}
+
+async function performImportFromWizard(rows, matchByTitle) {
+  let added = 0, updated = 0, skipped = 0;
+  for (const r of rows) {
+    if (r._deleted || !r.selected) continue;
+    const title = (r.title || "").trim();
+    if (!title || !r.date) { skipped++; continue; }
+    const newEvent = {
+      date: r.date,
+      dateEnd: r.dateEnd || "",
+      title,
+      type: r.type || "meeting",
+      desc: "",
+      notes: r.notes || "",
+      time: r.allDay ? "" : (r.time || ""),
+      endTime: r.allDay ? "" : (r.endTime || ""),
+      status: r.status || "scheduled",
+      source: "gcal"
+    };
+    if (matchByTitle && r.isDuplicate) {
+      // Replace the first existing milestone with this title (case-insensitive).
+      // One candidate → one replacement. Multiple candidates sharing a title
+      // each consume one existing match, so net counts stay balanced.
+      const tKey = title.toLowerCase();
+      const idx = STATE.__milestones.findIndex(m => (m.title || "").trim().toLowerCase() === tKey);
+      if (idx >= 0) {
+        STATE.__milestones.splice(idx, 1, newEvent);
+        updated++;
+        continue;
+      }
+      // No match found (another candidate already consumed it) — fall through to add.
+    }
+    STATE.__milestones.push(newEvent);
+    added++;
+  }
+  await saveState();
+  closeModal();
+  renderShell();
+  const bits = [];
+  if (updated) bits.push(`${updated} replaced`);
+  if (added)   bits.push(`${added} added`);
+  if (skipped) bits.push(`${skipped} skipped`);
+  toast(bits.join(" · ") || "Nothing imported", (added + updated) ? "success" : "warn");
 }
 
 /* ============================================================================
@@ -11590,6 +13178,20 @@ function openSettings() {
         class: "btn btn-outline",
         onclick: () => $("#gcal-import-file").click(),
         html: ICONS.cal + "<span>Import Google Calendar (.ics)</span>"
+      }),
+      h("button", {
+        class: "btn btn-outline",
+        style: "margin-left: 8px;",
+        onclick: removeRoutineMilestones,
+        title: "Delete existing milestones whose title matches Sprint Kick Off, All Hands, Focus time, or Lunch",
+        html: ICONS.x + "<span>Remove routine events from tracker</span>"
+      }),
+      h("button", {
+        class: "btn btn-outline",
+        style: "margin-left: 8px;",
+        onclick: recategorizeMilestones,
+        title: "Re-run the OOO / Focus / Lunch / Routine auto-categorizer on every stored milestone based on its title",
+        html: ICONS.cal + "<span>Re-categorize milestones</span>"
       })
     ]),
     h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
