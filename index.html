@@ -701,6 +701,53 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   color: var(--ink);
   line-height: 1.4;
 }
+.desc-callout {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  max-width: 300px;
+  z-index: 9000;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  pointer-events: none;
+  display: none;
+}
+/* Arrow pointing up (callout is below the card) */
+.desc-callout::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top: none;
+  border-bottom-color: var(--line-2);
+}
+.desc-callout::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top: none;
+  border-bottom-color: var(--surface);
+}
+/* Arrow pointing down (callout is above the card) */
+.desc-callout.is-above::before {
+  top: auto; bottom: -6px;
+  border-top-color: var(--line-2);
+  border-bottom: none;
+}
+.desc-callout.is-above::after {
+  top: auto; bottom: -5px;
+  border-top-color: var(--surface);
+  border-bottom: none;
+}
 .task.is-complete .task-title { text-decoration: line-through; color: var(--ink-3); }
 
 .task-badges {
@@ -1077,7 +1124,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   transition: background 0.12s ease;
   overflow: hidden;
 }
-.cal-day:hover { background: var(--bg-2); }
+.cal-day:hover { background: #FEF8F5; }
 .cal-day.is-other-month { background: var(--bg-3); color: var(--muted); }
 .cal-day.is-today .cal-daynum {
   color: white;
@@ -2998,7 +3045,7 @@ kbd {
 .risk-rows-grid .risk-phase-divider {
   grid-column: 1 / -1;
 }
-.risk-rows-grid .risk-row.is-open {
+.risk-rows-grid .risk-row {
   align-self: start;
 }
 @media (max-width: 640px) {
@@ -3740,6 +3787,9 @@ kbd {
 .cal-day.has-ooo.is-weekend {
   background: #D9E7DC;
 }
+.calendar-card .cal-day:hover,
+.calendar-card .cal-day.is-weekend:hover,
+.calendar-card .cal-day.is-other-month:hover { background: #FEF8F5; }
 .calendar-card .cal-daynum {
   font-family: var(--font-display);
   font-weight: 500;
@@ -3970,7 +4020,7 @@ kbd {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  overflow: hidden;
+  overflow: clip;
   font-size: 12px;
 }
 .timed-view-day  { grid-template-columns: 64px 1fr; }
@@ -4159,21 +4209,27 @@ kbd {
   margin-left: -6px;
   margin-right: -7px;
 }
-/* Float the label across the boundary for true centering (week view only). */
-.timed-view-week .timed-pill.is-allday.is-range-start:not(.is-range-end) .evt-inner {
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
+/* Week view: clip ALL all-day milestone labels within their column. */
+.timed-view-week .timed-pill.is-allday:has(.evt-inner) {
+  overflow: hidden;
+}
+.timed-view-week .timed-pill.is-allday .evt-inner {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   pointer-events: none;
 }
 .timed-pill.is-allday.is-range-end:not(.is-range-start) .evt-inner,
 .timed-pill.is-allday.is-range-locked .evt-inner {
   display: none;
 }
-/* OOO label specifically keeps its own solid-green background in week view */
-.timed-view-week .timed-pill.is-allday.is-ooo.is-range-start:not(.is-range-end) .evt-inner {
+/* OOO label keeps its solid-green background and flex layout for the icon */
+.timed-view-week .timed-pill.is-allday.is-ooo .evt-inner {
+  display: flex;
+  align-items: center;
   background: var(--leaf);
   padding: 0 8px;
   height: 20px;
@@ -4827,9 +4883,9 @@ const PHASES = [
     groups: [
       { id: "discovery", title: "Pre-Work", tasks: [
         { id: "d-1", title: "Initial requirements gathering with Wonderful", desc: "FLC model, daily billing cadence, legacy feature inventory.", defaultStatus: "complete" },
-        { id: "d-2", title: "Legacy feature inventory documented", defaultStatus: "complete" },
-        { id: "d-3", title: "Feature gap analysis produced", defaultStatus: "complete" },
-        { id: "d-4", title: "Monthly Progress Check cadence established with Wonderful", defaultStatus: "complete" },
+        { id: "d-2", title: "Legacy feature inventory documented", desc: "Catalogued all features Wonderful actively uses in legacy PickTrace: FLC billing model, NPT scripts, barcode bin workflows, scan-based check-in, crew management, and DataTech payroll export.", defaultStatus: "complete" },
+        { id: "d-3", title: "Feature gap analysis produced", desc: "Mapped the legacy feature set against PickTrace 3.0 capabilities to surface everything not yet built — the source of the custom feature list in Phases 03 and 04.", defaultStatus: "complete" },
+        { id: "d-4", title: "Monthly Progress Check cadence established with Wonderful", desc: "Recurring stakeholder check-in aligned around the 6 tracked workstreams. Progress deck (last updated 2/23/26) drives the status entries in Phase 02.", defaultStatus: "complete" },
         { id: "d-5", title: "Stakeholders identified: Rogelio (Harvesting) + Rosa (Farming & Nursery)", desc: "Both must be involved in future research calls. Both run scripts themselves in legacy, along with their FLCs.", defaultStatus: "complete" }
       ]}
     ]
@@ -4875,8 +4931,8 @@ const PHASES = [
       { id: "track-a", title: "Tracked workstreams", tasks: [
         { id: "f-sb", title: "Scanning Barcodes", desc: "Actions easier than field selections (fields tied to schedules). Requires new BE + mobile dev. Dev expected to start April." },
         { id: "f-dob", title: "DoB Update for Hiring", desc: "Understanding implications of removing DoB requirement. Dev expected to start April. Wonderful wants DoB removed from in-field hiring." },
-        { id: "f-bp", title: "Bulk Actions: Break Penalty Premium", desc: "Released.", defaultStatus: "complete" },
-        { id: "f-bl", title: "Bulk Actions: Add Break / Lunch", desc: "Planning." },
+        { id: "f-bp", title: "Bulk Actions: Break Penalty Premium", desc: "Released before this tracker's scope window. Bulk timecard tool for inserting break penalty premiums is live in PickTrace 3.0.", defaultStatus: "complete" },
+        { id: "f-bl", title: "Bulk Actions: Add Break / Lunch", desc: "Bulk action to insert breaks and lunches across multiple timecards. Ordering matters — breaks must be added before NPT (see Report 6, task s-r6). In planning." },
         { id: "f-nb", title: "Bulk Actions: NPT Bulk Actions", desc: "Discovery. Wonderful wants to retain manual-trigger control for harvesting; Rosa wants schedule-triggered for nursery. Apr 21 debrief: scope aligned with Delight — bulk insert NPT, breaks, lunches to replicate legacy functionality.", defaultStatus: "in_progress" },
         { id: "f-qc", title: "QC Tracking & Reporting", desc: "Standalone QC app, additional tracked variables, photos on records (future). Dev starts late March." },
         { id: "f-rep", title: "Reporting Templates & Recreation", desc: "Wonderful has custom calculated fields in legacy reports. Recreation begins earlier than typical implementation. Requires data in system first." },
@@ -4986,18 +5042,18 @@ const PHASES = [
       { id: "uat-med", title: "Medium modules", tasks: [
         { id: "t-sb", title: "Special Barcode — 12 tests", desc: "Barcode bins, piece attribution scans, follow-the-leader." },
         { id: "t-ci", title: "PT Check-In — 9 tests", desc: "Ranch, Block, Job, clock in employee. Rogelio testing this module directly." },
-        { id: "t-scale", title: "PT Scale — 9 tests" },
-        { id: "t-ct", title: "Crop Tracker — 8 tests" },
-        { id: "t-auto", title: "Auto Email Reports — 7 tests", desc: "Daily Crew Timesheet email cadence for FLCs." }
+        { id: "t-scale", title: "PT Scale — 9 tests", desc: "Bin scanning workflows: assign bin-rate modifier, scan barcode to one or multiple employees, FTL crew scan, partial bin (.50), delete bin, generate random bincode, view scan log. (Tests 21-28)" },
+        { id: "t-ct", title: "Crop Tracker — 8 tests", desc: "Crop record lifecycle: create, edit, correct site/location/modifier/weight on a bin record, transfer ownership, archive. (Tests 113-120)" },
+        { id: "t-auto", title: "Auto Email Reports — 7 tests", desc: "Daily Crew Timesheet email cadence for FLCs. Also covers Employee Productivity, Min Wage Adjustments, Crews Average Hourly Rate, QC Report, Devices Last Connected, and Missing Picker Check-Ins. (Tests 41-47)" }
       ]},
       { id: "uat-small", title: "Small modules", tasks: [
         { id: "t-emp", title: "Employee — 6 tests", desc: "Hiring flow (remove DoB, add last 4 of SSN), ALT ID, document upload." },
         { id: "t-dev", title: "Devices — 5 tests", desc: "Device lock settings, contractor binding." },
-        { id: "t-loc", title: "Locations — 4 tests" },
-        { id: "t-cm", title: "Crop Modifiers — 3 tests" },
-        { id: "t-lab", title: "Labor — 3 tests" },
-        { id: "t-usr", title: "Users — 3 tests" },
-        { id: "t-feat", title: "Features — 2 tests" }
+        { id: "t-loc", title: "Locations — 4 tests", desc: "Ranch (site) and block creation, location ID mapping (confirming if Ranch Numbers can serve as IDs), and CC1 code setup. (Tests 106-109)" },
+        { id: "t-cm", title: "Crop Modifiers — 3 tests", desc: "Create and edit crop modifiers, plus bulk-import all 103 crop modifiers from legacy. Source file and format for the import must be confirmed before UAT. (Tests 78-80)" },
+        { id: "t-lab", title: "Labor — 3 tests", desc: "Bulk imports for employees, crews, and contractors list from legacy data into PickTrace 3.0. (Tests 81-83)" },
+        { id: "t-usr", title: "Users — 3 tests", desc: "New user account creation, role setup with appropriate permission scopes (e.g., crew summary vs. individual profile access), and deactivating departing users. (Tests 110-112)" },
+        { id: "t-feat", title: "Features — 2 tests", desc: "Two standalone feature tests: Test 121 (unnamed — confirm scope in the test tracker before UAT) and Test 122 — Employee Signed Docs Repository (report showing who has/hasn't signed)." }
       ]},
       { id: "uat-process", title: "Process", tasks: [
         { id: "t-owner", title: "Assign Wonderful test owners per module", desc: "Rogelio confirmed for Check-In #1 and #2. Need owner assignments for other modules." },
@@ -7010,6 +7066,53 @@ function renderRiskList(rows) {
   return wrap;
 }
 
+/* ============================================================================
+   DESCRIPTION CALLOUT (hover tooltip — no layout shift)
+   ============================================================================ */
+let _descCalloutEl = null;
+function getDescCalloutEl() {
+  if (!_descCalloutEl) {
+    _descCalloutEl = document.createElement("div");
+    _descCalloutEl.className = "desc-callout";
+    document.body.appendChild(_descCalloutEl);
+  }
+  return _descCalloutEl;
+}
+function showDescCallout(text, anchorEl) {
+  if (!text) return;
+  const tip = getDescCalloutEl();
+  tip.textContent = text;
+  tip.style.maxWidth = Math.min(300, Math.max(220, anchorEl.getBoundingClientRect().width)) + "px";
+  tip.style.top = "-9999px";
+  tip.style.left = "-9999px";
+  tip.classList.remove("is-above");
+  tip.style.display = "block";
+
+  requestAnimationFrame(() => {
+    const rect = anchorEl.getBoundingClientRect();
+    const tr = tip.getBoundingClientRect();
+    const cardCenterX = rect.left + rect.width / 2;
+
+    // Center callout under card, clamped to viewport
+    let left = Math.round(cardCenterX - tr.width / 2);
+    left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+
+    // Flip above if not enough space below
+    const below = rect.bottom + 8 + tr.height < window.innerHeight - 8;
+    const top = below ? rect.bottom + 8 : rect.top - tr.height - 8;
+    if (!below) tip.classList.add("is-above");
+
+    // Arrow points at card center; offset relative to callout left edge
+    const arrowX = Math.round(cardCenterX - left);
+    tip.style.setProperty("--arrow-x", arrowX + "px");
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  });
+}
+function hideDescCallout() {
+  if (_descCalloutEl) _descCalloutEl.style.display = "none";
+}
+
 function renderRiskRow(r) {
   const { t, s, title, risk, phaseNum, phaseTitle } = r;
   const isExpanded = !!UI.openTasks[t.id];
@@ -7108,6 +7211,11 @@ function renderRiskRow(r) {
     class: "risk-phase-tag-corner",
     title: phaseTitle
   }, phaseNum));
+  const _rdesc = getDesc(t, s);
+  if (_rdesc) {
+    row.addEventListener("mouseenter", () => showDescCallout(_rdesc, row));
+    row.addEventListener("mouseleave", hideDescCallout);
+  }
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -7712,10 +7820,14 @@ function renderTask(t) {
     e.stopPropagation();
     openTaskContextMenu(e.clientX, e.clientY, t.id);
   });
+  const _desc = getDesc(t, s);
+  if (_desc) {
+    task.addEventListener("mouseenter", () => showDescCallout(_desc, task));
+    task.addEventListener("mouseleave", hideDescCallout);
+  }
 
   if (isExpanded) {
     const body = h("div", { class: "task-body" });
-    if (getDesc(t, s)) body.appendChild(h("div", { class: "task-desc" }, getDesc(t, s)));
 
     // Editable fields
     body.appendChild(h("div", { class: "task-fields" }, [
@@ -8119,7 +8231,7 @@ function renderCalendarView(main) {
     h("button", {
       class: "btn btn-outline",
       onclick: () => openNewMilestoneEditor(),
-      html: ICONS.plus + "<span>Milestone</span>"
+      html: ICONS.plus
     }),
     h("button", {
       class: "btn btn-outline",
