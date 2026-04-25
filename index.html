@@ -161,6 +161,79 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .topbar-actions { display: flex; gap: 6px; align-items: center; }
 
+/* ---------- Mobile hamburger + slide-down menu ---------- */
+.topbar-hamburger {
+  display: none;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-2);
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.topbar-hamburger:hover,
+.topbar-hamburger.is-open {
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  border-color: var(--citrus);
+}
+.topbar-hamburger svg { display: block; }
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0; right: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 16px 18px;
+  z-index: 49;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mobile-menu.is-open { display: block; }
+.mobile-menu-section {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 0;
+}
+.mobile-menu-section + .mobile-menu-section {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.mobile-menu-heading {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 4px 4px;
+}
+.mobile-menu .view-tab,
+.mobile-menu .btn,
+.mobile-menu .nav-link {
+  width: 100%;
+  min-height: 44px;
+  font-size: 15px;
+  padding: 10px 12px;
+  justify-content: flex-start;
+  border-radius: var(--radius-sm);
+}
+.mobile-menu .view-tab.is-active::after { display: none; }
+.mobile-menu .view-tab.is-active {
+  background: var(--citrus-soft);
+  color: var(--citrus-deep);
+  font-weight: 600;
+}
+.mobile-menu .countdown {
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 8px 14px;
+}
+
+
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 12px; border-radius: var(--radius-sm);
@@ -1215,6 +1288,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .cal-event[draggable="true"]:active { cursor: grabbing; }
 .cal-event.is-range-locked { cursor: pointer; }
 .cal-event.is-dragging { opacity: 0.4; }
+.cal-event.is-drag-mobile,
+.timed-pill.is-drag-mobile { opacity: 0.35; outline: 2px dashed var(--citrus); outline-offset: 1px; }
+.timed-col-wrap.is-drag-over { background: var(--citrus-soft); }
 
 /* ---------- Calendar event hover tooltip ---------- */
 .cal-tooltip {
@@ -1835,12 +1911,10 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .legend-chip.is-hidden:hover { opacity: 0.75; }
 
-/* Task swatch is a horizontal pill (rectangle) — matches the actual calendar
-   pill shape for ranged tasks, so the legend reads "task = duration bar". */
 .legend-swatch.task {
   display: inline-block;
-  width: 22px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 3px;
   background: var(--citrus-soft);
   border: 1px solid var(--citrus);
@@ -2851,6 +2925,7 @@ kbd {
 .risk-hero-title em { color: var(--danger); font-style: italic; font-weight: 500; }
 .risk-hero-sub { color: var(--ink-3); margin: 0; font-size: 13px; }
 .risk-ring { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+.risk-ring svg { width: 100%; height: 100%; display: block; }
 .risk-ring-inner {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -4460,6 +4535,254 @@ kbd {
     opacity: 0;
     animation: none;
   }
+}
+
+/* ---------- Mobile (≤768px) overrides — must come AFTER the 1280px block
+   so they win the cascade on small viewports. ---------- */
+@media (max-width: 768px) {
+  body { overflow-x: clip; }
+
+  /* ---- Layout shell ---- */
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 56px 1fr;
+    grid-template-areas: "topbar" "main";
+    min-width: 0;
+  }
+  .topbar {
+    padding: 0 12px;
+    gap: 10px;
+    min-width: 0;
+  }
+  .brand-mark { height: 48px; margin: -4px 0; }
+  .brand-text { font-size: 14px; }
+  .brand-sub { font-size: 9px; margin-top: 2px; }
+  .topbar-hamburger { display: inline-flex; margin-left: 0; }
+  .topbar > .topbar-tabs,
+  .topbar > .topbar-spacer,
+  .topbar > .topbar-actions { display: none; }
+  .topbar > .countdown {
+    margin-left: auto;
+    padding: 5px 10px;
+    font-size: 11px;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .topbar > .countdown b { font-size: 12px; }
+  .sidebar,
+  .sidebar:hover { display: none; }
+  .sidebar::after { display: none; content: none; }
+  .main {
+    padding: 16px 14px 60px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ---- Universal text overflow guard ---- */
+  .main h1, .main h2, .main h3,
+  .risk-hero-title, .hero-title, .phase-title, .attention-title,
+  .task-title, .risk-row-title, .bug-title,
+  .modal-title, .dash-title, .iw-title {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* ---- Tasks view ---- */
+  .risk-hero {
+    gap: 12px;
+    padding: 14px 0 16px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .risk-hero-text { min-width: 0; flex: 1 1 auto; }
+  .risk-hero-kicker { margin-bottom: 6px; }
+  .risk-hero-title { font-size: 22px; line-height: 1.1; }
+  .risk-hero-sub { font-size: 12px; }
+  .risk-ring { width: 68px; height: 68px; flex-shrink: 0; align-self: flex-start; margin-top: 4px; }
+  .risk-ring-num { font-size: 18px; }
+  .risk-ring-lbl { font-size: 8px; }
+  .hero-title { font-size: 26px; }
+  .phase-header {
+    padding: 12px 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .phase-title { font-size: 16px; min-width: 0; flex: 1 1 60%; }
+  .phase-window { display: none; }
+  .phase-progress { font-size: 11px; }
+  .risk-toolbar { flex-wrap: wrap; gap: 8px; }
+  .risk-toolbar .risk-search-wrap { flex: 1 1 100%; }
+  .risk-rows-grid { grid-template-columns: 1fr; }
+  .risk-toggle-row { gap: 8px; }
+  .risk-toggle-btn { padding: 6px 10px; font-size: 11px; }
+  .risk-toggle-hint { display: none; }
+  .risk-row { min-width: 0; }
+  .task-grid {
+    grid-template-columns: auto 1fr;
+    gap: 6px 8px;
+    padding: 10px 12px;
+  }
+  .task-title {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .task-meta, .task-actions {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+  .attention-header { flex-wrap: wrap; gap: 8px; }
+  .attention-meta { margin-left: 0; flex-basis: 100%; }
+  .attention-item { font-size: 12px; padding: 8px 10px; }
+  .attention-list { grid-template-columns: 1fr !important; }
+
+  /* ---- Owner workload heatmap ---- */
+  .owner-heatmap { padding: 12px; }
+  .heat-row { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 6px; }
+  .heat-bar { height: 32px; }
+
+  /* ---- Owner × Phase matrix ---- */
+  .matrix-chip-grid { grid-template-columns: 1fr; }
+
+  /* ---- Bugs view ---- */
+  .bugs-header { flex-wrap: wrap; gap: 8px; }
+  .bugs-title { font-size: 16px; min-width: 0; overflow-wrap: anywhere; }
+  .bugs-global-summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .bug-row, .bugs-section .bug-row { grid-template-columns: auto 1fr auto; gap: 6px 8px; padding: 10px 12px; }
+  .bug-title { min-width: 0; overflow-wrap: anywhere; }
+
+  /* ---- Calendar view ---- */
+  .cal-header,
+  .calendar-card .cal-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    align-items: center;
+  }
+  .cal-title,
+  .calendar-card .cal-title {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .cal-header .cal-today-btn,
+  .calendar-card .cal-today-btn { font-size: 11px; padding: 6px 10px; }
+  .cal-nav { gap: 2px; }
+  .cal-nav-btn { width: 32px; height: 32px; }
+  .cal-view-toggle { display: inline-flex; flex-wrap: wrap; }
+  .cal-view-toggle .cal-view-btn { padding: 6px 10px; font-size: 11px; }
+  .cal-header .btn,
+  .cal-header .btn-outline { padding: 6px 10px; font-size: 11px; }
+  .cal-header .btn-outline span { display: none; }
+  .cal-header > .cal-today-btn { margin-left: 0; }
+  .cal-grid {
+    font-size: 11px;
+  }
+  .cal-grid > * { min-width: 0; }
+  .calendar-card { padding: 10px; }
+  .timed-view-day { grid-template-columns: 44px 1fr; }
+  .timed-view-week { grid-template-columns: 44px repeat(7, 1fr); font-size: 10px; }
+  .timed-col-header .timed-col-num { font-size: 13px; }
+  .timed-col-header .timed-col-dow { font-size: 9px; }
+
+  /* ---- Tab navigation (keep horizontally scrollable, never overflow) ---- */
+  .tab-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-nav > * { flex-shrink: 0; }
+
+  /* ---- Modals — use the full screen ---- */
+  .modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+  .modal-overlay { padding: 0; }
+  .modal-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: sticky; top: 0; z-index: 5;
+    background: var(--surface);
+  }
+  .modal-title { font-size: 17px; min-width: 0; overflow-wrap: anywhere; }
+  .modal-body { padding: 14px 16px; }
+  .modal:has(#schedule-modal-body) { width: 100vw !important; max-width: 100vw !important; }
+
+  /* ---- Edit form — collapse multi-column grids to single column ---- */
+  .edit-form .ef-row,
+  .edit-form .ef-grid,
+  .edit-form .ef-grid-2,
+  .edit-form .ef-grid-3 { grid-template-columns: 1fr !important; }
+  .edit-form .ef-select-with-add { flex-wrap: wrap; }
+  .edit-form input,
+  .edit-form select,
+  .edit-form textarea { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+
+  /* ---- Calendar Import Wizard ---- */
+  .modal.is-wizard {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh;
+    max-height: 100vh !important;
+    border-radius: 0;
+  }
+  .iw-summary { padding: 8px 14px; font-size: 11px; flex-wrap: wrap; }
+  .iw-table { font-size: 11px; }
+
+  /* ---- Dashboard overlay ---- */
+  .dash-overlay { padding: 0; }
+  .dash-shell {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh;
+    max-height: 100vh !important;
+    border-radius: 0;
+  }
+  .dash-header { padding: 14px 16px 10px; flex-wrap: wrap; gap: 10px; }
+  .dash-header-top { flex-wrap: wrap; gap: 10px; }
+  .dash-title { font-size: 18px; min-width: 0; overflow-wrap: anywhere; }
+  .dash-body {
+    grid-template-columns: 1fr !important;
+    padding: 14px;
+    gap: 12px;
+  }
+  .dash-col-2, .dash-col-3, .dash-col-4, .dash-col-5,
+  .dash-col-6, .dash-col-7, .dash-col-8, .dash-col-9,
+  .dash-col-12 { grid-column: 1 / -1 !important; }
+  .dash-row, .dash-row-three, .dash-split-row { grid-template-columns: 1fr !important; }
+  .dash-attention-grid { grid-template-columns: 1fr !important; }
+  .dash-kpi-val { font-size: 24px; }
+  .dash-time-title { min-width: 0; }
+
+  /* ---- Toast & backup reminder — clamp inside viewport ---- */
+  .toast { left: 12px; right: 12px; bottom: 12px; max-width: calc(100vw - 24px); }
+  .backup-reminder { left: 12px; right: 12px; bottom: 12px; max-width: calc(100vw - 24px); }
+
+  /* ---- FAB position above iOS home indicator ---- */
+  .fab { bottom: 16px; right: 16px; }
+
+  /* ---- Mobile menu uses bigger viewport ---- */
+  .mobile-menu { max-height: calc(100vh - 56px); }
+
+  /* ---- Generic safety: media + long content ---- */
+  .main img, .main video,
+  .modal img, .modal video,
+  .mobile-menu img, .mobile-menu video { max-width: 100%; height: auto; }
+  .main pre, .main code,
+  .modal pre, .modal code { white-space: pre-wrap; word-break: break-word; }
 }
 
 /* ==========================================================
@@ -6501,10 +6824,111 @@ function renderShell() {
     ]));
   }
 
+  // ---- Mobile hamburger + slide-down menu
+  const hamburgerIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+  const closeIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>';
+
+  const closeMobileMenu = () => {
+    const m = document.querySelector(".mobile-menu");
+    const b = document.querySelector(".topbar-hamburger");
+    if (m) m.classList.remove("is-open");
+    if (b) {
+      b.classList.remove("is-open");
+      b.setAttribute("aria-expanded", "false");
+      b.innerHTML = hamburgerIcon;
+    }
+  };
+
+  const hamburger = h("button", {
+    class: "topbar-hamburger",
+    "aria-label": "Open menu",
+    "aria-expanded": "false",
+    html: hamburgerIcon,
+    onclick: (e) => {
+      e.stopPropagation();
+      const m = document.querySelector(".mobile-menu");
+      const b = e.currentTarget;
+      const open = !m.classList.contains("is-open");
+      m.classList.toggle("is-open", open);
+      b.classList.toggle("is-open", open);
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+      b.innerHTML = open ? closeIcon : hamburgerIcon;
+    }
+  });
+  topbar.appendChild(hamburger);
+
+  // Build mobile menu — mirrors topbar tabs/countdown/actions + sidebar phases
+  const mobileMenu = h("div", { class: "mobile-menu", id: "mobile-menu" });
+
+  const mTabs = h("div", { class: "mobile-menu-section" }, [
+    h("div", { class: "mobile-menu-heading" }, "Views"),
+    h("button", {
+      class: "view-tab" + (UI.view === "tasks" ? " is-active" : ""),
+      onclick: () => { closeMobileMenu(); setView("tasks"); }
+    }, [h("span", {}, lbl("tabs.tasks")), h("span", { class: "count" }, gs.total)]),
+    h("button", {
+      class: "view-tab" + (UI.view === "calendar" ? " is-active" : ""),
+      onclick: () => { closeMobileMenu(); setView("calendar"); }
+    }, [h("span", {}, lbl("tabs.calendar")), h("span", { class: "count" }, MILESTONES.length)]),
+    h("button", {
+      class: "view-tab" + (UI.view === "bugs" ? " is-active" : ""),
+      onclick: () => { closeMobileMenu(); setView("bugs"); }
+    }, [h("span", {}, lbl("tabs.bugs")), h("span", { class: "count" }, gs.bugsOpen)])
+  ]);
+  mobileMenu.appendChild(mTabs);
+
+  const mPhases = h("div", { class: "mobile-menu-section" }, [
+    h("div", { class: "mobile-menu-heading" }, lbl("sidebar.phases"))
+  ]);
+  effectivePhases().forEach(p => {
+    const st = phaseStats(p);
+    const isDone = st.total > 0 && st.complete === st.total;
+    const filtersApply = UI.view === "tasks" || UI.view === "calendar";
+    const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
+    mPhases.appendChild(h("button", {
+      class: "nav-link"
+        + (isActiveFilter ? " is-active" : "")
+        + (isDone ? " is-complete" : ""),
+      onclick: () => {
+        if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
+        UI.phaseFilter = isActiveFilter ? null : p.id;
+        UI.activeNavPhase = UI.phaseFilter;
+        saveUI();
+        closeMobileMenu();
+        renderShell();
+      }
+    }, [
+      h("span", { class: "nav-num" }, p.num),
+      h("span", {}, p.title),
+      h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
+    ]));
+  });
+  mobileMenu.appendChild(mPhases);
+
+  mobileMenu.appendChild(h("div", { class: "mobile-menu-section" }, [
+    h("div", { class: "mobile-menu-heading" }, "Actions"),
+    h("button", { class: "btn btn-outline",
+      onclick: () => { closeMobileMenu(); openDashboard(); },
+      html: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span style="margin-left:8px;">Dashboard</span>' }),
+    h("button", { class: "btn btn-ghost",
+      onclick: () => { closeMobileMenu(); openHelp(); },
+      html: ICONS.help + "<span style='margin-left:8px;'>Help</span>" }),
+    h("button", { class: "btn btn-outline",
+      onclick: () => { closeMobileMenu(); $("#import-file").click(); },
+      html: ICONS.upload + "<span style='margin-left:8px;'>Import</span>" }),
+    h("button", { class: "btn btn-outline",
+      onclick: () => { closeMobileMenu(); exportJSON(); },
+      html: ICONS.download + "<span style='margin-left:8px;'>Export JSON</span>" }),
+    h("button", { class: "btn btn-outline",
+      onclick: () => { closeMobileMenu(); openSettings(); },
+      html: ICONS.settings + "<span style='margin-left:8px;'>" + (lockOn ? "Encrypted" : "Settings") + "</span>" })
+  ]));
+
   // ---- Main
   const main = h("main", { class: "main", id: "main" });
 
   app.appendChild(topbar);
+  app.appendChild(mobileMenu);
   app.appendChild(sidebar);
   app.appendChild(main);
 
@@ -9533,6 +9957,217 @@ function openEventUpdateModal(ev, dateStr) {
   openModal({ title: "Update · " + title, body: form });
 }
 
+/* Mobile/touch gesture for empty date cells:
+ *   Tap        → does nothing (intentional — prevents accidental opens)
+ *   Hold 500ms → openNewMilestoneEditor(dateStr) to create a new entry on that date
+ * Desktop mouse interactions are unaffected. */
+function attachMobileDateGestures(cell, dateStr) {
+  if (!HAS_TOUCH) return;
+  const HOLD_DELAY = 500;
+  const MOVE_THRESHOLD = 12;
+  let holdTimer = null;
+  let touchActive = false;
+  let startX = 0, startY = 0;
+
+  cell.addEventListener("touchstart", (e) => {
+    // Don't trigger on touches that started inside a pill — that pill has its own gesture handler.
+    if (e.target.closest(".cal-event, .timed-pill")) return;
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    touchActive = true;
+    holdTimer = setTimeout(() => {
+      holdTimer = null;
+      if (navigator.vibrate) { try { navigator.vibrate(35); } catch {} }
+      openNewMilestoneEditor(dateStr);
+    }, HOLD_DELAY);
+  }, { passive: true });
+
+  cell.addEventListener("touchmove", (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    if (Math.hypot(t.clientX - startX, t.clientY - startY) > MOVE_THRESHOLD) {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      touchActive = false;
+    }
+  }, { passive: true });
+
+  cell.addEventListener("touchend", () => {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+  }, { passive: true });
+
+  cell.addEventListener("touchcancel", () => {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    touchActive = false;
+  });
+
+  // On touch devices, always suppress the click that follows a tap so the
+  // existing onclick (e.g. showScheduleModal) does not fire. The new entry is
+  // created exclusively via the long-press timer above.
+  cell.addEventListener("click", (e) => {
+    if (touchActive) {
+      e.stopPropagation();
+      e.preventDefault();
+      touchActive = false;
+    }
+  }, true);
+}
+
+/* Mobile/touch gestures for calendar pills:
+ *   Tap (release < 500ms)              → show preview tooltip
+ *   Hold (500–900ms then release)      → open editor
+ *   Long-press (900ms+) then drag      → reschedule onto another date
+ * Desktop mouse interactions (click/HTML5 drag) are unaffected. */
+const HAS_TOUCH = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+function attachMobileCalGestures(el, ev, dateStr, edge, isDraggable) {
+  if (!HAS_TOUCH) return;
+
+  const EDIT_DELAY = 500;
+  const DRAG_DELAY = 900;
+  const MOVE_THRESHOLD = 12;
+
+  let dragArmTimer = null;
+  let inDragMode = false;
+  let suppressClick = false;
+  let startX = 0, startY = 0;
+  let touchStartTs = 0;
+  let ghost = null;
+  let lastDropEl = null;
+  let movedBeforeDrag = false;
+
+  const clearHighlights = () => {
+    document.querySelectorAll(".cal-day.is-drag-over, .timed-col-wrap.is-drag-over")
+      .forEach(c => c.classList.remove("is-drag-over"));
+  };
+  const cleanup = () => {
+    if (dragArmTimer) { clearTimeout(dragArmTimer); dragArmTimer = null; }
+    if (ghost) { ghost.remove(); ghost = null; }
+    el.classList.remove("is-drag-mobile");
+    inDragMode = false;
+    movedBeforeDrag = false;
+    clearHighlights();
+  };
+
+  const openEditor = () => {
+    hideEventTooltip();
+    if (ev.kind === "task") {
+      if (ev.isRepeatOccurrence) openEventUpdateModal(ev, dateStr);
+      else openTaskEditor(ev.taskId);
+    } else if (ev.kind === "milestone") {
+      openMilestoneEditor(ev.milestoneIndex);
+    } else if (ev.kind === "recurring") {
+      openEventUpdateModal(ev, dateStr);
+    }
+  };
+
+  el.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    touchStartTs = Date.now();
+    suppressClick = false;
+    movedBeforeDrag = false;
+
+    if (isDraggable) {
+      dragArmTimer = setTimeout(() => {
+        inDragMode = true;
+        hideEventTooltip();
+        el.classList.add("is-drag-mobile");
+        if (navigator.vibrate) { try { navigator.vibrate(35); } catch {} }
+        const r = el.getBoundingClientRect();
+        ghost = el.cloneNode(true);
+        ghost.style.position = "fixed";
+        ghost.style.left = (startX - r.width / 2) + "px";
+        ghost.style.top  = (startY - r.height / 2) + "px";
+        ghost.style.width = r.width + "px";
+        ghost.style.opacity = "0.92";
+        ghost.style.pointerEvents = "none";
+        ghost.style.zIndex = "9999";
+        ghost.style.boxShadow = "0 8px 24px rgba(0,0,0,0.18)";
+        ghost.style.transform = "scale(1.04)";
+        document.body.appendChild(ghost);
+      }, DRAG_DELAY);
+    }
+  }, { passive: true });
+
+  el.addEventListener("touchmove", (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (!inDragMode) {
+      if (Math.hypot(dx, dy) > MOVE_THRESHOLD) {
+        movedBeforeDrag = true;
+        if (dragArmTimer) { clearTimeout(dragArmTimer); dragArmTimer = null; }
+      }
+      return;
+    }
+    e.preventDefault();
+    if (ghost) {
+      const r = el.getBoundingClientRect();
+      ghost.style.left = (t.clientX - r.width / 2) + "px";
+      ghost.style.top  = (t.clientY - r.height / 2) + "px";
+      ghost.style.display = "none";
+    }
+    const target = document.elementFromPoint(t.clientX, t.clientY);
+    if (ghost) ghost.style.display = "";
+    const cell = target ? target.closest("[data-date]") : null;
+    if (cell !== lastDropEl) {
+      clearHighlights();
+      if (cell) cell.classList.add("is-drag-over");
+      lastDropEl = cell;
+    }
+  }, { passive: false });
+
+  el.addEventListener("touchend", (e) => {
+    const dt = Date.now() - touchStartTs;
+    if (dragArmTimer) { clearTimeout(dragArmTimer); dragArmTimer = null; }
+
+    if (inDragMode) {
+      e.preventDefault();
+      suppressClick = true;
+      const tt = e.changedTouches[0];
+      if (ghost) ghost.style.display = "none";
+      const target = tt ? document.elementFromPoint(tt.clientX, tt.clientY) : null;
+      const cell = target ? target.closest("[data-date]") : null;
+      const targetDate = cell ? cell.getAttribute("data-date") : null;
+      cleanup();
+      if (targetDate && ev.taskId && targetDate !== dateStr) {
+        dropTaskOnDate({
+          taskId: ev.taskId,
+          anchor: dateStr,
+          start: ev.startDate,
+          end: ev.dueDate,
+          edge: edge || "single"
+        }, targetDate);
+      }
+      return;
+    }
+
+    if (movedBeforeDrag) { cleanup(); return; }
+
+    e.preventDefault();
+    suppressClick = true;
+    cleanup();
+
+    if (dt < EDIT_DELAY) {
+      showEventTooltip(el, ev, dateStr);
+      setTimeout(hideEventTooltip, 4000);
+    } else {
+      openEditor();
+    }
+  }, { passive: false });
+
+  el.addEventListener("touchcancel", cleanup);
+
+  el.addEventListener("click", (e) => {
+    if (suppressClick) {
+      e.stopPropagation();
+      e.preventDefault();
+      suppressClick = false;
+    }
+  }, true);
+}
+
 function showEventTooltip(targetEl, ev, dateStr) {
   const tip = $("#cal-tooltip");
   if (!tip) return;
@@ -9875,6 +10510,8 @@ function makeTimedPill(ev, dateStr, times, mode) {
   } else {
     pill.appendChild(h("div", { class: "timed-pill-title" }, ev.title));
   }
+  // Mobile: tap=preview, hold=edit, long-press=drag-to-move
+  attachMobileCalGestures(pill, ev, dateStr, "single", ev.kind === "task" && !!ev.taskId);
   return pill;
 }
 
@@ -9891,7 +10528,8 @@ function renderTimedDay(dateStr, todayStr) {
   }
   wrap.appendChild(labels);
   // Date header
-  const colWrap = h("div", { class: "timed-col-wrap" });
+  const colWrap = h("div", { class: "timed-col-wrap", "data-date": dateStr });
+  attachMobileDateGestures(colWrap, dateStr);
   const d = new Date(dateStr + "T00:00:00");
   colWrap.appendChild(h("div", {
     class: "timed-col-header" + (dateStr === todayStr ? " is-today" : "")
@@ -9921,7 +10559,8 @@ function renderTimedWeek(weekStart, todayStr) {
   for (let i = 0; i < 7; i++) {
     const d = new Date(weekStart); d.setDate(d.getDate() + i);
     const dateStr = ymd(d);
-    const colWrap = h("div", { class: "timed-col-wrap" });
+    const colWrap = h("div", { class: "timed-col-wrap", "data-date": dateStr });
+  attachMobileDateGestures(colWrap, dateStr);
     colWrap.appendChild(h("div", {
       class: "timed-col-header" + (dateStr === todayStr ? " is-today" : "")
     }, [
@@ -10070,10 +10709,12 @@ function renderCalDay(date, opts) {
         // Milestone labels always get wrapped in a span so CSS can float the
         // label across a range's cell boundary. Tasks/recurring stay as
         // text nodes so their own range styling isn't affected.
-        if (ev.kind === "milestone") {
-          return h("div", attrs, [h("span", { class: "evt-inner" }, label)]);
-        }
-        return h("div", attrs, label);
+        const pillEl = ev.kind === "milestone"
+          ? h("div", attrs, [h("span", { class: "evt-inner" }, label)])
+          : h("div", attrs, label);
+        // Mobile: tap=preview, hold=edit, long-press=drag-to-move
+        attachMobileCalGestures(pillEl, ev, dateStr, edge, isDraggable);
+        return pillEl;
       }),
       events.length > 3 ? h("div", { class: "cal-event-more" }, `+${events.length - 3} more`) : null
     ].filter(Boolean))
@@ -10096,6 +10737,9 @@ function renderCalDay(date, opts) {
     if (!payload || !payload.taskId) return;
     dropTaskOnDate(payload, dateStr);
   });
+
+  // Mobile: long-press on the cell creates a new entry on that date.
+  attachMobileDateGestures(cell, dateStr);
 
   return cell;
 }
@@ -13479,8 +14123,8 @@ async function boot() {
   // Update countdown every minute
   setInterval(() => {
     const cd = daysUntil(GO_LIVE);
-    const el = document.querySelector(".countdown b");
-    if (el) el.textContent = cd > 0 ? `${cd} days` : (cd === 0 ? "TODAY" : `${Math.abs(cd)}d`);
+    const txt = cd > 0 ? `${cd} days` : (cd === 0 ? "TODAY" : `${Math.abs(cd)}d`);
+    document.querySelectorAll(".countdown b").forEach(el => { el.textContent = txt; });
   }, 60000);
 }
 
@@ -13504,6 +14148,31 @@ async function init() {
     }
     // Close context menu on any outside click
     if (!e.target.closest("#ctx-menu")) hideContextMenu();
+    // Close mobile menu on outside click
+    const mm = document.querySelector(".mobile-menu.is-open");
+    if (mm && !e.target.closest(".mobile-menu") && !e.target.closest(".topbar-hamburger")) {
+      mm.classList.remove("is-open");
+      const hb = document.querySelector(".topbar-hamburger");
+      if (hb) {
+        hb.classList.remove("is-open");
+        hb.setAttribute("aria-expanded", "false");
+        hb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+      }
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) {
+      const mm = document.querySelector(".mobile-menu.is-open");
+      if (mm) {
+        mm.classList.remove("is-open");
+        const hb = document.querySelector(".topbar-hamburger");
+        if (hb) {
+          hb.classList.remove("is-open");
+          hb.setAttribute("aria-expanded", "false");
+          hb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+        }
+      }
+    }
   });
   document.addEventListener("scroll", hideContextMenu, true);
   window.addEventListener("blur", hideContextMenu);
@@ -13511,6 +14180,17 @@ async function init() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       hideContextMenu();
+      const mmOpen = document.querySelector(".mobile-menu.is-open");
+      if (mmOpen) {
+        mmOpen.classList.remove("is-open");
+        const hb = document.querySelector(".topbar-hamburger");
+        if (hb) {
+          hb.classList.remove("is-open");
+          hb.setAttribute("aria-expanded", "false");
+          hb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+        }
+        return;
+      }
       const dashOverlay = document.getElementById("dash-overlay");
       if (dashOverlay && dashOverlay.classList.contains("is-open")) { closeDashboard(); return; }
       const overlay = $("#modal-overlay");
