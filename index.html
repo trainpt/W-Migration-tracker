@@ -292,6 +292,80 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   color: var(--muted);
   padding: 0 8px 8px;
 }
+.phase-group-header {
+  display: flex; align-items: center;
+  gap: 4px;
+  padding: 6px 4px 6px 6px;
+  margin-top: 6px;
+  border-radius: var(--radius-sm);
+}
+.phase-group-header:hover { background: var(--bg-3); }
+.phase-group-toggle {
+  flex: 1 1 auto;
+  display: flex; align-items: center; gap: 6px;
+  padding: 2px 4px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  text-align: left;
+  background: transparent; border: 0; cursor: pointer;
+  min-width: 0;
+}
+.phase-group-toggle:hover { color: var(--ink); }
+.phase-group-chevron {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+.phase-group-header:not(.is-collapsed) .phase-group-chevron { transform: rotate(90deg); }
+.phase-group-title {
+  flex: 1 1 auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.phase-group-add, .phase-group-menu {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  padding: 0;
+  font-size: 13px; line-height: 1;
+  color: var(--muted);
+  background: transparent; border: 0; border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+.phase-group-header:hover .phase-group-add,
+.phase-group-header:hover .phase-group-menu { opacity: 1; }
+.phase-group-add:hover, .phase-group-menu:hover { background: var(--bg-1); color: var(--ink); }
+.phase-group-add svg { width: 13px; height: 13px; }
+.phase-group-empty {
+  padding: 4px 10px 8px 28px;
+  font-size: 11px; color: var(--muted); font-style: italic;
+}
+.nav-link.nav-link-grouped { padding-left: 22px; }
+.phase-group-new {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 12px; font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.phase-group-new:hover { color: var(--ink); border-color: var(--ink-3, var(--ink-2)); background: var(--bg-3); }
+.phase-group-new svg { width: 13px; height: 13px; }
+.mobile-menu-subheading {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 8px 4px;
+  margin-top: 4px;
+}
 .nav-link {
   display: flex; align-items: center; gap: 10px;
   width: 100%;
@@ -4518,8 +4592,12 @@ kbd {
     50%      { transform: translate(4px, -50%); opacity: 1; }
   }
 
-  /* Expand on hover: overlay the main content with a full sidebar. */
-  .sidebar:hover {
+  /* Expand on hover: overlay the main content with a full sidebar.
+     `.is-pinned-hover` is a JS-driven mirror of :hover, applied after a
+     re-render that replaced the sidebar DOM while the cursor was still over
+     it (CSS :hover wouldn't re-fire until the next mousemove). */
+  .sidebar:hover,
+  .sidebar.is-pinned-hover {
     position: fixed;
     width: 280px;
     padding: 20px 14px;
@@ -4530,8 +4608,10 @@ kbd {
     left: 0;
     height: calc(100vh - 72px);
   }
-  .sidebar:hover > * { opacity: 1; pointer-events: auto; }
-  .sidebar:hover::after {
+  .sidebar:hover > *,
+  .sidebar.is-pinned-hover > * { opacity: 1; pointer-events: auto; }
+  .sidebar:hover::after,
+  .sidebar.is-pinned-hover::after {
     opacity: 0;
     animation: none;
   }
@@ -5191,16 +5271,21 @@ const LOCK_KEY = "wonderful-pt3-lock-v4";
 const BACKUP_KEY = "wonderful-pt3-last-backup-v4";
 
 /* ============================================================================
+   PHASE GROUPS
+   Top-level grouping above phases. Seeded with "Features in Development"; users
+   can create more via the sidebar "+ New Phase Group" button.
+   ============================================================================ */
+const PHASE_GROUPS_DEFAULT = [
+  { id: "grp-features-in-dev", title: "Features in Development" }
+];
+
+/* ============================================================================
    PHASES & TASKS
-   Includes everything from original SOP + new info from April 15 meeting:
-   - NPT Scripts inventory (Rogelio harvesting + Rosa nursery/farming)
-   - Reporting Time Pay 4022 wiring
-   - Rogelio vs Rosa ownership split
-   - Backfill rules, scheduling rules
    ============================================================================ */
 const PHASES = [
   {
     id: "p1", num: "01", title: "Scannable Actions",
+    groupId: "grp-features-in-dev",
     window: "Active development · Launch July 13, 2026",
     desc: "The architectural spine. Per the April 23 meeting: 'the one thing everything else leans on.' A single barcode selects job + location + check-in in one action. Wonderful has up to ~12 combinations.",
     groups: [
@@ -5230,6 +5315,7 @@ const PHASES = [
   },
   {
     id: "p2", num: "02", title: "Scripts: Legacy Report Replacements",
+    groupId: "grp-features-in-dev",
     window: "Must-have · Pre-launch",
     desc: "Replaces Wonderful's preconfigured Legacy scripts (the 'Simple Time Card Adding' family) with 3.0 equivalents. Auto-applies breaks, lunches, and NPT in bulk — Wonderful processes thousands of timecards across multiple business units.",
     groups: [
@@ -5259,6 +5345,7 @@ const PHASES = [
   },
   {
     id: "p3", num: "03", title: "Compensation: Crew-Leader Rate, Pay Groups, Penalty Triggers",
+    groupId: "grp-features-in-dev",
     window: "Must-have — the rate-decoupling workstream",
     desc: "Per the meeting: 'the crew-leader piece-rate problem is really a rate-decoupling problem.' Legacy let rate live independent of job; 3.0 couples them. The same fix unlocks Wonderful's broader pay-groups ask.",
     groups: [
@@ -5282,6 +5369,7 @@ const PHASES = [
   },
   {
     id: "p4", num: "04", title: "Onboarding & Permissions",
+    groupId: "grp-features-in-dev",
     window: "Must-have / Already exists",
     desc: "Document handling for FLC onboarding plus the role-config solution for pay-period locking.",
     groups: [
@@ -5302,6 +5390,7 @@ const PHASES = [
   },
   {
     id: "p5", num: "05", title: "Nice-to-Have / Post-Launch",
+    groupId: "grp-features-in-dev",
     window: "Deferrable",
     desc: "Real value but not launch-blocking. Revisit after July 13 go-live.",
     groups: [
@@ -5317,6 +5406,7 @@ const PHASES = [
   },
   {
     id: "p6", num: "06", title: "Open Questions for Rogelio (Tuesday)",
+    groupId: "grp-features-in-dev",
     window: "Verification only — no solutions yet",
     desc: "Per Harrison: 'Don't present solutions — only questions.' Rogelio is logical but reflexively rejects anything framed as 'different from Legacy' if it arrives as a decision rather than as validated verification.",
     groups: [
@@ -5659,6 +5749,12 @@ function lbl(key) {
 
 /* Computed PHASES with overrides applied + custom tasks injected. */
 function effectivePhases() {
+  const deleted = new Set(STATE?.__phaseDeleted || []);
+  const groupReassign = STATE?.__phaseGroupAssignments || {};
+  const applyGroupId = (p) => {
+    const override = groupReassign[p.id];
+    return override ? { ...p, groupId: override } : p;
+  };
   const customByGroup = {};
   (STATE?.__customTasks || []).forEach(t => {
     const k = t.phaseId + "::" + t.groupId;
@@ -5673,7 +5769,7 @@ function effectivePhases() {
       custom: true
     }));
   };
-  const hardcoded = PHASES.map(p => {
+  const hardcoded = PHASES.filter(p => !deleted.has(p.id)).map(p => {
     const meta = phaseMeta(p);
     const groups = [
       ...p.groups.map(g => {
@@ -5686,18 +5782,18 @@ function effectivePhases() {
       }),
       ...customGroupsFor(p.id)
     ];
-    return { ...p, num: meta.num, title: meta.title, window: meta.window, desc: meta.desc, groups };
+    return applyGroupId({ ...p, num: meta.num, title: meta.title, window: meta.window, desc: meta.desc, groups });
   });
   // User-created phases appended at the end — each carries its own groups
   // plus any custom groups keyed to its id.
-  const customPhases = (STATE?.__customPhases || []).map(p => {
+  const customPhases = (STATE?.__customPhases || []).filter(p => !deleted.has(p.id)).map(p => {
     const meta = phaseMeta(p);
     const baseGroups = (p.groups || []).map(g => ({
       ...g,
       title: groupMeta(p.id, g).title || g.title,
       tasks: customByGroup[p.id + "::" + g.id] || []
     }));
-    return {
+    return applyGroupId({
       ...p,
       custom: true,
       num: meta.num || p.num,
@@ -5705,9 +5801,43 @@ function effectivePhases() {
       window: meta.window || p.window || "",
       desc: meta.desc || p.desc || "",
       groups: [...baseGroups, ...customGroupsFor(p.id)]
-    };
+    });
   });
   return [...hardcoded, ...customPhases];
+}
+
+/* Phase Groups — returns merged seeded + custom groups, with renames + order applied. */
+function effectiveGroups() {
+  const overrides = STATE?.__phaseGroupOverrides || {};
+  const custom = STATE?.__phaseGroups || [];
+  const seeded = PHASE_GROUPS_DEFAULT.map(g => ({ ...g, seeded: true }));
+  const all = [...seeded, ...custom].map(g => {
+    const ov = overrides[g.id];
+    return ov?.title ? { ...g, title: ov.title } : g;
+  });
+  const order = STATE?.__phaseGroupOrder;
+  if (Array.isArray(order) && order.length) {
+    const byId = new Map(all.map(g => [g.id, g]));
+    const ordered = order.map(id => byId.get(id)).filter(Boolean);
+    const trailing = all.filter(g => !order.includes(g.id));
+    return [...ordered, ...trailing];
+  }
+  return all;
+}
+
+/* Returns [{ group, phases }] for sidebar render. Phases without a known
+   group fall under the seeded "Features in Development" group. */
+function groupedPhases() {
+  const groups = effectiveGroups();
+  if (!groups.length) return [];
+  const fallbackId = groups[0].id;
+  const phases = effectivePhases();
+  const byGroup = new Map(groups.map(g => [g.id, []]));
+  for (const p of phases) {
+    const gid = byGroup.has(p.groupId) ? p.groupId : fallbackId;
+    byGroup.get(gid).push(p);
+  }
+  return groups.map(g => ({ group: g, phases: byGroup.get(g.id) || [] }));
 }
 
 // Create a new custom phase (returns its id). Num auto-assigns if blank.
@@ -5718,14 +5848,80 @@ async function createCustomPhase(title, opts = {}) {
   const totalExisting = PHASES.length + STATE.__customPhases.length;
   const id = "cp-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 10000).toString(36);
   const num = opts.num || String(totalExisting).padStart(2, "0");
+  const groupId = opts.groupId || (effectiveGroups()[0]?.id) || "grp-features-in-dev";
   STATE.__customPhases.push({
     id, num, title: t,
+    groupId,
     window: opts.window || "",
     desc: opts.desc || "",
     groups: []
   });
   await saveState();
   return id;
+}
+
+// Create a new phase group (returns its id).
+async function createPhaseGroup(title) {
+  const t = (title || "").trim();
+  if (!t) return null;
+  STATE.__phaseGroups = STATE.__phaseGroups || [];
+  STATE.__phaseGroupOrder = STATE.__phaseGroupOrder || effectiveGroups().map(g => g.id);
+  const id = "pg-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 10000).toString(36);
+  STATE.__phaseGroups.push({ id, title: t });
+  if (!STATE.__phaseGroupOrder.includes(id)) STATE.__phaseGroupOrder.push(id);
+  await saveState();
+  return id;
+}
+
+async function renamePhaseGroup(groupId, newTitle) {
+  const t = (newTitle || "").trim();
+  if (!t || !groupId) return false;
+  STATE.__phaseGroupOverrides = STATE.__phaseGroupOverrides || {};
+  STATE.__phaseGroupOverrides[groupId] = { ...(STATE.__phaseGroupOverrides[groupId] || {}), title: t };
+  // For non-seeded groups, also mutate the canonical entry so deletes/renames stay consistent.
+  const cust = (STATE.__phaseGroups || []).find(g => g.id === groupId);
+  if (cust) cust.title = t;
+  await saveState();
+  return true;
+}
+
+// Delete a phase group. mode: "delete-phases" wipes member phases too;
+// "move" reassigns them to the seeded group. The seeded "Features in Development"
+// group is protected from deletion if it's the only one left.
+async function deletePhaseGroup(groupId, mode) {
+  const groups = effectiveGroups();
+  if (groups.length <= 1) return false;
+  const member = groupedPhases().find(gp => gp.group.id === groupId);
+  const phaseIds = (member?.phases || []).map(p => p.id);
+  if (phaseIds.length && mode === "delete-phases") {
+    STATE.__phaseDeleted = STATE.__phaseDeleted || [];
+    for (const pid of phaseIds) if (!STATE.__phaseDeleted.includes(pid)) STATE.__phaseDeleted.push(pid);
+    STATE.__customPhases = (STATE.__customPhases || []).filter(p => !phaseIds.includes(p.id));
+  } else if (phaseIds.length) {
+    const fallback = groups.find(g => g.id !== groupId)?.id || PHASE_GROUPS_DEFAULT[0].id;
+    STATE.__phaseGroupAssignments = STATE.__phaseGroupAssignments || {};
+    for (const pid of phaseIds) STATE.__phaseGroupAssignments[pid] = fallback;
+  }
+  STATE.__phaseGroups = (STATE.__phaseGroups || []).filter(g => g.id !== groupId);
+  STATE.__phaseGroupOrder = (STATE.__phaseGroupOrder || []).filter(id => id !== groupId);
+  if (STATE.__phaseGroupOverrides) delete STATE.__phaseGroupOverrides[groupId];
+  await saveState();
+  return true;
+}
+
+// Delete a phase. Hardcoded → tombstone in __phaseDeleted; custom → splice.
+async function deletePhase(phaseId) {
+  if (!phaseId) return false;
+  const isCustom = (STATE.__customPhases || []).some(p => p.id === phaseId);
+  if (isCustom) {
+    STATE.__customPhases = STATE.__customPhases.filter(p => p.id !== phaseId);
+  } else {
+    STATE.__phaseDeleted = STATE.__phaseDeleted || [];
+    if (!STATE.__phaseDeleted.includes(phaseId)) STATE.__phaseDeleted.push(phaseId);
+  }
+  if (STATE.__phaseGroupAssignments) delete STATE.__phaseGroupAssignments[phaseId];
+  await saveState();
+  return true;
 }
 
 // Create a new custom group inside a phase (returns its id).
@@ -5844,7 +6040,8 @@ function defaultUI() {
     archiveFilter: "active",  // "active" (default) | "archived" | "all"
     phaseFilter: null,        // null = all phases; otherwise phaseId
     calWonderfulOnly: false,  // calendar filter: hide gcal-imports unless title contains "wonderful"
-    calTypeFilters: {}        // { [typeKey]: false } — any key set false hides that type on the calendar
+    calTypeFilters: {},       // { [typeKey]: false } — any key set false hides that type on the calendar
+    collapsedPhaseGroups: {}  // { [groupId]: true } when collapsed in the sidebar
   };
 }
 
@@ -6598,6 +6795,20 @@ function toast(msg, kind = "") {
 /* ============================================================================
    SHELL RENDERING
    ============================================================================ */
+// Track whether the cursor is currently inside the sidebar so renderShell()
+// can preserve the expanded state across DOM rebuilds (CSS :hover doesn't
+// re-fire on the new element until the next mousemove, and a hit-test on
+// coordinates fails because the new sidebar starts collapsed/narrow).
+let __cursorInSidebar = false;
+window.addEventListener("mousemove", (e) => {
+  __cursorInSidebar = !!(e.target && e.target.closest && e.target.closest(".sidebar"));
+}, { passive: true, capture: true });
+// If the cursor leaves the window entirely, drop the flag so a re-render
+// after the user has moved away doesn't pin the sidebar open.
+window.addEventListener("mouseout", (e) => {
+  if (!e.relatedTarget && !e.toElement) __cursorInSidebar = false;
+}, { passive: true });
+
 function renderShell() {
   const app = $("#app");
   app.innerHTML = "";
@@ -6652,41 +6863,82 @@ function renderShell() {
   const sidebar = h("aside", { class: "sidebar" }, []);
 
   sidebar.appendChild(h("div", { class: "sidebar-heading" }, lbl("sidebar.phases")));
-  effectivePhases().forEach(p => {
-    const st = phaseStats(p);
-    const isDone = st.total > 0 && st.complete === st.total;
-    const filtersApply = UI.view === "tasks" || UI.view === "calendar";
-    const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
-    const link = h("button", {
-      class: "nav-link"
-        + (isActiveFilter ? " is-active" : "")
-        + (isDone ? " is-complete" : ""),
-      title: isActiveFilter
-        ? "Showing only this phase — click to clear filter"
-        : (UI.view === "calendar"
-            ? "Filter Calendar tasks to this phase"
-            : "Filter Tasks view to this phase"),
-      onclick: () => {
-        // Toggle phase filter. On Tasks/Calendar views stay put and just
-        // flip the filter; on any other view, jump to Tasks.
-        if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
-        UI.phaseFilter = isActiveFilter ? null : p.id;
-        UI.activeNavPhase = UI.phaseFilter;
-        saveUI();
-        renderShell();
-      }
-    }, [
-      h("span", { class: "nav-num" }, p.num),
-      h("span", {}, p.title),
-      h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
+  const collapsedGroups = UI.collapsedPhaseGroups || {};
+  groupedPhases().forEach(({ group, phases }) => {
+    const isCollapsed = !!collapsedGroups[group.id];
+    const groupRow = h("div", { class: "phase-group-header" + (isCollapsed ? " is-collapsed" : "") }, [
+      h("button", {
+        class: "phase-group-toggle",
+        title: isCollapsed ? "Expand group" : "Collapse group",
+        onclick: (e) => {
+          e.stopPropagation();
+          UI.collapsedPhaseGroups = UI.collapsedPhaseGroups || {};
+          UI.collapsedPhaseGroups[group.id] = !UI.collapsedPhaseGroups[group.id];
+          saveUI();
+          renderShell();
+        }
+      }, [
+        h("span", { class: "phase-group-chevron", html: ICONS.chevron }),
+        h("span", { class: "phase-group-title" }, group.title)
+      ]),
+      h("button", {
+        class: "phase-group-add",
+        title: "Add a phase to this group",
+        onclick: (e) => { e.stopPropagation(); openNewPhaseDialog(group.id); }
+      }, [h("span", { html: ICONS.plus })]),
+      h("button", {
+        class: "phase-group-menu",
+        title: "Group options",
+        onclick: (e) => { e.stopPropagation(); openPhaseGroupMenu(e.clientX, e.clientY, group.id); }
+      }, "⋯")
     ]);
-    link.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      openPhaseContextMenu(e.clientX, e.clientY, p.id);
+    sidebar.appendChild(groupRow);
+    if (isCollapsed) return;
+    if (!phases.length) {
+      sidebar.appendChild(h("div", { class: "phase-group-empty" }, "No phases yet"));
+      return;
+    }
+    phases.forEach(p => {
+      const st = phaseStats(p);
+      const isDone = st.total > 0 && st.complete === st.total;
+      const filtersApply = UI.view === "tasks" || UI.view === "calendar";
+      const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
+      const link = h("button", {
+        class: "nav-link nav-link-grouped"
+          + (isActiveFilter ? " is-active" : "")
+          + (isDone ? " is-complete" : ""),
+        title: isActiveFilter
+          ? "Showing only this phase — click to clear filter"
+          : (UI.view === "calendar"
+              ? "Filter Calendar tasks to this phase"
+              : "Filter Tasks view to this phase"),
+        onclick: () => {
+          if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
+          UI.phaseFilter = isActiveFilter ? null : p.id;
+          UI.activeNavPhase = UI.phaseFilter;
+          saveUI();
+          renderShell();
+        }
+      }, [
+        h("span", { class: "nav-num" }, p.num),
+        h("span", {}, p.title),
+        h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
+      ]);
+      link.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openPhaseContextMenu(e.clientX, e.clientY, p.id);
+      });
+      sidebar.appendChild(link);
     });
-    sidebar.appendChild(link);
   });
+  sidebar.appendChild(h("button", {
+    class: "phase-group-new",
+    onclick: () => openNewPhaseGroupDialog()
+  }, [
+    h("span", { html: ICONS.plus }),
+    h("span", {}, "New Phase Group")
+  ]));
 
   sidebar.appendChild(h("div", { class: "sidebar-divider" }));
   // Admin Dashboard launcher — sits right above the Summary block so the
@@ -6801,28 +7053,31 @@ function renderShell() {
   const mPhases = h("div", { class: "mobile-menu-section" }, [
     h("div", { class: "mobile-menu-heading" }, lbl("sidebar.phases"))
   ]);
-  effectivePhases().forEach(p => {
-    const st = phaseStats(p);
-    const isDone = st.total > 0 && st.complete === st.total;
-    const filtersApply = UI.view === "tasks" || UI.view === "calendar";
-    const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
-    mPhases.appendChild(h("button", {
-      class: "nav-link"
-        + (isActiveFilter ? " is-active" : "")
-        + (isDone ? " is-complete" : ""),
-      onclick: () => {
-        if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
-        UI.phaseFilter = isActiveFilter ? null : p.id;
-        UI.activeNavPhase = UI.phaseFilter;
-        saveUI();
-        closeMobileMenu();
-        renderShell();
-      }
-    }, [
-      h("span", { class: "nav-num" }, p.num),
-      h("span", {}, p.title),
-      h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
-    ]));
+  groupedPhases().forEach(({ group, phases }) => {
+    mPhases.appendChild(h("div", { class: "mobile-menu-subheading" }, group.title));
+    phases.forEach(p => {
+      const st = phaseStats(p);
+      const isDone = st.total > 0 && st.complete === st.total;
+      const filtersApply = UI.view === "tasks" || UI.view === "calendar";
+      const isActiveFilter = filtersApply && UI.phaseFilter === p.id;
+      mPhases.appendChild(h("button", {
+        class: "nav-link"
+          + (isActiveFilter ? " is-active" : "")
+          + (isDone ? " is-complete" : ""),
+        onclick: () => {
+          if (UI.view !== "tasks" && UI.view !== "calendar") UI.view = "tasks";
+          UI.phaseFilter = isActiveFilter ? null : p.id;
+          UI.activeNavPhase = UI.phaseFilter;
+          saveUI();
+          closeMobileMenu();
+          renderShell();
+        }
+      }, [
+        h("span", { class: "nav-num" }, p.num),
+        h("span", {}, p.title),
+        h("span", { class: "nav-progress" }, `${st.complete}/${st.total}`)
+      ]));
+    });
   });
   mobileMenu.appendChild(mPhases);
 
@@ -6852,6 +7107,15 @@ function renderShell() {
   app.appendChild(mobileMenu);
   app.appendChild(sidebar);
   app.appendChild(main);
+
+  // If a re-render replaced the sidebar while the cursor was still over it,
+  // CSS :hover won't fire on the new element until the next mousemove — and
+  // by then the sidebar has already collapsed mid-interaction. Pin a class
+  // that mirrors :hover until the cursor actually leaves.
+  if (__cursorInSidebar) {
+    sidebar.classList.add("is-pinned-hover");
+    sidebar.addEventListener("mouseleave", () => sidebar.classList.remove("is-pinned-hover"), { once: true });
+  }
 
   renderMain();
 }
@@ -9327,6 +9591,159 @@ function openGroupEditor(phaseId, groupId) {
   openModal({ title: "Edit group", body: form });
 }
 
+/* ---------- Phase Group dialogs ---------- */
+function openNewPhaseGroupDialog() {
+  const form = h("div", { class: "edit-form" });
+  const titleIn = h("input", { type: "text", placeholder: "e.g. Post-Launch" });
+  form.appendChild(h("div", { class: "ef-row" }, [
+    h("label", { class: "ef-label" }, "Group name"), titleIn
+  ]));
+  const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
+  const save = h("button", {
+    class: "btn btn-primary",
+    onclick: async () => {
+      const name = titleIn.value.trim();
+      if (!name) { titleIn.focus(); return; }
+      await createPhaseGroup(name);
+      closeModal();
+      renderShell();
+      toast("Group created");
+    }
+  }, "Create group");
+  form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, save]));
+  openModal({ title: "New phase group", body: form });
+  setTimeout(() => titleIn.focus(), 50);
+}
+
+function openNewPhaseDialog(groupId) {
+  const groups = effectiveGroups();
+  const targetId = groupId || groups[0]?.id;
+  const form = h("div", { class: "edit-form" });
+  const titleIn = h("input", { type: "text", placeholder: "Phase name" });
+  form.appendChild(h("div", { class: "ef-row" }, [
+    h("label", { class: "ef-label" }, "Title"), titleIn
+  ]));
+  const winIn = h("input", { type: "text", placeholder: "e.g. Q3 2026" });
+  form.appendChild(h("div", { class: "ef-row" }, [
+    h("label", { class: "ef-label" }, "Window (optional)"), winIn
+  ]));
+  const groupSel = h("select", {},
+    groups.map(g => h("option", { value: g.id, ...(g.id === targetId ? { selected: "selected" } : {}) }, g.title)));
+  form.appendChild(h("div", { class: "ef-row" }, [
+    h("label", { class: "ef-label" }, "Group"), groupSel
+  ]));
+  const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
+  const save = h("button", {
+    class: "btn btn-primary",
+    onclick: async () => {
+      const name = titleIn.value.trim();
+      if (!name) { titleIn.focus(); return; }
+      await createCustomPhase(name, { window: winIn.value.trim(), groupId: groupSel.value });
+      closeModal();
+      renderShell();
+      toast("Phase created");
+    }
+  }, "Create phase");
+  form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, save]));
+  openModal({ title: "New phase", body: form });
+  setTimeout(() => titleIn.focus(), 50);
+}
+
+function openRenamePhaseGroupDialog(groupId) {
+  const grp = effectiveGroups().find(g => g.id === groupId);
+  if (!grp) return;
+  const form = h("div", { class: "edit-form" });
+  const titleIn = h("input", { type: "text", value: grp.title });
+  form.appendChild(h("div", { class: "ef-row" }, [
+    h("label", { class: "ef-label" }, "Group name"), titleIn
+  ]));
+  const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
+  const save = h("button", {
+    class: "btn btn-primary",
+    onclick: async () => {
+      const name = titleIn.value.trim();
+      if (!name) { titleIn.focus(); return; }
+      await renamePhaseGroup(groupId, name);
+      closeModal();
+      renderShell();
+      toast("Renamed");
+    }
+  }, "Save");
+  form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, save]));
+  openModal({ title: "Rename group", body: form });
+  setTimeout(() => { titleIn.focus(); titleIn.select(); }, 50);
+}
+
+function openDeletePhaseGroupDialog(groupId) {
+  const groups = effectiveGroups();
+  if (groups.length <= 1) {
+    toast("Can't delete the last group");
+    return;
+  }
+  const grp = groups.find(g => g.id === groupId);
+  const member = groupedPhases().find(gp => gp.group.id === groupId);
+  const phaseCount = (member?.phases || []).length;
+  const form = h("div", { class: "edit-form" });
+  if (phaseCount === 0) {
+    form.appendChild(h("p", { style: "margin: 0 0 12px;" },
+      `Delete "${grp.title}"? It has no phases.`));
+    const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
+    const del = h("button", {
+      class: "btn btn-primary",
+      style: "background: #c0392b; border-color: #c0392b;",
+      onclick: async () => {
+        await deletePhaseGroup(groupId, "move");
+        closeModal();
+        renderShell();
+        toast("Group deleted");
+      }
+    }, "Delete group");
+    form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, del]));
+  } else {
+    form.appendChild(h("p", { style: "margin: 0 0 12px;" },
+      `"${grp.title}" contains ${phaseCount} phase${phaseCount === 1 ? "" : "s"}. What should happen to ${phaseCount === 1 ? "it" : "them"}?`));
+    const fallback = groups.find(g => g.id !== groupId);
+    const moveLabel = fallback ? `Move ${phaseCount === 1 ? "phase" : "phases"} to "${fallback.title}"` : "Move phases";
+    const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
+    const moveBtn = h("button", {
+      class: "btn btn-outline",
+      onclick: async () => {
+        await deletePhaseGroup(groupId, "move");
+        closeModal();
+        renderShell();
+        toast("Group deleted, phases moved");
+      }
+    }, moveLabel);
+    const wipeBtn = h("button", {
+      class: "btn btn-primary",
+      style: "background: #c0392b; border-color: #c0392b;",
+      onclick: async () => {
+        if (!confirm(`Delete the group AND its ${phaseCount} phase${phaseCount === 1 ? "" : "s"}? This cannot be undone.`)) return;
+        await deletePhaseGroup(groupId, "delete-phases");
+        closeModal();
+        renderShell();
+        toast("Group and phases deleted");
+      }
+    }, "Delete group + phases");
+    form.appendChild(h("div", { class: "ef-footer" }, [cancel, h("div", { class: "spacer" }), moveBtn, wipeBtn]));
+  }
+  openModal({ title: "Delete group", body: form });
+}
+
+function openPhaseGroupMenu(x, y, groupId) {
+  hideEventTooltip();
+  const groups = effectiveGroups();
+  const items = [
+    { label: "Add phase…", onClick: () => openNewPhaseDialog(groupId) },
+    { label: "Rename group…", onClick: () => openRenamePhaseGroupDialog(groupId) }
+  ];
+  if (groups.length > 1) {
+    items.push({ sep: true });
+    items.push({ label: "Delete group…", danger: true, onClick: () => openDeletePhaseGroupDialog(groupId) });
+  }
+  showContextMenu(x, y, items);
+}
+
 /* ---------- Hero / header editor ---------- */
 function openHeroEditor() {
   const cur = heroText();
@@ -9626,15 +10043,42 @@ function openNewTaskEditor(opts) {
 /* ---------- Context menu for phases / groups ---------- */
 function openPhaseContextMenu(x, y, phaseId) {
   hideEventTooltip();
-  showContextMenu(x, y, [
-    { label: "Edit phase…", onClick: () => openPhaseEditor(phaseId) },
-    { label: "Add task…", onClick: () => {
-        const p = PHASES.find(x => x.id === phaseId);
-        const firstGroup = p && p.groups[0];
-        openNewTaskEditor({ phaseId, groupId: firstGroup?.id });
-      }
+  const p = effectivePhases().find(x => x.id === phaseId);
+  const isHardcoded = PHASES.some(x => x.id === phaseId);
+  const groups = effectiveGroups();
+  const currentGroupId = p?.groupId || groups[0]?.id;
+  const items = [];
+  if (isHardcoded) items.push({ label: "Edit phase…", onClick: () => openPhaseEditor(phaseId) });
+  items.push({ label: "Add task…", onClick: () => {
+    const firstGroup = p && p.groups[0];
+    openNewTaskEditor({ phaseId, groupId: firstGroup?.id });
+  }});
+  if (groups.length > 1) {
+    items.push({ sep: true });
+    groups.forEach(g => {
+      if (g.id === currentGroupId) return;
+      items.push({
+        label: "Move to: " + g.title,
+        onClick: async () => {
+          STATE.__phaseGroupAssignments = STATE.__phaseGroupAssignments || {};
+          STATE.__phaseGroupAssignments[phaseId] = g.id;
+          await saveState();
+          renderShell();
+          toast("Moved");
+        }
+      });
+    });
+  }
+  items.push({ sep: true });
+  items.push({
+    label: "Delete phase", danger: true, onClick: async () => {
+      if (!confirm("Delete this phase? Tasks under it will no longer appear.")) return;
+      await deletePhase(phaseId);
+      renderShell();
+      toast("Phase deleted");
     }
-  ]);
+  });
+  showContextMenu(x, y, items);
 }
 function openGroupContextMenu(x, y, phaseId, groupId) {
   hideEventTooltip();
@@ -12206,27 +12650,41 @@ function openImportWizard(rows, meta) {
   const footer = h("div", { class: "iw-footer" });
   rerenderFooter = () => {
     footer.innerHTML = "";
-    const totalSelected = rows.filter(r => !r._deleted && r.selected).length;
+    // When the search box has text, "Import" only brings in visible (filtered)
+    // events. From / To / Hide-duplicates also narrow the visible set, so this
+    // honors any active filter, not just text search.
+    const isFiltering = !!(state.search && state.search.trim()) || !!state.from || !!state.to || !!state.hideDupes;
     const visible = getVisible();
+    const totalSelected = rows.filter(r => !r._deleted && r.selected).length;
     const visSelected = visible.filter(r => r.selected).length;
+    const importSet = isFiltering ? visible.filter(r => r.selected) : rows.filter(r => !r._deleted && r.selected);
+    const importCount = importSet.length;
 
     const info = h("div", { class: "iw-footer-info" }, []);
-    info.appendChild(document.createTextNode("Will import: "));
-    info.appendChild(h("strong", {}, String(totalSelected)));
-    info.appendChild(document.createTextNode(` event${totalSelected === 1 ? "" : "s"} · ${visSelected} visible selected`));
+    if (isFiltering) {
+      info.appendChild(document.createTextNode("Will import: "));
+      info.appendChild(h("strong", {}, String(importCount)));
+      info.appendChild(document.createTextNode(` filtered event${importCount === 1 ? "" : "s"} · ${totalSelected} selected total`));
+    } else {
+      info.appendChild(document.createTextNode("Will import: "));
+      info.appendChild(h("strong", {}, String(totalSelected)));
+      info.appendChild(document.createTextNode(` event${totalSelected === 1 ? "" : "s"} · ${visSelected} visible selected`));
+    }
 
     const cancelBtn = h("button", { class: "btn btn-outline" }, "Cancel");
     cancelBtn.addEventListener("click", closeModal);
 
     const repCount = state.matchByTitle
-      ? rows.filter(r => !r._deleted && r.selected && r.isDuplicate).length
+      ? importSet.filter(r => r.isDuplicate).length
       : 0;
     const importLabel = state.matchByTitle && repCount
-      ? `Import ${totalSelected} (${repCount} replace)`
-      : `Import ${totalSelected} event${totalSelected === 1 ? "" : "s"}`;
+      ? `Import ${importCount} (${repCount} replace)`
+      : (isFiltering
+          ? `Import ${importCount} filtered event${importCount === 1 ? "" : "s"}`
+          : `Import ${importCount} event${importCount === 1 ? "" : "s"}`);
     const importBtn = h("button", { class: "btn btn-primary" }, importLabel);
-    if (!totalSelected) importBtn.setAttribute("disabled", "");
-    importBtn.addEventListener("click", () => performImportFromWizard(rows, state.matchByTitle));
+    if (!importCount) importBtn.setAttribute("disabled", "");
+    importBtn.addEventListener("click", () => performImportFromWizard(importSet, state.matchByTitle));
 
     footer.appendChild(info);
     footer.appendChild(h("div", { class: "iw-footer-actions" }, [cancelBtn, importBtn]));
