@@ -5160,7 +5160,7 @@ kbd {
    ============================================================================ */
 const GO_LIVE = "2026-07-13";
 const PAYROLL_FIRST = "2026-07-21";
-const STORAGE_KEY = "wonderful-pt3-tracker-v3";
+const STORAGE_KEY = "wonderful-pt3-tracker-v4";
 
 /* Inline SVG logo — "PLANNER" wordmark with stylized P. Kept as a string
    so it can be injected into the topbar via innerHTML. fill colors are
@@ -5186,9 +5186,9 @@ const LOGO_SVG = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox=
 <path fill="#000000" opacity="1" stroke="none" d="M476.320251,231.078247 C476.308197,241.634354 476.312195,241.513596 465.632446,241.161102 C460.970673,241.007233 458.793396,239.336548 458.722656,234.362579 C458.570801,223.690750 463.366760,220.070755 473.827698,223.439621 C477.835938,224.730438 475.734802,228.128235 476.320251,231.078247 z"/>
 <path fill="#000000" opacity="1" stroke="none" d="M563.272522,236.765778 C563.323181,239.349487 562.555054,240.877136 560.228882,240.942627 C556.406738,241.050232 552.580383,241.084534 548.757080,241.039581 C546.797668,241.016571 545.613708,239.902084 545.697083,237.890244 C545.887756,233.288879 543.654114,227.411346 546.671997,224.430679 C549.687195,221.452667 555.527405,223.921188 560.122742,223.700653 C562.485291,223.587280 563.230042,225.226059 563.243408,227.314194 C563.262512,230.308182 563.269104,233.302231 563.272522,236.765778 z"/>
 </svg>`.replace(/fill="#000000"/g, 'fill="currentColor"');
-const UI_KEY = "wonderful-pt3-ui-v3";
-const LOCK_KEY = "wonderful-pt3-lock-v3";
-const BACKUP_KEY = "wonderful-pt3-last-backup-v3";
+const UI_KEY = "wonderful-pt3-ui-v4";
+const LOCK_KEY = "wonderful-pt3-lock-v4";
+const BACKUP_KEY = "wonderful-pt3-last-backup-v4";
 
 /* ============================================================================
    PHASES & TASKS
@@ -5200,467 +5200,162 @@ const BACKUP_KEY = "wonderful-pt3-last-backup-v3";
    ============================================================================ */
 const PHASES = [
   {
-    id: "p0", num: "00", title: "Discovery & Requirements",
-    window: "Complete · Feb 2026",
-    desc: "Foundation work that preceded this tracker. Left visible so new team members can see what was already agreed to.",
+    id: "p1", num: "01", title: "Scannable Actions",
+    window: "Active development · Launch July 13, 2026",
+    desc: "The architectural spine. Per the April 23 meeting: 'the one thing everything else leans on.' A single barcode selects job + location + check-in in one action. Wonderful has up to ~12 combinations.",
     groups: [
-      { id: "discovery", title: "Pre-Work", tasks: [
-        { id: "d-1", title: "Initial requirements gathering with Wonderful", desc: "FLC model, daily billing cadence, legacy feature inventory.", defaultStatus: "complete" },
-        { id: "d-2", title: "Legacy feature inventory documented", desc: "Catalogued all features Wonderful actively uses in legacy PickTrace: FLC billing model, NPT scripts, barcode bin workflows, scan-based check-in, crew management, and DataTech payroll export.", defaultStatus: "complete" },
-        { id: "d-3", title: "Feature gap analysis produced", desc: "Mapped the legacy feature set against PickTrace 3.0 capabilities to surface everything not yet built — the source of the custom feature list in Phases 03 and 04.", defaultStatus: "complete" },
-        { id: "d-4", title: "Monthly Progress Check cadence established with Wonderful", desc: "Recurring stakeholder check-in aligned around the 6 tracked workstreams. Progress deck (last updated 2/23/26) drives the status entries in Phase 02.", defaultStatus: "complete" },
-        { id: "d-5", title: "Stakeholders identified: Rogelio (Harvesting) + Rosa (Farming & Nursery)", desc: "Both must be involved in future research calls. Both run scripts themselves in legacy, along with their FLCs.", defaultStatus: "complete" }
-      ]}
-    ]
-  },
-  {
-    id: "psync", num: "01", title: "Internal Knowledge Sync with the Team",
-    window: "Apr 2026 · ongoing",
-    desc: "Cross-team debrief cadence to surface newly identified requirements, escalate risks, and align on scope between IM, Delight, VEP, and product. Records of alignment meetings, action items, and scope risks that emerged between discovery and feature dev.",
-    groups: [
-      { id: "apr21-debrief", title: "Apr 21 Onsite Debrief (Gomez / Brewer / Vemprala / Pradhan / Torrez / Martin / Carlos V)", tasks: [
-        { id: "sy-meeting", title: "Hold Apr 21 internal debrief",
-          desc: "Daniel Gomez, Ella Brewer, Chaitanya Vemprala, Sabeen Pradhan, Jackie Torrez, Martin Carlos, Carlos V. Reviewed feedback and operational gaps from on-site visits. Gemini notes archived.",
-          defaultStatus: "complete" },
-        { id: "sy-harrison", title: "Align with Harrison on scope + contract obligations (Thu Apr 23, 2 PM)",
-          desc: "Scheduled w/ Chaitanya, Harrison, Pascal. Walk through all newly identified requirements; confirm what Harrison agreed to during sales. Critical — nothing else unblocks until this.",
-          priority: "priority", urgent: true },
-        { id: "sy-flag-doc", title: "Highlight newly identified requirements in shared Google doc (red / orange)",
-          desc: "Owner: Daniel. Mark every item not originally in the 3.0 roadmap so the team can triage in-scope vs. renegotiated.",
-          defaultStatus: "in_progress", priority: "priority" },
-        { id: "sy-npt-logic", title: "Confirm NPT 18-min insertion logic with Austin / Addison",
-          desc: "Owner: Chaitanya. Answer: is the 18-min insert random, first-hour only, or configurable by interval? Determines how 's-r99' must be built. Feeds into Roelio confirmation.",
-          urgent: true, priority: "priority" },
-        { id: "sy-foreman-loop", title: "Loop Chaitanya + Ella into foreman pay-group production-allocation logic",
-          desc: "Owner: Daniel. CC on internal discussions — today's employee-group model does not cover Austin's legacy foreman allocation script. Need alternatives evaluated before Harrison meeting if possible." },
-        { id: "sy-channel-update", title: "Post Wonderful team channel update after Harrison discussion",
-          desc: "Owner: Daniel. Summarize scope confirmations + gaps for async visibility." },
-        { id: "sy-roelio-email", title: "Email Roelio with outstanding questions after Harrison alignment",
-          desc: "Owner: Daniel. Written confirmation requested on: NPT script logic options (1/2/3/4), 18-min insertion timing, pay-group edit-on-timecard, 3-layer site selection, device lock, same-day attestation, foreman allocation.",
-          priority: "priority" },
-        { id: "sy-roelio-written", title: "Obtain written Roelio confirmation on NPT script logic options",
-          desc: "Ella flagged this as must-have before Delight commits build effort. Need one response capturing NPT / break / lunch insertion logic + configurability expectations." },
-        { id: "sy-risk-gate", title: "Project status gate: mark \"at risk\" if Harrison unconfirmed by Fri Apr 24",
-          desc: "Ella: 8 weeks / 4 sprints left before end-of-June R&D lock. If no Harrison alignment by Friday, project flips to at-risk formally. 24-hour warning. RESOLVED Apr 23: Harrison aligned on schedule — gate satisfied.",
-          defaultStatus: "complete", urgent: true, priority: "priority" }
-      ]},
-      { id: "apr23-harrison", title: "Apr 23 Harrison Alignment — Resolutions (Crew Mgmt Mtg Pt.2)", tasks: [
-        { id: "h-overall", title: "Apr 23 takeaway: most concerns already solved in 3.0, just differently",
-          desc: "Harrison's framing: majority of Wonderful's findings are workflow shifts, not missing features. Two items genuinely require new work before launch: (1) scan actions in kiosk for nursery, (2) crew-leader piece-rate solution. Everything else exists, has a workaround, or is nice-to-have. Hackathon idea floated for complex parts if 7-week window tightens.",
-          defaultStatus: "complete" },
-        { id: "h-sg", title: "Site-group 3-layer DESCOPED — use crew scheduler",
-          desc: "Harrison's call: not building third hierarchy layer. Crew scheduler + site-group search handles it natively. Replaced with dropdown filter (see w-cs-filter).",
-          defaultStatus: "complete" },
-        { id: "h-kiosk", title: "Nursery direction = kiosk mode + scan actions in kiosk",
-          desc: "Harrison's decision (CONTINGENT on verifying nursery doesn't split into multiple crews). NEW SCOPE: scan-actions stream extends from field-app-only to also kiosk. See w-sg / n-devicelock.",
-          defaultStatus: "complete", priority: "priority" },
-        { id: "h-attest", title: "Same-day attestation: launch with barcode workaround",
-          desc: "Sabeen attestation barcodes for launch. Real solution = Pascal kiosk attestations this quarter. Field-app daily-attestation parity → post-launch.",
-          defaultStatus: "complete" },
-        { id: "h-crewleader", title: "Crew-leader piece-rate path: lean toward scheduled-script + employee-title",
-          desc: "Validate with Rogelio Tuesday WITHOUT pitching solution. Sam + Chai + Sabeen to caucus on solution options. See dedicated 'Crew Leader Piece Rate' group below.",
-          defaultStatus: "in_progress", priority: "priority" },
-        { id: "h-paylock", title: "Pay-period locking — solved via existing read-only role",
-          desc: "Rogelio wants only him to lock pay periods; FLCs read-only. Existing role config covers it. One open verification: does export still work under read-only? Carlos found it may not show export option.",
-          defaultStatus: "in_progress" },
-        { id: "h-rep50", title: "Report 50 = EHR multi-tab Excel line-items report",
-          desc: "Harrison reproducing as EHR line-items report. Rogelio accepted: 'as long as you give me the information.' Format may differ from Legacy.",
-          defaultStatus: "in_progress" },
-        { id: "h-mealpen", title: "Meal/rest penalty triggered by attestation = 'No'",
-          desc: "[Owner: Delight] NEW FUNCTIONALITY. Today Delight tracks waiver status but doesn't close loop to warning. If worker answers 'No, I didn't get my break', auto-trigger missed-meal warning → premium eligible. Existing apply-break/meal-penalty buttons exist; expand rule to fire from 'no' attestation. Likely runs through EHR until Delight builds natively." },
-        { id: "h-onboarding", title: "External contractor onboarding — lift dropdown restriction",
-          desc: "[Owner: Convert · code change] Today external contractors don't appear in employer dropdown for one-off hiring. Original assumption (external = separate legal entity) is wrong for Wonderful — all FLCs operate within Wonderful's org. Harrison: 'lift that requirement.' Chai: code change, not huge. Harrison to test and follow up." },
-        { id: "h-doc-report", title: "Onboarding doc upload + missing-doc report",
-          desc: "[Owner: Convert · requires research] Rogelio wants to drop signed arbitration/policy PDFs onto profiles + run report showing which FLC employees are missing docs. PROBLEM: random PDFs have no versioning, so PickTrace can't know WHICH document was uploaded. Bandaid: EHR report grouped by crew with document COUNT (e.g., 'should have 5; this one has 4'). Ideal: Wonderful uses PickTrace's actual onboarding flow (mobile supports it), but they probably won't." },
-        { id: "h-bulk-place", title: "Bulk apply break/meal penalty — page placement TABLED",
-          desc: "[Owner: Delight] Open question: trigger from time-card page (Harrison's preference — see effect immediately) vs payroll page (Chai's preference — matches pay-cycle scope). Tabled; revisit after more Rogelio input.",
-          priority: "priority" },
-        { id: "h-ukg", title: "UKG mapping codes — fully supported",
-          desc: "Setup is more tedious in 3.0 (values live on extension, not entity), but it's a one-time setup. Confirmed feasible.",
-          defaultStatus: "complete" },
-        { id: "h-pruning", title: "Piece accreditation when not harvesting (pruning) — already supported",
-          desc: "Built for OBAM. Wonderful insists on scanning 100+10+3 = 113 trees. Same exact scan loop as today — purely so workers don't do math. NO development needed.",
-          defaultStatus: "complete" }
-      ]},
-      { id: "apr27-prep", title: "Apr 27 Wonderful Prep — Calendar Reset + Leadership Meeting", tasks: [
-        { id: "p27-leadership", title: "Apr 27, 4 PM — Leadership team meeting",
-          desc: "Ella + Chai present timeline, risks, new items to leadership (Damon, C, others). Harrison owns: pay groups + piece rate, kiosk proposal, external contractor onboarding. Strategy: redirect away from solutioning if conversation goes into the weeds; focus on highest-priority/most-critical areas.",
+      { id: "scan-core", title: "Core scan workflow", tasks: [
+        { id: "sa-chain", title: "Chain-of-command barcodes (job + location + check-in)",
+          desc: "[Veeps · Must-have · ACTIVE DEV] Single-scan selects job, location, and check-in in one action. Same barcode used for the whole crew (job/location IDs specific; 'move crew' generic). Pascal/Sabine working out the shortcut approach over the coming weeks.",
           defaultStatus: "in_progress", priority: "priority", urgent: true },
-        { id: "p27-prep-internal", title: "Apr 27, 2:30–3 PM — Internal team prep",
-          desc: "Daniel, Chai, Ella + Maria + Sierra. Review problem statements + open questions to ensure entire crew prepared for Apr 28 external call.",
+        { id: "sa-movecrew", title: "Move crew via single-barcode scan",
+          desc: "[Veeps · Must-have · ACTIVE DEV] Legacy parity: replace today's multi-menu touchscreen flow with single-scan move-crew. Generic barcode (not crew-specific). Included in the scannable actions stream.",
+          defaultStatus: "in_progress", urgent: true },
+        { id: "sa-kiosk", title: "Nursery kiosk locking + scan support in kiosk mode",
+          desc: "[Convert · Must-have · BIGGEST OPEN DESIGN] Kiosk mode prevents workers being moved between crews. NEW SCOPE: scan actions must work in kiosk, not just field app. Contingent on verifying TX nursery doesn't split into multiple crews. CA confirmed no.",
+          defaultStatus: "not_started", urgent: true },
+        { id: "sa-attest", title: "Daily attestations — Legacy-barcode workaround",
+          desc: "[Convert · Must-have · LAUNCH WORKAROUND] Field app doesn't support same-day attestation. Launch with Legacy attestation barcodes; lose the green/red signature indicator on timeline. Real solution: Pascal kiosk attestations this quarter (configurable later — CBCA wants opposite ordering).",
+          defaultStatus: "not_started", urgent: true }
+      ]},
+      { id: "scan-deferred", title: "Deferred / already supported", tasks: [
+        { id: "sa-automove", title: "Auto-move crew on cross-location credit",
+          desc: "[Nice-to-have · POST-LAUNCH] Legacy auto-created a time card for the new location when pieces credited at a different location. Backend feasible but not a launch blocker. Wonderful workaround: scannable Move Crew.",
+          defaultStatus: "not_started" },
+        { id: "sa-pieceacc", title: "Piece accreditation when not harvesting (pruning)",
+          desc: "[Already supported] Built for OBAM. Wonderful's 100 + 10 + 3 = 113-trees scan loop already works — purely so workers don't do math. NO development needed.",
+          defaultStatus: "complete" }
+      ]}
+    ]
+  },
+  {
+    id: "p2", num: "02", title: "Scripts: Legacy Report Replacements",
+    window: "Must-have · Pre-launch",
+    desc: "Replaces Wonderful's preconfigured Legacy scripts (the 'Simple Time Card Adding' family) with 3.0 equivalents. Auto-applies breaks, lunches, and NPT in bulk — Wonderful processes thousands of timecards across multiple business units.",
+    groups: [
+      { id: "scripts-harvest", title: "Harvesting (Rogelio — manual trigger)", tasks: [
+        { id: "rep-6", title: "Report 6 — Break additions (must run before NPT)",
+          desc: "[Delight · Must-have] Adds breaks per 2/4/6-hour rules. Sequencing constraint: must execute before any NPT script. FLCs also run this script.",
+          defaultStatus: "not_started", priority: "priority" },
+        { id: "rep-51", title: "Report 51 — Break removals for issue resolution",
+          desc: "[Delight · Must-have] Removes all breaks. No meal/break penalties for harvest workers. Used to reverse break-insertion issues.",
+          defaultStatus: "not_started" },
+        { id: "rep-99", title: "Report 99 — NPT 18-min for piece work (carrying ladder)",
+          desc: "[Delight · Must-have] 18-min NPT inserted because Wonderful timed the walk with a ladder. Must NOT land after a break, lunch, or other NPT. Apr 23: confirmed ADDITIVE — does not modify start/end times.",
+          defaultStatus: "not_started", priority: "priority", urgent: true },
+        { id: "rep-50", title: "Report 50 — Daily crew timesheet → EHR multi-tab Excel",
+          desc: "[Veeps · Must-have] Replace Legacy's Report 50 (generic data dump) with an EHR line-items report delivered as multi-tab Excel. FLCs bill Wonderful daily from this. Rogelio accepted: 'as long as you give me the information.'",
+          defaultStatus: "not_started", priority: "priority" }
+      ]},
+      { id: "scripts-nursery", title: "Nursery / Farming (Rosa — scheduled Tuesday)", tasks: [
+        { id: "rep-19", title: "Report 19 — Break / lunch penalty (nursery)",
+          desc: "[Delight · Must-have] Applies break and lunch penalties for nursery / farming. Runs for the prior pay period because all timecard punches are audited by Tuesday morning. FLCs also run this.",
+          defaultStatus: "not_started" },
+        { id: "rep-4", title: "Report 4 — NPT 2-min addition (FLC nursery only)",
+          desc: "[Delight · Must-have] Adds 2 min at start of day, FLC employees only. ADDS to total time worked (does NOT cut into shift) — distinguishes it from harvest NPT scripts. Currently runs every Monday for prior pay period. Need both scheduling and ad-hoc trigger; override required when Monday holiday pushes the audit window.",
+          defaultStatus: "not_started", priority: "priority" }
+      ]}
+    ]
+  },
+  {
+    id: "p3", num: "03", title: "Compensation: Crew-Leader Rate, Pay Groups, Penalty Triggers",
+    window: "Must-have — the rate-decoupling workstream",
+    desc: "Per the meeting: 'the crew-leader piece-rate problem is really a rate-decoupling problem.' Legacy let rate live independent of job; 3.0 couples them. The same fix unlocks Wonderful's broader pay-groups ask.",
+    groups: [
+      { id: "comp-rate", title: "Rate decoupling", tasks: [
+        { id: "comp-crewlead", title: "Crew leader piece rate (THE complex one)",
+          desc: "[Delight · Must-have · LARGE LIFT] Foreman clocks into picking-piecework but is paid a different lower rate on the entire crew's output (e.g., $2.25 × 500 bins = $1,125). Leading approach: scheduled script reads employees with title='crew leader', switches their time card job, uses crew schedule's rate. Emit a separate unit type so analytics don't double-count. Acting/temporary crew leader = edit person's title that day (start/end-dated title assignment).",
+          defaultStatus: "not_started", priority: "priority", urgent: true },
+        { id: "comp-paygroups", title: "Pay groups (Wonderful-wide)",
+          desc: "[Unassigned · Must-have · STRATEGIC] Different FLCs paid at different rates; workers crossing counties (Kern↔Tulare) auto-update rate. Office-side only, no device sync. Strategic decision deferred until after Rogelio Tuesday — tied directly to the crew-leader solution. Schedule impact: 6w if alternative accepted, ~10w if full pay groups must be built.",
+          defaultStatus: "not_started", priority: "priority" }
+      ]},
+      { id: "comp-penalties", title: "Penalty automation (Delight)", tasks: [
+        { id: "comp-bulkpen", title: "Bulk apply break / meal penalties",
+          desc: "[Delight · Must-have] Existing functionality, UX placement debated. Wonderful wants no per-employee selection — ideally full pay period. Open: trigger from payroll page (Chai — matches pay-cycle scope) vs time-card page (Harrison — see effect immediately). Tabled.",
+          defaultStatus: "not_started" },
+        { id: "comp-attestpen", title: "Meal / rest penalty trigger when attestation = 'No'",
+          desc: "[Delight · Must-have · NEW FUNCTIONALITY] Today Delight tracks waiver status but doesn't close the loop to the warning. Worker answering 'No' must trigger missed-meal warning → premium eligibility. Verify with Delight.",
+          defaultStatus: "not_started" }
+      ]}
+    ]
+  },
+  {
+    id: "p4", num: "04", title: "Onboarding & Permissions",
+    window: "Must-have / Already exists",
+    desc: "Document handling for FLC onboarding plus the role-config solution for pay-period locking.",
+    groups: [
+      { id: "onb-docs", title: "Documents", tasks: [
+        { id: "onb-upload", title: "Onboarding doc upload + missing-doc report",
+          desc: "[Convert · Must-have · needs Pascal] Upload supported. Missing-doc report is the ask. PDFs have no versioning, so Harrison's bandaid is an EHR report grouped by crew showing document COUNT per employee ('should have 5; this one has 4'). Ideal path: convince Wonderful to use PickTrace's onboarding flow (mobile now supports it).",
+          defaultStatus: "not_started" },
+        { id: "onb-extcontract", title: "External contractor onboarding",
+          desc: "[Convert · Must-have · CODE CHANGE] Today external contractors don't appear in the employer dropdown for one-off hiring. Original assumption (separate legal entity) is wrong for Wonderful — all FLCs operate within Wonderful's org. Harrison: 'lift that requirement.' Chai: requires a code change.",
+          defaultStatus: "not_started" }
+      ]},
+      { id: "onb-perms", title: "Permissions", tasks: [
+        { id: "onb-paylock", title: "Pay-period locking permissions",
+          desc: "[Already exists · EASY WIN] Solved by existing role configuration: give FLCs read on payroll (locking is a write permission). Confirm export still works under read-only; small additional permission may be needed.",
+          defaultStatus: "complete" }
+      ]}
+    ]
+  },
+  {
+    id: "p5", num: "05", title: "Nice-to-Have / Post-Launch",
+    window: "Deferrable",
+    desc: "Real value but not launch-blocking. Revisit after July 13 go-live.",
+    groups: [
+      { id: "nice-all", title: "Nice-to-have items", tasks: [
+        { id: "nice-printout", title: "Crew summary printout with signature fields",
+          desc: "[Veeps · Nice-to-have] Printout of clocked-in workers for headcount reconciliation. Harrison's proposal: add two signature fields to the existing print-device-summary; same form serves Sun Pacific's release-form use case. Supportable but not currently on the radar.",
+          defaultStatus: "not_started" },
+        { id: "nice-sitegroup", title: "Site-group filtering on crew schedules",
+          desc: "[Unassigned · Nice-to-have] Let admins search the crew-scheduling page by site group instead of picking ranches one by one. Hold the line: 'you schedule once, the device is locked, this is better than per-device toggling.'",
+          defaultStatus: "not_started" }
+      ]}
+    ]
+  },
+  {
+    id: "p6", num: "06", title: "Open Questions for Rogelio (Tuesday)",
+    window: "Verification only — no solutions yet",
+    desc: "Per Harrison: 'Don't present solutions — only questions.' Rogelio is logical but reflexively rejects anything framed as 'different from Legacy' if it arrives as a decision rather than as validated verification.",
+    groups: [
+      { id: "q-tuesday", title: "Tuesday checkpoint (validation questions)", tasks: [
+        { id: "q-tx-crews", title: "Does Wonderful use crews in the Texas nursery?",
+          desc: "California confirmed no. If TX also operates as a single crew, the field app suffices and the kiosk effort disappears. If they split into crews, nursery hardware must move from C66 scanners to tablets in kiosk mode — main risk is convincing Rogelio and Rosa.",
+          defaultStatus: "not_started", urgent: true, priority: "priority" },
+        { id: "q-rate-stable", title: "Does the crew-leader piece rate change across the harvest cycle?",
+          desc: "Scan of Legacy suggests no — $2.25/bin appears stable. Confirm with Rogelio. Answer determines whether the comp model needs tiered handling or a single value.",
+          defaultStatus: "not_started", urgent: true },
+        { id: "q-bulk-trigger", title: "Bulk break/meal penalty trigger — time-card page or payroll page?",
+          desc: "Chai prefers payroll page (matches pay-cycle scope). Harrison prefers time-card page (see effect immediately). Tabled until Rogelio decides.",
+          defaultStatus: "not_started" },
+        { id: "q-bundle", title: "Do FLCs use a single work bundle for crew-leader time cards?",
+          desc: "Required to simplify the scheduled-script approach for crew-leader rate.",
+          defaultStatus: "not_started" },
+        { id: "q-onboarding", title: "Will Wonderful adopt PickTrace onboarding instead of raw PDFs?",
+          desc: "Mobile now supports PickTrace onboarding — would solve the missing-doc-report problem (no random-PDF versioning issue). Probably won't accept, but ask.",
+          defaultStatus: "not_started" }
+      ]},
+      { id: "q-scripts", title: "Consolidated script questions (Problem Synthesis)", tasks: [
+        { id: "q-script-list", title: "Confirm full list of Legacy scripts in scope",
+          desc: "Working list: Reports 6, 51, 99, 50 (harvest); 19, 4 (nursery). Verify nothing else is in active use. Daniel suspects more reports may surface.",
+          defaultStatus: "not_started" },
+        { id: "q-npt-misc-add-cut", title: "Engineering spike: 'NPT Miscellaneous' logic + add-vs-cut behavior",
+          desc: "Schedule with Jorge (TSS) to walk through Legacy scripts. Goal: figure out NPT Misc rules/configurations AND verify which scripts add to total time (Report 4) vs cut into existing hours (everything else). Verify Legacy supports both modes natively.",
+          defaultStatus: "not_started", priority: "priority" },
+        { id: "q-org-mapping", title: "Legacy servers → 3.0 organizations / employee groups",
+          desc: "How Wonderful Citrus Farming, Wonderful Texas, and FLC Employee Server map into 3.0 orgs. In progress with Daniel + Shane + Rogelio. Drives how each script scopes its target population.",
           defaultStatus: "in_progress" },
-        { id: "p27-prep-leadership", title: "Apr 27, 3–4 PM — Leadership meeting prep",
-          desc: "Ella drafts message to Harrison (he has 30-min window 2:30–3) confirming his speaking points: pay groups + piece rate, kiosk proposal, external contractor onboarding.",
-          defaultStatus: "in_progress" },
-        { id: "p28-precall", title: "Apr 28, 12 PM — Pre-call internal alignment",
-          desc: "Daniel + team + Maria + Sierra. Lock plan based on Apr 27 leadership outcomes. Compile open questions for 1 PM external call." },
-        { id: "p28-external", title: "Apr 28, 1 PM — Wonderful external call (RECONFIGURED to discovery)",
-          desc: "PIVOT from kickoff/training to discovery / answering open questions. Harrison opens with pay groups + kiosk + external contractor onboarding. Goal: complete all open questions today; if not, schedule async/email follow-up this week. Don't pitch solutions — only validation questions (Harrison's read: Rogelio reflexively rejects 'different from Legacy' if framed as a decision).",
-          urgent: true, priority: "priority" },
-        { id: "p29-or-may1-kickoff", title: "Apr 29 or May 1 — Standard product kickoff/demo",
-          desc: "Daniel reschedules the postponed kickoff: walk Rogelio + Rosa through 3.0 features (orgs, users page, sites). Pure overview, deferred from Apr 28." },
-        { id: "p-may4-design", title: "Week of May 4 — Internal design/solutioning week begins",
-          desc: "Sit down to design based on Apr 28/29 answers. Send mockups to Wonderful asynchronously midweek to validate filters + flow before dev kickoff." },
-        { id: "p27-risk-pg", title: "Risk: Pay-groups decision drives 6w vs 10w timeline",
-          desc: "Chai: 6 weeks deliverable if alternative accepted; ~10 weeks if full pay groups required (impacts break calc, precedence logic, daily rate history, hourly+piece). Highlighted in leadership meeting.",
-          urgent: true, priority: "priority" },
-        { id: "p27-risk-tester", title: "Risk: Maria sole tester for both Convert + Delight scope",
-          desc: "Ella: capacity risk in tight 7-week window. Matthew can be looped in but must come in early — last-minute handoff won't work. Highlighted in leadership meeting.",
-          urgent: true },
-        { id: "p27-risk-kiosk", title: "Risk: Nursery hardware shift acceptance",
-          desc: "Moving nursery from C66 scanners to kiosk tablets is a major change for Rosa. Daniel told Harrison: 'huge lift to get them to agree.' Shane noted contract has them paying for scanners — switching to tablets affects contract terms." },
-        { id: "p27-risk-more", title: "Risk: more requirements will surface as Wonderful sees the product",
-          desc: "Daniel: checkout-on-same-page-as-checkin example surfaced post-debrief; expect more after Apr 28. Continue investing resources until clear pay-groups indication." }
-      ]}
-    ]
-  },
-  {
-    id: "p1", num: "02", title: "Feature Development — Core",
-    window: "Feb – Jun 2026",
-    desc: "The six tracked workstreams from the Monthly Progress Check deck. These are PickTrace product features being built.",
-    groups: [
-      { id: "track-a", title: "Tracked workstreams", tasks: [
-        { id: "f-sb", title: "Scanning Barcodes (chain-command barcodes)", desc: "[Owner: Veeps · Must-have · ACTIVE DEV] Architectural spine — single barcode selects job + location + check-in in one action. Wonderful has ~12 combinations. Same barcode used for everyone in the crew (job ID + location ID specific; 'move crew' generic). Apr 23: confirmed scan actions must work in BOTH field app AND kiosk (new scope expansion for nursery). Pascal/Sabeen still finalizing shortcut approach." },
-        { id: "f-dob", title: "DoB Update for Hiring", desc: "Understanding implications of removing DoB requirement. Dev expected to start April. Wonderful wants DoB removed from in-field hiring." },
-        { id: "f-bp", title: "Bulk Actions: Break Penalty Premium", desc: "Released before this tracker's scope window. Bulk timecard tool for inserting break penalty premiums is live in PickTrace 3.0.", defaultStatus: "complete" },
-        { id: "f-bl", title: "Bulk Actions: Add Break / Lunch", desc: "[Owner: Delight · Must-have] Bulk action to insert breaks and lunches across multiple timecards. Ordering matters — breaks must be added before NPT (see Report 6, task s-r6). Apr 23: confirmed CA-law driven (4th/6th hour for 8h shift), auto-applies based on hours worked — no manual per-employee selection. Three predefined rule options needed: (1) breaks AND lunches, (2) lunches only, (3) breaks only. In planning." },
-        { id: "f-nb", title: "Bulk Actions: NPT Bulk Actions", desc: "[Owner: Delight · Must-have] Discovery. Wonderful wants manual-trigger control for harvesting; Rosa wants schedule-triggered for nursery (Tuesday AM). Apr 21 debrief: scope aligned with Delight — bulk insert NPT, breaks, lunches to replicate legacy. Apr 23: Chai favors scheduled-reports model — configure once, run nightly at 11pm.", defaultStatus: "in_progress" },
-        { id: "f-qc", title: "QC Tracking & Reporting", desc: "Standalone QC app, additional tracked variables, photos on records (future). Dev starts late March." },
-        { id: "f-rep", title: "Reporting Templates & Recreation", desc: "Wonderful has custom calculated fields in legacy reports. Recreation begins earlier than typical implementation. Requires data in system first." },
-        { id: "f-ukg", title: "UKG Integration", desc: "FTP integration overhaul. Needs feature flag for daily import." }
-      ]}
-    ]
-  },
-  {
-    id: "p2", num: "03", title: "Feature Development — Wonderful-Specific",
-    window: "Mar – Jun 2026",
-    desc: "Features that exist in legacy but not in 3.0 — these must be built or explicitly negotiated away with Wonderful's written consent.",
-    groups: [
-      { id: "harvest", title: "Harvesting (Rogelio)", tasks: [
-        { id: "w-ftl", title: "Follow-the-Leader crew attribution", desc: "Crew badge scanned, then follow-the-leader crew scans groups all employees. Crew ID must not appear on reports — needs 'report ignore' flag." },
-        { id: "w-bb", title: "Barcode Bin workflow — multi-scan attribution", desc: "[Owner: Veeps · Must-have] Auto-generated barcodes, rolls don't work because they use new bins. When paying per tree with dropped fruit, they scan multiple times (e.g., 100+10+2 = 112 then employer ID) to accredit pieces. Apr 21: Sabeen confirmed work not started — blocker is how client generates these barcodes; field-app side straightforward.", urgent: true },
-        { id: "w-rescan", title: "Ability to scan barcode to print active employees / crew summary", desc: "Preference is to scan a barcode to trigger print." },
-        { id: "w-cl", title: "Crew leader piece-accreditation ($2.25/bin) — see Phase 03 'Crew Leader Piece Rate' group for design", desc: "[Owner: Delight · Must-have · MAJOR DESIGN] Crew leader auto-accredited per what the crew did. Today $2.25 per bin. Apr 23: identified as the central rate-decoupling problem (same shape as pay groups). See dedicated 'Crew Leader Piece Rate' group below for design candidates. Mechanics need their own scanners." },
-        { id: "w-moveckpt", title: "Auto-checkpoint creation on location change", desc: "[Nice-to-have · POST-LAUNCH] When someone scans a barcode bin at a different location, auto-create a new checkpoint (timecard) for that employee indicating a move. Replaces follow-the-leader / move-the-crew. Apr 23: descoped to nice-to-have — every Legacy-migrating customer has complained about losing this; device-side is hard, backend-only feasible. Workaround for Wonderful: use Move Crew (which IS scannable). NOT a launch blocker." },
-        { id: "w-pickup", title: "Pick-up multiplier (scan 2x/3x/4x to claim %)", desc: "Rare: when someone picks up where someone left off, they scan the picker-up barcode multiple times to claim that percentage of the piece." },
-        { id: "w-sg", title: "Site Groups — 3-layer location (DESCOPED Apr 23)", desc: "[Owner: descoped → crew scheduler · Apr 23 RESOLUTION] NOT building third hierarchy layer. Harrison's call: Legacy 3-layer is a remnant of pre-crew-scheduler device scoping. In 3.0, crew scheduler + site-group search handles this natively — device gets scheduled to specific ranches in a county and is locked. Replaced with a county/ranch dropdown filter on crew scheduler page (see nice-to-have task w-cs-filter). Hold the line: 'schedule once, device is locked, this is better than per-device toggling.'", defaultStatus: "complete" },
-        { id: "w-cs", title: "Crew Scheduler (range-open + block flexibility)", desc: "Leave range open in crew scheduler. Wonderful dislikes the current open-ended behavior where any employee can work in any block any ranch. Needs validation.", priority: "priority" },
-        { id: "w-cs-filter", title: "Crew Scheduler — site-group/county/ranch dropdown filter", desc: "[Owner: Unassigned · Nice-to-have] Replacement for descoped 3-layer site group (w-sg). Add dropdown filter on crew-scheduling page so admins can search by site group / county / ranch instead of picking ranches one-by-one. Small enhancement, not a new hierarchy." },
-        { id: "w-print-sig", title: "Crew summary printout with signature fields", desc: "[Owner: Veeps · Nice-to-have] Apr 23: Harrison's proposal — printout of who is clocked in so crew counters can reconcile headcount. Add two signature fields to existing print-device-summary; same change also serves Sun Pacific release-form use case. Supportable but not currently on the radar." },
-        { id: "w-lock", title: "Locking devices to contractor/employer", desc: "Must lock devices so they can only be used by one contractor." },
-        { id: "w-delete-badge", title: "Badge to delete last production record (up to 5 at once)", desc: "Scan barcode up to 5 times to delete up to 5 prior production records." }
-      ]},
-      { id: "nursery-shop", title: "Nursery & Shop (Rosa)", tasks: [
-        { id: "n-clock", title: "Clock into Activity/Job (not Location) for Nursery", desc: "Nursery employees don't clock into location, they clock into activity/job. No 'Block' field — it's called 'Project'. They cannot change Ranch." },
-        { id: "n-scan", title: "Single-scan combined location + activity", desc: "One ADM scan writes ubicación and actividad simultaneously — critical UX requirement. Today they scan yellow barcode + white barcode; goal is single-scan." },
-        { id: "n-letters", title: "Quick letter filter instead of search bar", desc: "They use a letter-bucket filter (A, B, C...) instead of free-text search. Required for their workflow." },
-        { id: "n-overnight", title: "Overnight activity clear", desc: "Activity currently stays in system overnight and doesn't clear — allows employees to scan into the wrong job the next day. Needs overnight clear + require scan before clocking in." },
-        { id: "n-mech", title: "Mechanics' own scanner — change activity from field", desc: "Mechanics need their own scanner to track their owners and change activity from the field." },
-        { id: "n-devicelock", title: "Nursery device locking — kiosk mode (Apr 23 resolution)", desc: "[Owner: Convert · Must-have · BIGGEST OPEN DESIGN Q] Apr 23 decision: solve via kiosk mode + chain-command barcodes encoding both job and location. Single scan selects both; device in kiosk prevents worker getting moved between crews. NEW SCOPE: scan-actions stream must extend to kiosk (currently planned only for field app). HINGE QUESTION: Do they use crews in nursery in CA and TX? CA confirmed no. If single-crew everywhere, field app suffices and kiosk effort disappears. Else: hardware shift from C66 scanners to tablets — main risk is convincing Rogelio/Rosa.", urgent: true },
-        { id: "n-breaks", title: "Break as NPT with scan-out + scan-in", desc: "Breaks are on one kiosk and are NPT even though it's hourly work. They scan NPT to clock out, then re-scan to return. 15 min max. The 2 minutes walking from house = NPT even though it's hourly time." },
-        { id: "n-attest", title: "Same-day attestation — barcode workaround for launch", desc: "[Owner: Convert · Must-have · LAUNCH WORKAROUND] Wonderful wants daily attestations BEFORE clocking out (3.0 today is previous-day). Apr 23 decision: launch with Legacy-style attestation barcodes (Sabeen's). Lose green/red signature indicator on timeline only — keep everything else. Real solution: Pascal/Convert's kiosk attestations starting this quarter. CBCA wants opposite ordering (audit then sign), so the ordering will be configurable later. Field-app daily-attestation parity goes to post-launch list.", urgent: true },
-        { id: "n-pieces", title: "Pieces — lead-entered via their own device", desc: "Green piece job: lead tracks how many beds each employee did and enters the amount into their own device. Leads need their own scanner for price tracking." }
-      ]},
-      { id: "crew-leader-rate", title: "Crew Leader / Foreman Piece Rate (THE complex one — Apr 23)", tasks: [
-        { id: "cl-problem", title: "Problem statement: rate-decoupling",
-          desc: "[Owner: Delight · Must-have · LARGE LIFT] Foreman clocks into same 'picking piecework' job as everyone else but is paid at a different, lower piece rate on entire crew's output (e.g., $2.25/bin × 500 bins = $1,125). Same shape as broader pay-groups problem — Legacy lets rate live independent of job; 3.0 couples them. Clean fix here is the same fix that solves pay groups." },
-        { id: "cl-design-1", title: "Design candidate 1: Default piece rate field on compensation",
-          desc: "Mirrors existing 'default job' field on employee compensation. Simple. Limitation: one value only, no tiered handling." },
-        { id: "cl-design-2", title: "Design candidate 2: Scheduled script keyed to employee title (LEADING)",
-          desc: "[CURRENT LEADING CANDIDATE] Nightly script reads every employee whose title is 'crew leader', switches their timecard job to crew leader, pulls rate from crew schedule (or compensation). Preserves editability after the fact. Acting/temporary crew leader = edit person's title that day (start/end-dated title assignment on profile)." },
-        { id: "cl-design-3", title: "Design candidate 3: Crew schedule holds the crew-leader piece rate",
-          desc: "Chai's preferred placement. Assignment then flows from title. Variant of candidate 2." },
-        { id: "cl-acting", title: "Acting/temporary crew leader handling",
-          desc: "Edit person's title for that day — either via employee profile or via start/end-dated title assignment. Rate automatically expires when title ends." },
-        { id: "cl-analytics", title: "Analytics: don't double-count pieces",
-          desc: "Probably emit a SEPARATE unit type (e.g., 'pieces' vs 'bins') so reports can exclude foreman-allocated pieces from crew totals. No checkpoint needed — they already have a timecard; just add pieces against their default job." },
-        { id: "cl-rogelio-validate", title: "Apr 28/29 — Validate with Rogelio (questions only, no solution pitch)",
-          desc: "Q1: Does crew-leader piece rate ever change mid-season? (Legacy scan suggests no — $2.25 stable.) Q2: Confirm whether FLCs use a single work bundle for crew-leader timecards (required to simplify the script). Q3: Definition of 'crew worker' vs 'nursery contract employee' (Rosa). Sam + Chai + Sabeen to caucus before pitching anything.",
-          priority: "priority", urgent: true }
-      ]},
-      { id: "cross", title: "Cross-cutting", tasks: [
-        { id: "x-kiosk-locked", title: "Kiosk job/location locked per device", desc: "In-house jobs on kiosk stay the same per device (locked). Managed through office-side Devices page." },
-        { id: "x-tabbed", title: "Clock in/out as toggle tabs on same screen", desc: "Not separate screens — single screen with tab toggle." },
-        { id: "x-nolunch", title: "No automatic lunch (they don't stop)", desc: "Harvest workers don't take a lunch even if they go over 6 hours. System must not auto-insert lunch." },
-        { id: "x-live-lunch", title: "Keep live lunches (no delayed)", desc: "They want to keep live lunches." },
-        { id: "x-docs", title: "Document storage on employee profiles", desc: "Upload file into someone's org profile (arbitration agreements, meal waivers) with metadata: uploaded/created/signed/completed dates. Currently on a flash drive. Need a report for who has/hasn't signed." },
-        { id: "x-modifiers", title: "Crop modifiers / pack styles discussion", desc: "Wonderful doesn't like setting up piece rates per location. Introduce pack styles? They may not want it while working in bins. Consider open-ended piece rates.", priority: "priority" },
-        { id: "x-crew-summary", title: "Crew summary page — limited permissions", desc: "Device users CAN see timecard data on crew summary, but CANNOT access individual employee profiles or personal info. Today crew summary is binary on/off — need more granular permission." },
-        { id: "x-h2a", title: "H2A Employee support", desc: "H2A employees (H2A Employee, H2A Foreman, H2A Forklift, H2A Row Boss, H2A Bus Driver) appear in Pay Groups test tracker. Confirm with Harrison if these are contractually required." }
-      ]}
-    ]
-  },
-  {
-    id: "p3", num: "04", title: "NPT Scripts Inventory & Implementation",
-    window: "Apr – Jun 2026",
-    desc: "From the April 15 Delight Grooming call: Wonderful runs six scripts in legacy that must be supported in 3.0. Rogelio owns Harvesting scripts. Rosa owns Nursery/Farming scripts. Each script has different targeting, scheduling, and insertion-vs-extension behavior.",
-    groups: [
-      { id: "scripts-harvest", title: "Harvesting (Rogelio — manual trigger preferred)", tasks: [
-        { id: "s-r6", title: "Report 6 — Add Breaks First (before NPT)", desc: "Breaks must be added before NPT is added. Ordering matters. FLCs also run this script.", priority: "priority" },
-        { id: "s-r51", title: "Report 51 — Break Removals", desc: "For when there are break-insertion issues and they need to reverse.", priority: "priority" },
-        { id: "s-r99", title: "Report 99 — NPT Script for PW (18 minutes for carrying ladder)", desc: "[Owner: Delight · Must-have] Carrying a ladder = 18 min NPT on piecework shifts (Wonderful timed the walk). Apr 23: Harrison clarified placement is start-of-day or end-of-day per script CONFIG (NOT random as appeared in Legacy). Apr 23: confirmed ADDITIVE (does not modify start/end times) — does not cut into existing shift. Both adjust-vs-add modes still required across script suite. Need Rogelio written confirmation on exact rules.", priority: "priority", urgent: true },
-        { id: "s-r50", title: "Report 50 — Daily Crew Timesheet report", desc: "FLCs bill Wonderful daily from this report. Cannot go live without it. See the sample workbook for exact format.", priority: "priority" }
-      ]},
-      { id: "scripts-nursery", title: "Nursery / Farming (Rosa — scheduled every Tuesday morning)", tasks: [
-        { id: "s-r19", title: "Report 19 — Break/Lunch Penalty (Nursery)", desc: "Runs for prior pay period because all timecard punches will be audited by then. FLCs also run this." },
-        { id: "s-r4", title: "Report 4 — NPT 2-min Addition (FLC Employees ONLY — Nursery)", desc: "Applies ONLY to a specific FLC whose employees are the only ones receiving 2 minutes. EXTENDS time (adds to total) — does not insert within existing hours. This distinguishes it from the harvesting NPT scripts." }
-      ]},
-      { id: "scripts-architecture", title: "Bulk Scripts Architecture (Delight Problem Synthesis)", tasks: [
-        { id: "ba-core", title: "Core problem: Legacy preconfigured scripts → 3.0 has none",
-          desc: "[Owner: Delight] Wonderful processes thousands of timecards across multiple business units. Legacy office users run preconfigured scripts ('Simple Time Card Adding') to apply breaks/lunches/NPT in bulk with different rules per org section. In 3.0, none of that exists — users are stuck doing it manually card-by-card. User intent: fewest clicks/manual work to achieve results.",
-          priority: "priority" },
-        { id: "ba-multi-server", title: "Multi-server org mapping (Wonderful Citrus Farming / Texas / FLC Employee Server)",
-          desc: "Wonderful's org spans multiple Legacy servers, each with different scripts. How they map to 3.0 organizations/employee groups is being decided by Daniel + Shane + Rogelio.",
-          defaultStatus: "in_progress" },
-        { id: "ba-bl-rules", title: "Breaks & Lunches: rule-based bulk insertion",
-          desc: "Three predefined rule options (farming vs citrus differ): (1) breaks AND lunches, (2) lunches only, (3) breaks only. Auto-calc on hours worked thresholds — 4hr/6hr/8hr logic keyed to shift start time. Flexible date range: weekly for standard payroll, daily for harvest piecework." },
-        { id: "ba-npt-groups", title: "NPT — different rules per employee group",
-          desc: "Crew workers (Rosa) = 1 min, beginning of day, rarely changes. Nursery contract employees (Rosa) = 2 min, beginning of day, rarely changes. Harvesting crews (Rogelio) = varies / 'NPT Misc', placement unknown — needs investigation. Irrigators = N/A (hourly, exact time tracked). 'Group' may be defined by crew, employer, or employee classification." },
-        { id: "ba-npt-modes", title: "NPT two coexisting modes: automated/bulk + manual/scan",
-          desc: "Automated/bulk = office user triggers a rule applying NPT to many timecards (Delight focus). Manual/scan-based = employee scans into NPT via barcode chain commands (Veeps focus). Separate streams but must coexist." },
-        { id: "ba-presets", title: "Saved presets (configure once, reuse)",
-          desc: "Legacy has saved filters. In 3.0 today, users would re-enter all criteria each run. For weekly (or daily for harvest) operations this is repetitive and error-prone. Need named, reusable rule + filter presets." },
-        { id: "ba-targeting", title: "Employee targeting: multi-dimensional",
-          desc: "By employer/contractor; by crew; by employee classification (crew workers vs nursery contract vs irrigators); by org (Legacy server → 3.0 org mapping)." },
-        { id: "ba-edges", title: "Edge cases to investigate",
-          desc: "Meal-penalty calc interactions with auto-inserted breaks/lunches; contiguous overnight shifts (3.0 already has automatic midnight-split — must not conflict); existing 'add static duration jobs' bulk tools (relationship to new rule-based automation); checkpoint overlaps (NPT is implemented as checkpoints — auto-creation must not create conflicts)." },
-        { id: "ba-spike-npt-misc", title: "Engineering spike: investigate Legacy 'Simple Time Card Adding' + 'NPT Miscellaneous'",
-          desc: "Schedule with Jorge (TSS) to walk through Legacy scripts. Goal: figure out 'NPT Misc' logic — what rules, when leveraged, what configurations exist. Required input for 3.0 design.",
-          priority: "priority" }
-      ]},
-      { id: "scripts-plat", title: "Platform work", tasks: [
-        { id: "sp-trigger", title: "Trigger model: manual for harvesting, schedule-override-capable for nursery", desc: "Rogelio: retain manual control. Rosa: scheduled every Tuesday morning, with ability to override when a Holiday lands on Monday (results in auditing the prior Sunday)." },
-        { id: "sp-target", title: "Script targeting: by FLC / by crew / by individual", desc: "Rosa targets by FLC (only one specific FLC gets 2-min script). Need targeting by crew, by employer, and by individual employee. Confirm definition of 'crew employee' with Rosa." },
-        { id: "sp-ext", title: "Insertion-vs-Extension (Add vs Cut) toggle per script", desc: "[Owner: Delight · Must-have · PAYROLL-CRITICAL] Apr 23: BOTH MODES CONFIRMED REQUIRED. Harvest 18-min NPT = adjusted within shift (cut into). Farming 2-min NPT = added on top (8h becomes 8h02m). Current 3.0 only does cut-into. Open: not yet validated whether Legacy supports both modes natively or via separate scripts. Directly affects payroll calculations.", priority: "priority", urgent: true },
-        { id: "sp-backfill", title: "Backfill limits: current (unpaid) pay period only", desc: "Yes to backfill, but only the current pay period that has not yet been paid. No further back." },
-        { id: "sp-meal", title: "Edge case: meal penalty interactions with NPT", desc: "Wonderful to revisit in a follow-up. Open question." },
-        { id: "sp-preset", title: "Saved filter presets + pay-period quick filter on time cards", desc: "Team alignment from April 15: approach includes crew-level config, scheduled background jobs, saved filter presets, and a pay-period quick filter." },
-        { id: "sp-jorge", title: "Schedule time with Jorge (TSS) to investigate legacy script + NPT Misc logic", desc: "Action item from April 15 meeting." }
-      ]}
-    ]
-  },
-  {
-    id: "p4", num: "05", title: "Configuration & Data Setup",
-    window: "Jun 2026",
-    desc: "DataTech payroll integration setup, ALT IDs, crop IDs, job codes, and the Reporting Time Pay wiring from image001.",
-    groups: [
-      { id: "datatech", title: "DataTech integration", tasks: [
-        { id: "c-alt", title: "Import ALT IDs for all employees", desc: "Every employee in PickTrace must have their DataTech-assigned employee number in the ALT ID field. Edit profile → add → save. Step 1 of the DataTech Import SOP.", priority: "priority" },
-        { id: "c-grower", title: "Configure Grower ID = 500", desc: "Wonderful's Grower ID in DataTech." },
-        { id: "c-crops", title: "Configure Crop IDs: Oranges 2000, Lemons 2001, Mandarins 2002, Clementines 2003, Minneola 2004, Grapefruit 2005", desc: "Verify that Cost Center = Crop ID is acceptable to Wonderful. Today in 3.0 Cost Center can be Crop ID but this needs explicit sign-off." },
-        { id: "c-jobs", title: "Configure Job codes: 4000-4023, 4050", desc: "Foreman 4000, Assistant 4001, Picking 4002, Dropping Fruit 4003, Forklift 4004, Tractor 4005, Hauling 4006, NPT-Training 4007, NPT-Switching 4008, R&R 4009, NPT-Wait 4010, Drenching 4011, Hourly Picking 4012, Reporting Time Pay 4022, NPT Misc 4020, Block Change 4021, QC 4023, Malla 4050, Bus Driving 4015 (test tracker only — needs DataTech confirmation). Lluvia (show-up/rain pay) code TBD — confirm if same as 4022 or separate." },
-        { id: "c-rtp", title: "Reporting Time Pay (Job 4022) — wire PHASE1/RH/OT/DT", desc: "Per the Jobs screenshot: PHASE1=4022; RH=wcRT; OT=wcRTOT; DT=wcRTDT. Site = MASTER EMPLOYEES & JOBS. Rate = 0. Required to avoid the 'letters in numbers field' error in DataTech when half-day show-up pay is paid (common on rain days).", priority: "priority" },
-        { id: "c-wage", title: "Configure Wage Types: RH, OT, DT, PW, PO, PD, SA, BO, GP", desc: "Regular Hourly / Overtime / Double-time for hourly and piecework, plus Salary, Bonus, Guaranteed Piecework." },
-        { id: "c-flag", title: "Turn on feature flag: daily import", desc: "Enable the daily import feature flag in the account config." },
-        { id: "c-map", title: "Map payroll when mapping job alt ID / site alt ID", desc: "Ability to map out-out payroll whenever you map out job alt ID, site alt ID, etc. — so it auto-flows to payroll." }
-      ]},
-      { id: "copy-legacy", title: "Copy from Legacy (one-time)", tasks: [
-        { id: "c-copy-nj", title: "Copy Nursery/Shop: Jobs, Sites, Locations", desc: "Required because Shop + Harvest go live at the same time." },
-        { id: "c-copy-h", title: "Copy Harvesting: Jobs", desc: "Harvesting uses blocks not projects, so locations are different." },
-        { id: "c-pg", title: "Pay Groups (Wonderful-wide rate-decoupling) — DECISION DEFERRED", desc: "[Owner: UNASSIGNED · Must-have · BIGGEST UNKNOWN] Wonderful uses pay groups broadly: different FLCs at different rates; workers moving between counties (Kern↔Tulare) have pay group switched so rate auto-updates. Apr 23: office-side only, does NOT sync to device. Tied directly to crew-leader piece-rate (both = rate-decoupling problem — Legacy lets rate live independent of job; 3.0 couples them). Harrison: pay groups 'would solve a lot of issues really quickly.' Decision deferred until after Apr 28/29 Rogelio call. SCHEDULE IMPACT: 6 weeks if alternative accepted (employee compensation + title-driven script); ~10 weeks if full pay groups must be built. Apr 27 prep: Harrison owns this topic in leadership meeting + Wonderful call.", priority: "priority", urgent: true }
-      ]}
-    ]
-  },
-  {
-    id: "p5", num: "06", title: "Testing & UAT",
-    window: "Jun – early Jul 2026",
-    desc: "131 tests across 16 modules from the Test Execution Tracker. Rogelio is the primary tester for many check-in and job scenarios. Must pass before parallel payroll run.",
-    groups: [
-      { id: "uat-large", title: "Large modules (plan dedicated sessions)", tasks: [
-        { id: "t-jobs", title: "Jobs — 17 tests", desc: "Jobs create/edit/expire, site mapping, pay group interaction, piece rate config." },
-        { id: "t-ts", title: "Timesheet — 17 tests", desc: "Timecard create/edit, bulk actions, attestation, meal penalty, script behavior." },
-        { id: "t-reports", title: "Reports — 13 tests", desc: "Data Dump parity, Daily Crew Timesheet, Report 68 (payroll export), custom calculated fields." },
-        { id: "t-pg", title: "Pay Groups — 13 tests", desc: "Rate overrides, per-day overrides, device/location binding." }
-      ]},
-      { id: "uat-med", title: "Medium modules", tasks: [
-        { id: "t-sb", title: "Special Barcode — 12 tests", desc: "Barcode bins, piece attribution scans, follow-the-leader." },
-        { id: "t-ci", title: "PT Check-In — 9 tests", desc: "Ranch, Block, Job, clock in employee. Rogelio testing this module directly." },
-        { id: "t-scale", title: "PT Scale — 9 tests", desc: "Bin scanning workflows: assign bin-rate modifier, scan barcode to one or multiple employees, FTL crew scan, partial bin (.50), delete bin, generate random bincode, view scan log. (Tests 21-28)" },
-        { id: "t-ct", title: "Crop Tracker — 8 tests", desc: "Crop record lifecycle: create, edit, correct site/location/modifier/weight on a bin record, transfer ownership, archive. (Tests 113-120)" },
-        { id: "t-auto", title: "Auto Email Reports — 7 tests", desc: "Daily Crew Timesheet email cadence for FLCs. Also covers Employee Productivity, Min Wage Adjustments, Crews Average Hourly Rate, QC Report, Devices Last Connected, and Missing Picker Check-Ins. (Tests 41-47)" }
-      ]},
-      { id: "uat-small", title: "Small modules", tasks: [
-        { id: "t-emp", title: "Employee — 6 tests", desc: "Hiring flow (remove DoB, add last 4 of SSN), ALT ID, document upload." },
-        { id: "t-dev", title: "Devices — 5 tests", desc: "Device lock settings, contractor binding." },
-        { id: "t-loc", title: "Locations — 4 tests", desc: "Ranch (site) and block creation, location ID mapping (confirming if Ranch Numbers can serve as IDs), and CC1 code setup. (Tests 106-109)" },
-        { id: "t-cm", title: "Crop Modifiers — 3 tests", desc: "Create and edit crop modifiers, plus bulk-import all 103 crop modifiers from legacy. Source file and format for the import must be confirmed before UAT. (Tests 78-80)" },
-        { id: "t-lab", title: "Labor — 3 tests", desc: "Bulk imports for employees, crews, and contractors list from legacy data into PickTrace 3.0. (Tests 81-83)" },
-        { id: "t-usr", title: "Users — 3 tests", desc: "New user account creation, role setup with appropriate permission scopes (e.g., crew summary vs. individual profile access), and deactivating departing users. (Tests 110-112)" },
-        { id: "t-feat", title: "Features — 2 tests", desc: "Two standalone feature tests: Test 121 (unnamed — confirm scope in the test tracker before UAT) and Test 122 — Employee Signed Docs Repository (report showing who has/hasn't signed)." }
-      ]},
-      { id: "uat-process", title: "Process", tasks: [
-        { id: "t-owner", title: "Assign Wonderful test owners per module", desc: "Rogelio confirmed for Check-In #1 and #2. Need owner assignments for other modules." },
-        { id: "t-daily-standup", title: "Daily test-result standup during UAT weeks", desc: "Runs during the last 2 weeks before go-live." },
-        { id: "t-bugs", title: "Bug triage cadence: daily (P0/P1), weekly (P2/P3)", desc: "Link bugs to Zendesk and Airtable via URL fields." },
-        { id: "t-signoff", title: "Written UAT sign-off from Rogelio + Rosa before go-live", desc: "Must be documented — can't go live on a verbal 'looks good.'", priority: "priority", urgent: true }
-      ]}
-    ]
-  },
-  {
-    id: "p6", num: "07", title: "Training & Change Management",
-    window: "Jul 6 – 12, 2026",
-    desc: "Week-before training for FLCs, office staff, and field leads. Short, targeted, multi-language where needed.",
-    groups: [
-      { id: "train", title: "Training deliverables", tasks: [
-        { id: "tr-flc", title: "FLC training — billing + Daily Crew Timesheet workflow", desc: "FLCs must leave training able to run Report 50 and reconcile against prior-day billing." },
-        { id: "tr-office", title: "Office staff — payroll audit workflow (weekly Data Dump)", desc: "Friday Data Dump walkthrough with at least two people from Wonderful." },
-        { id: "tr-field", title: "Field lead training — new 3.0 kiosk + scanner behaviors", desc: "Short video + one in-person session per FLC." },
-        { id: "tr-lang", title: "Spanish-language training materials", desc: "Most field staff operate in Spanish. Translate quick reference cards, error message guide, attestation screens." },
-        { id: "tr-mayor", title: "Mayordomo training — site groups + crew management", desc: "District-level mayordomos need specific training on the site-group layer." },
-        { id: "tr-mech", title: "Mechanics scanner training", desc: "Mechanics have their own scanners for activity changes from field." }
-      ]}
-    ]
-  },
-  {
-    id: "p7", num: "08", title: "Go-Live (July 13, 2026)",
-    window: "Mon Jul 13, 2026",
-    desc: "Harvest + Nursery/Shop go live together. Websites: Nursery and Shop on same site; everything else on separate sites. Full IM on-site or on-call.",
-    groups: [
-      { id: "golive", title: "Day-of", tasks: [
-        { id: "g-harvest", title: "Harvest go-live", desc: "First scans, follow-the-leader, barcode bins, district mayordomo view.", priority: "priority", urgent: true },
-        { id: "g-ns", title: "Nursery + Shop go-live (same day)", desc: "Must go live together. Same website for Nursery/Shop.", priority: "priority", urgent: true },
-        { id: "g-kiosk", title: "Kiosks physically deployed + device-locked", desc: "One singular device locked to ADM (general overhead). Each house device set to its own house." },
-        { id: "g-printer", title: "Bluetooth printer connection verified", desc: "Legacy had Bluetooth printer connection issues — test extensively before." },
-        { id: "g-wifi", title: "WiFi + sync stress test", desc: "Nursery had one time where no WiFi caused issues. Shop has sync issues that knock users out. Test both before go-live." },
-        { id: "g-oncall", title: "24-hour on-call rotation for IM team", desc: "Monday through Thursday minimum. Go-live week is no-vacation week." },
-        { id: "g-war-room", title: "War-room channel (Slack)", desc: "Dedicated channel with Wonderful IT + IM team + product. Respond in minutes not hours." }
-      ]}
-    ]
-  },
-  {
-    id: "p8", num: "09", title: "First Payroll Run — Parallel (July 21)",
-    window: "Tue Jul 21, 2026",
-    desc: "First DataTech payroll import from 3.0. Must reconcile against parallel legacy run. Any dollar-variance outside tolerance = back to investigation before paying.",
-    groups: [
-      { id: "payroll", title: "Parallel run checklist", tasks: [
-        { id: "pay-pick", title: "Pick 1 crew for trial run (per DataTech SOP Step 4)", desc: "Start small. Full period of timecards and crop records reviewed for accuracy." },
-        { id: "pay-alt", title: "Verify every employee has ALT ID", desc: "Re-check before download." },
-        { id: "pay-68", title: "Download Report 68 from 3.0", desc: "Payroll import file." },
-        { id: "pay-import", title: "Import Report 68 to DataTech", desc: "Payroll Menu → Daily Payroll Entry → Import Data. Use 'Filename to Import' field." },
-        { id: "pay-review", title: "Review import for accuracy (line-by-line)", desc: "First run gets checked line-by-line. No exceptions." },
-        { id: "pay-recon", title: "Reconcile 3.0 output vs legacy parallel run", desc: "Any dollar-variance outside tolerance = don't pay from 3.0 yet. Investigate first.", priority: "priority", urgent: true },
-        { id: "pay-scale", title: "If reconciled: roll out to remaining crews", desc: "Step 5 of DataTech SOP." },
-        { id: "pay-friday", title: "Friday audit Data Dump (range: all contractors, combined)", desc: "Weekly. This is the lawsuit-driven report. Exact format and all fields must match legacy output. Rogelio downloads and combines weekly.", priority: "priority" }
-      ]}
-    ]
-  },
-  {
-    id: "p9", num: "10", title: "Hypercare & Post-Go-Live",
-    window: "Jul 13 – Aug 15, 2026",
-    desc: "First 4 weeks of hypercare — daily Wonderful check-ins. After week 4, shift to weekly cadence if stable.",
-    groups: [
-      { id: "hyper", title: "Hypercare", tasks: [
-        { id: "hc-daily", title: "Daily Wonderful sync (weeks 1-4)", desc: "15 minutes max. Pending issues, resolved issues, new ones from overnight field use." },
-        { id: "hc-bugs", title: "Bug triage: P0 same-day, P1 within 48 hours", desc: "Everything tracked in Zendesk + mirrored here with Zendesk URL." },
-        { id: "hc-weekly", title: "Weekly payroll audit meeting w/ Rogelio", desc: "Fridays. Review Data Dump variance. Each week catches a class of bug." },
-        { id: "hc-nursery-script", title: "Monitor Rosa's scheduled Tuesday script run", desc: "Every Tuesday morning for first 4 weeks. Confirm Holiday-on-Monday override works when it occurs." },
-        { id: "hc-handoff", title: "Handoff to account management (end of week 4)", desc: "IM team stays available for P0/P1, AM owns weekly cadence going forward." }
-      ]}
-    ]
-  },
-  {
-    id: "p11", num: "11", title: "Post-Launch / Descoped",
-    window: "After Aug 15, 2026",
-    desc: "Items explicitly negotiated away from launch scope (Apr 23 / Apr 27). Tracked here so they're not lost — revisit after hypercare ends. Chai's framing: 'list everything, prioritize against time and what can be negotiated away. Items without a launch-blocking argument go to the post-launch list.'",
-    groups: [
-      { id: "post-descoped", title: "Descoped from launch (post-launch list)", tasks: [
-        { id: "pl-automove", title: "Auto-move crew on cross-location credit",
-          desc: "[Nice-to-have · backend-only feasible] Legacy auto-created a timecard for new location using previous job when pieces were credited at a different location. Every customer migrating from Legacy has complained. Apr 23: device-side hard, backend feasible. Workaround for Wonderful: scannable Move Crew. NOT a launch blocker." },
-        { id: "pl-extcontractor-full", title: "Full external contractor onboarding redesign",
-          desc: "Quick-fix shipped at launch (lift dropdown restriction — h-onboarding). Larger redesign of the external-contractor model defers to post-launch." },
-        { id: "pl-paygroups-full", title: "Full pay-groups model (if alternative accepted at launch)",
-          desc: "If Apr 28/29 Rogelio call accepts the employee-compensation + title-driven script alternative, the full Legacy-style pay-groups model with daily rate history + precedence logic + hourly+piece rate types defers post-launch. Reopened only if Wonderful can't operate without it." },
-        { id: "pl-attest-fieldapp", title: "Field-app daily-attestation parity (CBCA + configurable ordering)",
-          desc: "Launch ships with Sabeen attestation barcodes. Post-launch: configurable 'audit then sign' vs 'sign then audit' in field-app attestation experience. CBCA wants opposite ordering; Wonderful wants same-day. Make ordering configurable." },
-        { id: "pl-hackathon", title: "Hackathon (semi-floated)",
-          desc: "Apr 23: hackathon idea floated to push through complex parts (kiosk scan-actions + crew-leader piece rate) if 7-week window tightens. Semi-joking but worth revisiting." }
-      ]}
-    ]
-  },
-  {
-    id: "pq", num: "Q", title: "Open Questions Tracker",
-    window: "Rolling — must answer before design",
-    desc: "Consolidated open questions across all sources (Apr 15 Delight grooming + Apr 21 onsite debrief + Apr 23 Crew Mgmt Mtg Pt.2 + Delight Problem Synthesis). Many are taking to Rogelio Apr 28/29. Mark complete as answers come in.",
-    groups: [
-      { id: "q-rogelio-apr28", title: "Take to Rogelio on Apr 28/29 (validation questions, no solution pitch)", tasks: [
-        { id: "q1-tx-crews", title: "Q1: Does Wonderful use crews in nursery in Texas?",
-          desc: "California confirmed NO. Hinge question for nursery kiosk effort — if single-crew everywhere, field app suffices and kiosk effort disappears. (PDF Open Question + Apr 27 prep)",
-          urgent: true, priority: "priority" },
-        { id: "q2-cl-rate-stable", title: "Q2: Does crew-leader piece rate change during the harvest cycle?",
-          desc: "Harrison's read from Legacy scan: NO, $2.25 is stable. Verify with Rogelio. Determines whether design needs daily rate history.",
-          priority: "priority" },
-        { id: "q3-bulk-page", title: "Q3: Bulk apply break/meal penalty — time-card page or payroll page?",
-          desc: "Harrison: time-card page (see effect immediately). Chai: payroll page (matches pay-cycle scope). Tabled until Rogelio input." },
-        { id: "q4-cl-bundle", title: "Q4: Do FLCs use a single work bundle for crew-leader timecards?",
-          desc: "Required to simplify the scheduled-script approach. Confirm with Rogelio." },
-        { id: "q5-pt-onboarding", title: "Q5: Can we convince Wonderful to use PickTrace onboarding instead of raw PDF uploads?",
-          desc: "Ideal path solves the missing-doc report problem (no random-PDF versioning issue). Probably won't accept — bandaid is EHR doc-count report." },
-        { id: "q6-scripts-list", title: "Q6: Full list of Legacy scripts that need to be supported in 3.0?",
-          desc: "Ask Rogelio + Rosa. Daniel suspects more reports will surface beyond the 6 already known." },
-        { id: "q7-rosa-defs", title: "Q7: Definitions of 'crew workers' and 'nursery contract employees'",
-          desc: "Ask Rosa. 'Nursery contract employees' = FLC contractors or H-2A? Definition of 'crew workers'? Affects targeting model." },
-        { id: "q8-trigger", title: "Q8: Automated scheduled execution or manual-trigger (or both)?",
-          desc: "Partially answered — appears manual trigger preferred. Confirm with Rogelio + Rosa. Chai favors scheduled-reports model (run nightly at 11pm)." },
-        { id: "q9-who-runs", title: "Q9: Who actually runs these scripts/reports weekly? What pages do they use?",
-          desc: "Affects UI placement decisions. Ask Rogelio + Rosa." },
-        { id: "q10-extends-example", title: "Q10: Example of a Legacy script that EXTENDS time (vs inserts/cuts into)",
-          desc: "Need Rogelio + Rosa Legacy walkthrough. Confirms whether Legacy supports both modes natively or via separate scripts." },
-        { id: "q11-pay-groups", title: "Q11: Pay groups — must we build full Legacy-style or accept alternative?",
-          desc: "Decision = 6w vs 10w schedule. Alternative = employee compensation default piece rate + title-driven script. Pitched only if Wonderful pushes back on alternative.",
-          urgent: true, priority: "priority" }
-      ]},
-      { id: "q-eng-spike", title: "Engineering spikes (investigate Legacy code)", tasks: [
-        { id: "q-spike-npt-misc", title: "Spike: 'NPT Miscellaneous' logic — what rules, when leveraged, what configs?",
-          desc: "Schedule with Jorge (TSS). Required input for 3.0 design.",
-          priority: "priority" },
-        { id: "q-spike-stca", title: "Spike: 'Simple Time Card Adding' Legacy logic",
-          desc: "Investigate Legacy codebase to understand bulk-scripts behavior." },
-        { id: "q-spike-add-cut", title: "Spike: Does Legacy support both 'add to time' AND 'cut into time' for NPT?",
-          desc: "Investigate Legacy code or ask Harrison. Pay-period scope: previous or current? Daily vs weekly schedule? Static-duration vs regular-duration job preference?" },
-        { id: "q-spike-rosa-script", title: "Spike: How does Rosa's script differentiate 1-min (crew) vs 2-min (nursery)?",
-          desc: "One script with parameters, or separate scripts? Engineering spike — investigate Legacy codebase." },
-        { id: "q-spike-18min", title: "Spike: NPT 18-min insertion logic — confirm with Austin/Addison",
-          desc: "Apr 23 partially answered (start-of-day or end-of-day per config, additive). Verify the legacy implementation matches." }
-      ]},
-      { id: "q-internal", title: "Internal / Engineering+product decisions", tasks: [
-        { id: "q-int-meal-edge", title: "Edge cases: breaks/lunches × meal penalty calc",
-          desc: "How does auto-inserting breaks/lunches interact with existing meal penalty logic? Internal investigation." },
-        { id: "q-int-job-granularity", title: "Job-type granularity beyond what Rosa described?",
-          desc: "Re-watch Harrison recording; confirm with both Rogelio + Rosa." },
-        { id: "q-int-bulk-range", title: "Should bulk operations have a max date range (e.g., one pay period) for server load?",
-          desc: "Engineering + product decision." },
-        { id: "q-int-overnight", title: "Overnight midnight-split × NPT auto-insertion conflict?",
-          desc: "3.0 already has automatic midnight-split. NPT auto-insertion must not conflict." },
-        { id: "q-int-static-jobs", title: "Existing 'add static duration jobs' bulk tools — relationship to new rule-based automation?",
-          desc: "Clarify before designing new automation to avoid duplicate UX paths." },
-        { id: "q-int-checkpoint", title: "Checkpoint overlap prevention",
-          desc: "NPT is implemented as checkpoints. Auto-creation must not create conflicts." },
-        { id: "q-int-org-mapping", title: "Legacy servers → 3.0 org/employee-group mapping",
-          desc: "Wonderful Citrus Farming, Wonderful Texas, FLC Employee Server. Daniel + Shane + Rogelio in progress." },
-        { id: "q-int-paylock-export", title: "Verify export still works under read-only payroll role",
-          desc: "Carlos found read-only doesn't currently show export option. Small additional permission may be needed." }
-      ]},
-      { id: "q-harrison", title: "Items still needing Harrison / contract review", tasks: [
-        { id: "q-h-h2a", title: "H2A employee types — contracted requirement?",
-          desc: "H2A Employee, H2A Foreman, H2A Forklift, H2A Row Boss, H2A Bus Driver appear in Pay Groups test list. Confirm with Harrison." },
-        { id: "q-h-cc1", title: "CC1 codes (Test 109) — DataTech-side or PickTrace-side?",
-          desc: "Locations test references CC1 codes. Confirm what they are." },
-        { id: "q-h-bus-lluvia", title: "Bus Driving (4015) and Lluvia codes — confirm DataTech alignment",
-          desc: "Present in test tracker but not in DataTech PDF. Confirm with Wonderful + DataTech." },
-        { id: "q-h-rtp-error", title: "Reporting Time Pay DataTech error fix verification",
-          desc: "Letters in number fields when half-day show-up pay runs. Job 4022 + wcRT/OT/DT wiring should fix — verify with DataTech." },
-        { id: "q-h-cropmod-import", title: "103 Crop Modifiers import — source file + format",
-          desc: "Test 80. Large import job. Confirm format before UAT." },
-        { id: "q-h-data-migration", title: "Legacy → 3.0 historical data migration?",
-          desc: "Can any legacy historical data be migrated? Team to investigate." },
-        { id: "q-h-pack-styles", title: "Pack styles vs per-location piece rates",
-          desc: "Wonderful doesn't like setting up piece rates per location. Pack styles alternative? Probably not while working in bins. Decision pending." },
-        { id: "q-h-famous", title: "Famous Payroll Import (Reports 78 & 79)",
-          desc: "Appears in test tracker. Not mentioned in any meeting notes. Confirm what this is and whether it needs to be built in 3.0." },
-        { id: "q-h-cost-center", title: "Cost Center = Crop ID — Wonderful sign-off",
-          desc: "Today in 3.0 Cost Center can be Crop ID but this needs explicit Wonderful sign-off." },
-        { id: "q-h-crew-suppress", title: "Crew ID suppression on reports — 'report ignore' flag buildable?",
-          desc: "When crew badge triggers follow-the-leader, crew ID must not appear on any report. Confirm flag is buildable." }
+        { id: "q-classification", title: "Employee classification: 'crew workers' vs FLC vs H-2A + Rosa's script logic",
+          desc: "Define 'crew workers' (1-min NPT) vs 'nursery contract employees' (2-min NPT, FLC). Are nursery contract employees synonymous with FLC contractors, or are H-2A workers a separate category? Does Rosa's script differentiate via parameters or are they two separate scripts? Engineering spike + ask Rosa.",
+          defaultStatus: "not_started" },
+        { id: "q-execution-model", title: "Execution model: scheduling, runners, static-vs-regular jobs, backfill",
+          desc: "Confirm: harvest = manual; nursery/farming = scheduled Tuesday for prior pay period with override on Monday holidays. Who runs the scripts weekly and which pages do they use? Static-duration vs regular jobs preference per script. Backfill cap (current unpaid period only — verify hard-block on prior paid periods).",
+          defaultStatus: "not_started" },
+        { id: "q-edge-cases", title: "Edge cases: meal penalties, overnight shifts, checkpoint overlaps",
+          desc: "How does auto-inserting breaks/lunches interact with existing meal penalty logic? 3.0 already has automatic midnight-split — NPT auto-insertion must not conflict. NPT is implemented as checkpoints — auto-creation must not create overlaps. Relationship to existing 'add static duration jobs' bulk tools.",
+          defaultStatus: "not_started" }
       ]}
     ]
   }
@@ -6233,6 +5928,12 @@ async function decryptPayload(payload, passphrase) {
 /* ============================================================================
    STORAGE LAYER
    ============================================================================ */
+/* One-time wipe of pre-v4 keys: old task IDs no longer exist after the
+   April-23-PDF rebuild, so any preserved STATE would be orphaned. */
+["wonderful-pt3-tracker-v3", "wonderful-pt3-ui-v3",
+ "wonderful-pt3-lock-v3", "wonderful-pt3-last-backup-v3"]
+  .forEach(k => localStorage.removeItem(k));
+
 function getLockConfig() {
   try { return JSON.parse(localStorage.getItem(LOCK_KEY)) || { enabled: false }; }
   catch { return { enabled: false }; }
