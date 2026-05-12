@@ -110,10 +110,45 @@ a:hover { color: var(--citrus); text-decoration: underline; }
    ========================================================== */
 .app {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: var(--sidebar-w, 280px) 1fr;
   grid-template-rows: 72px 1fr;
   grid-template-areas: "topbar topbar" "sidebar main";
   min-height: 100vh;
+}
+
+/* Sidebar drag handle — sits on the seam between sidebar + main. Only on
+   desktop (≥1281px); hidden when the sidebar collapses to a thin strip. */
+.sidebar-resizer {
+  position: fixed;
+  top: 72px;
+  bottom: 0;
+  left: var(--sidebar-w, 280px);
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  z-index: 45;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+.sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 2px; height: 44px;
+  margin-left: -1px; margin-top: -22px;
+  background: var(--line-2);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.sidebar-resizer:hover::after,
+.sidebar-resizer.is-dragging::after { opacity: 1; background: var(--pt-orange); }
+.sidebar-resizer.is-dragging { background: rgba(243,156,18,0.06); }
+/* While dragging, kill text selection across the whole page for clean drag UX */
+body.is-resizing-sidebar { cursor: col-resize; user-select: none; }
+body.is-resizing-sidebar * { user-select: none !important; }
+@media (max-width: 1280px) {
+  .sidebar-resizer { display: none; }
 }
 
 /* ---------- Topbar ---------- */
@@ -344,6 +379,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border-right: 1px solid var(--line);
   padding: 20px 14px;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: none;
   position: sticky;
   top: 72px;
@@ -361,36 +397,47 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   color: var(--muted);
   padding: 0 8px 8px;
 }
+/* Phase Group header — quiet section header: bold navy title + top divider,
+   no heavy fill (which made the sidebar feel crowded and forced ellipsis on
+   long titles). Action buttons stay hidden until hover. */
 .phase-group-header {
   display: flex; align-items: center;
   gap: 4px;
-  padding: 6px 4px 6px 6px;
-  margin-top: 6px;
-  border-radius: var(--radius-sm);
+  padding: 6px 2px 6px 4px;
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  min-width: 0;
 }
-.phase-group-header:hover { background: var(--bg-3); }
+.phase-group-header:first-of-type { border-top: none; margin-top: 4px; }
 .phase-group-toggle {
   flex: 1 1 auto;
   display: flex; align-items: center; gap: 6px;
   padding: 2px 4px;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--ink-2);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--pt-navy-deep);
   text-align: left;
   background: transparent; border: 0; cursor: pointer;
   min-width: 0;
 }
-.phase-group-toggle:hover { color: var(--ink); }
+.phase-group-toggle:hover { color: var(--pt-orange-deep); }
 .phase-group-chevron {
+  flex: 0 0 auto;
   display: inline-flex; align-items: center; justify-content: center;
   width: 14px; height: 14px;
-  color: var(--muted);
+  color: var(--pt-navy);
   transition: transform 0.15s ease;
 }
-.phase-group-header:not(.is-collapsed) .phase-group-chevron { transform: rotate(90deg); }
+/* Default chevron SVG points DOWN. We want:
+     expanded   → arrow points DOWN (no transform)
+     collapsed  → arrow points RIGHT (rotate -90deg) */
+.phase-group-header.is-collapsed .phase-group-chevron { transform: rotate(-90deg); }
 .phase-group-title {
   flex: 1 1 auto;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 .phase-group-add, .phase-group-menu {
   flex: 0 0 auto;
@@ -398,7 +445,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   width: 22px; height: 22px;
   padding: 0;
   font-size: 13px; line-height: 1;
-  color: var(--muted);
+  color: var(--ink-3);
   background: transparent; border: 0; border-radius: 4px;
   cursor: pointer;
   opacity: 0;
@@ -406,13 +453,17 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .phase-group-header:hover .phase-group-add,
 .phase-group-header:hover .phase-group-menu { opacity: 1; }
-.phase-group-add:hover, .phase-group-menu:hover { background: var(--bg-1); color: var(--ink); }
+.phase-group-add:hover, .phase-group-menu:hover { background: var(--pt-navy-soft); color: var(--pt-navy); }
 .phase-group-add svg { width: 13px; height: 13px; }
 .phase-group-empty {
-  padding: 4px 10px 8px 28px;
+  padding: 4px 10px 6px 28px;
   font-size: 11px; color: var(--muted); font-style: italic;
 }
-.nav-link.nav-link-grouped { padding-left: 22px; }
+/* Phases live INSIDE a phase group — indented so the hierarchy reads. */
+.nav-link.nav-link-grouped {
+  padding-left: 22px;
+  font-size: 12px;
+}
 .phase-group-new {
   display: flex; align-items: center; gap: 8px;
   width: 100%;
@@ -5670,6 +5721,14 @@ function hydrateState(raw) {
   const out = raw || {};
   if (!Array.isArray(out.__customTasks)) out.__customTasks = [];
   if (!Array.isArray(out.__customPhases)) out.__customPhases = [];
+  // Backfill: any custom phase created before the auto-default-group fix has
+  // groups: [] and can't hold tasks. Give it an internal "Tasks" bucket so the
+  // New Task modal and counts work going forward.
+  out.__customPhases.forEach(p => {
+    if (!Array.isArray(p.groups) || p.groups.length === 0) {
+      p.groups = [{ id: "g-default-" + (p.id || Math.random().toString(36).slice(2, 8)), title: "Tasks", tasks: [] }];
+    }
+  });
   if (!out.__customGroups || typeof out.__customGroups !== "object") out.__customGroups = {};
   if (!out.__overrides || typeof out.__overrides !== "object") out.__overrides = {};
   if (!Array.isArray(out.__milestones)) {
@@ -5796,7 +5855,7 @@ const LABEL_DEFAULTS = {
   "tabs.tasks": "Tasks",
   "tabs.calendar": "Calendar",
   "tabs.bugs": "Bugs",
-  "sidebar.phases": "Phases",
+  "sidebar.phases": "Roadmap",
   "sidebar.summary": "Summary",
   "stats.tasksComplete": "Tasks complete",
   "stats.progress": "Progress",
@@ -5925,16 +5984,22 @@ async function createCustomPhase(title, opts = {}) {
   const t = (title || "").trim();
   if (!t) return null;
   STATE.__customPhases = STATE.__customPhases || [];
-  const totalExisting = PHASES.length + STATE.__customPhases.length;
   const id = "cp-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 10000).toString(36);
-  const num = opts.num || String(totalExisting).padStart(2, "0");
   const groupId = opts.groupId || (effectiveGroups()[0]?.id) || "grp-features-in-dev";
+  // Per-phase-group numbering: count existing phases in the target phase group,
+  // +1 for the one we're about to add. So each phase group restarts at 01.
+  const phasesInGroup = effectivePhases().filter(p => p.groupId === groupId).length;
+  const num = opts.num || String(phasesInGroup + 1).padStart(2, "0");
+  // Seed a default inner task-bucket so the phase can hold tasks immediately.
+  // The user never sees this — it's an internal container kept for compat with
+  // the rest of the codebase which iterates phase.groups[].tasks[].
+  const defaultGroupId = "g-default-" + Date.now().toString(36);
   STATE.__customPhases.push({
     id, num, title: t,
     groupId,
     window: opts.window || "",
     desc: opts.desc || "",
-    groups: []
+    groups: [{ id: defaultGroupId, title: "Tasks", tasks: [] }]
   });
   await saveState();
   return id;
@@ -6018,7 +6083,7 @@ async function createCustomGroup(phaseId, title) {
 
 // In-place "create a new phase" affordance: swaps the <select> for a styled
 // text input. Enter commits, Esc / blur cancels (unless blur follows a save).
-function startInlinePhaseCreate(selectEl, addBtn, refillPhases, refillGroups) {
+function startInlinePhaseCreate(selectEl, addBtn, refillPhases, refillGroups, phaseGroupId) {
   const input = h("input", {
     type: "text",
     class: "ef-inline-create",
@@ -6042,7 +6107,7 @@ function startInlinePhaseCreate(selectEl, addBtn, refillPhases, refillGroups) {
     const name = input.value.trim();
     if (!name) { restore(); return; }
     done = true; // prevent double-fire from blur
-    const newId = await createCustomPhase(name);
+    const newId = await createCustomPhase(name, phaseGroupId ? { groupId: phaseGroupId } : {});
     input.replaceWith(selectEl);
     addBtn.disabled = false;
     if (newId) {
@@ -6121,7 +6186,8 @@ function defaultUI() {
     phaseFilter: null,        // null = all phases; otherwise phaseId
     calWonderfulOnly: false,  // calendar filter: hide gcal-imports unless title contains "wonderful"
     calTypeFilters: {},       // { [typeKey]: false } — any key set false hides that type on the calendar
-    collapsedPhaseGroups: {}  // { [groupId]: true } when collapsed in the sidebar
+    collapsedPhaseGroups: {}, // { [groupId]: true } when collapsed in the sidebar
+    sidebarWidth: 280         // px — user-resizable on desktop (>1280px viewports)
   };
 }
 
@@ -6892,6 +6958,7 @@ window.addEventListener("mouseout", (e) => {
 function renderShell() {
   const app = $("#app");
   app.innerHTML = "";
+  applySidebarWidth();
 
   // ---- Topbar
   const cd = daysUntil(GO_LIVE);
@@ -6949,7 +7016,7 @@ function renderShell() {
     const groupRow = h("div", { class: "phase-group-header" + (isCollapsed ? " is-collapsed" : "") }, [
       h("button", {
         class: "phase-group-toggle",
-        title: isCollapsed ? "Expand group" : "Collapse group",
+        title: isCollapsed ? "Expand group" : "Collapse group — right-click for options",
         onclick: (e) => {
           e.stopPropagation();
           UI.collapsedPhaseGroups = UI.collapsedPhaseGroups || {};
@@ -6963,15 +7030,21 @@ function renderShell() {
       ]),
       h("button", {
         class: "phase-group-add",
-        title: "Add a phase to this group",
+        title: "Add a phase to this Phase Group",
         onclick: (e) => { e.stopPropagation(); openNewPhaseDialog(group.id); }
       }, [h("span", { html: ICONS.plus })]),
       h("button", {
         class: "phase-group-menu",
-        title: "Group options",
+        title: "Phase Group options",
         onclick: (e) => { e.stopPropagation(); openPhaseGroupMenu(e.clientX, e.clientY, group.id); }
       }, "⋯")
     ]);
+    // Right-click anywhere on the group header → same group options menu.
+    groupRow.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openPhaseGroupMenu(e.clientX, e.clientY, group.id);
+    });
     sidebar.appendChild(groupRow);
     if (isCollapsed) return;
     if (!phases.length) {
@@ -9576,13 +9649,19 @@ function openNewRecurringEditor() {
 
 /* ---------- Phase editor ---------- */
 function openPhaseEditor(phaseId) {
-  const p = PHASES.find(x => x.id === phaseId);
+  // Resolve from hardcoded PHASES or user-created __customPhases. For hardcoded
+  // phases we write to STATE.__overrides.phases (revertible); for custom phases
+  // we mutate the entry directly so the rename sticks as the canonical name.
+  const hardcoded = PHASES.find(x => x.id === phaseId);
+  const custom = !hardcoded ? (STATE.__customPhases || []).find(x => x.id === phaseId) : null;
+  const p = hardcoded || custom;
   if (!p) return;
-  const meta = phaseMeta(p);
+  const isCustom = !!custom;
+  const meta = hardcoded ? phaseMeta(hardcoded) : { num: p.num, title: p.title, window: p.window || "", desc: p.desc || "" };
   const form = h("div", { class: "edit-form" });
 
   const numIn = h("input", { type: "text", value: meta.num || "", placeholder: p.num });
-  const winIn = h("input", { type: "text", value: meta.window || "", placeholder: p.window });
+  const winIn = h("input", { type: "text", value: meta.window || "", placeholder: p.window || "" });
   form.appendChild(h("div", { class: "ef-dates" }, [
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Number"), numIn]),
     h("div", { class: "ef-row" }, [h("label", { class: "ef-label" }, "Window"), winIn])
@@ -9598,7 +9677,7 @@ function openPhaseEditor(phaseId) {
     h("label", { class: "ef-label" }, "Description"), descIn
   ]));
 
-  const reset = h("button", {
+  const reset = isCustom ? null : h("button", {
     class: "btn btn-outline",
     onclick: async () => {
       if (!confirm("Reset this phase's text to the defaults in code?")) return;
@@ -9612,15 +9691,22 @@ function openPhaseEditor(phaseId) {
   const save = h("button", {
     class: "btn btn-primary",
     onclick: async () => {
-      STATE.__overrides = STATE.__overrides || {};
-      STATE.__overrides.phases = STATE.__overrides.phases || {};
-      const entry = {};
-      if (numIn.value.trim() && numIn.value.trim() !== p.num) entry.num = numIn.value.trim();
-      if (winIn.value.trim() !== (p.window || "")) entry.window = winIn.value.trim();
-      if (titleIn.value.trim() && titleIn.value.trim() !== p.title) entry.title = titleIn.value.trim();
-      if (descIn.value !== (p.desc || "")) entry.desc = descIn.value;
-      if (Object.keys(entry).length === 0) delete STATE.__overrides.phases[phaseId];
-      else STATE.__overrides.phases[phaseId] = entry;
+      if (isCustom) {
+        if (numIn.value.trim())   custom.num   = numIn.value.trim();
+        if (titleIn.value.trim()) custom.title = titleIn.value.trim();
+        custom.window = winIn.value.trim();
+        custom.desc   = descIn.value;
+      } else {
+        STATE.__overrides = STATE.__overrides || {};
+        STATE.__overrides.phases = STATE.__overrides.phases || {};
+        const entry = {};
+        if (numIn.value.trim() && numIn.value.trim() !== p.num) entry.num = numIn.value.trim();
+        if (winIn.value.trim() !== (p.window || "")) entry.window = winIn.value.trim();
+        if (titleIn.value.trim() && titleIn.value.trim() !== p.title) entry.title = titleIn.value.trim();
+        if (descIn.value !== (p.desc || "")) entry.desc = descIn.value;
+        if (Object.keys(entry).length === 0) delete STATE.__overrides.phases[phaseId];
+        else STATE.__overrides.phases[phaseId] = entry;
+      }
       await saveState();
       closeModal();
       renderShell();
@@ -9629,7 +9715,10 @@ function openPhaseEditor(phaseId) {
   }, "Save");
   const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
 
-  form.appendChild(h("div", { class: "ef-footer" }, [reset, h("div", { class: "spacer" }), cancel, save]));
+  const footerChildren = isCustom
+    ? [h("div", { class: "spacer" }), cancel, save]
+    : [reset, h("div", { class: "spacer" }), cancel, save];
+  form.appendChild(h("div", { class: "ef-footer" }, footerChildren));
   openModal({ title: "Edit phase", body: form });
 }
 
@@ -9696,7 +9785,7 @@ function openNewPhaseGroupDialog() {
     }
   }, "Create group");
   form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, save]));
-  openModal({ title: "New phase group", body: form });
+  openModal({ title: "New Phase Group", body: form });
   setTimeout(() => titleIn.focus(), 50);
 }
 
@@ -9715,7 +9804,7 @@ function openNewPhaseDialog(groupId) {
   const groupSel = h("select", {},
     groups.map(g => h("option", { value: g.id, ...(g.id === targetId ? { selected: "selected" } : {}) }, g.title)));
   form.appendChild(h("div", { class: "ef-row" }, [
-    h("label", { class: "ef-label" }, "Group"), groupSel
+    h("label", { class: "ef-label" }, "Phase Group"), groupSel
   ]));
   const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
   const save = h("button", {
@@ -9755,14 +9844,14 @@ function openRenamePhaseGroupDialog(groupId) {
     }
   }, "Save");
   form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, save]));
-  openModal({ title: "Rename group", body: form });
+  openModal({ title: "Rename Phase Group", body: form });
   setTimeout(() => { titleIn.focus(); titleIn.select(); }, 50);
 }
 
 function openDeletePhaseGroupDialog(groupId) {
   const groups = effectiveGroups();
   if (groups.length <= 1) {
-    toast("Can't delete the last group");
+    toast("Can't delete the last Phase Group");
     return;
   }
   const grp = groups.find(g => g.id === groupId);
@@ -9780,9 +9869,9 @@ function openDeletePhaseGroupDialog(groupId) {
         await deletePhaseGroup(groupId, "move");
         closeModal();
         renderShell();
-        toast("Group deleted");
+        toast("Phase Group deleted");
       }
-    }, "Delete group");
+    }, "Delete Phase Group");
     form.appendChild(h("div", { class: "ef-footer" }, [h("div", { class: "spacer" }), cancel, del]));
   } else {
     form.appendChild(h("p", { style: "margin: 0 0 12px;" },
@@ -9796,7 +9885,7 @@ function openDeletePhaseGroupDialog(groupId) {
         await deletePhaseGroup(groupId, "move");
         closeModal();
         renderShell();
-        toast("Group deleted, phases moved");
+        toast("Phase Group deleted, phases moved");
       }
     }, moveLabel);
     const wipeBtn = h("button", {
@@ -9807,12 +9896,12 @@ function openDeletePhaseGroupDialog(groupId) {
         await deletePhaseGroup(groupId, "delete-phases");
         closeModal();
         renderShell();
-        toast("Group and phases deleted");
+        toast("Phase Group and phases deleted");
       }
-    }, "Delete group + phases");
+    }, "Delete Phase Group + phases");
     form.appendChild(h("div", { class: "ef-footer" }, [cancel, h("div", { class: "spacer" }), moveBtn, wipeBtn]));
   }
-  openModal({ title: "Delete group", body: form });
+  openModal({ title: "Delete Phase Group", body: form });
 }
 
 function openPhaseGroupMenu(x, y, groupId) {
@@ -9820,11 +9909,11 @@ function openPhaseGroupMenu(x, y, groupId) {
   const groups = effectiveGroups();
   const items = [
     { label: "Add phase…", onClick: () => openNewPhaseDialog(groupId) },
-    { label: "Rename group…", onClick: () => openRenamePhaseGroupDialog(groupId) }
+    { label: "Rename Phase Group…", onClick: () => openRenamePhaseGroupDialog(groupId) }
   ];
   if (groups.length > 1) {
     items.push({ sep: true });
-    items.push({ label: "Delete group…", danger: true, onClick: () => openDeletePhaseGroupDialog(groupId) });
+    items.push({ label: "Delete Phase Group…", danger: true, onClick: () => openDeletePhaseGroupDialog(groupId) });
   }
   showContextMenu(x, y, items);
 }
@@ -9978,62 +10067,91 @@ function openNewTaskEditor(opts) {
     h("label", { class: "ef-label" }, "Description"), descIn
   ]));
 
-  // Phase + group pickers
+  // Phase Group → Phase pickers. The inner task-bucket ("group" in the data
+  // model) is auto-picked from the chosen phase — users never see it.
+  //
+  // Auto-fill behavior:
+  //   - If the modal was opened from a phase context menu (opts.phaseId) OR
+  //     the user is currently scoped to a phase via the sidebar filter
+  //     (UI.phaseFilter), prefill both dropdowns to that phase's group + id.
+  //   - Otherwise, both dropdowns start blank with a "— Select —" placeholder
+  //     so the user has to consciously pick where the task belongs.
+  const scopedPhaseId = opts.phaseId || UI.phaseFilter || null;
+  const scopedPhase = scopedPhaseId
+    ? effectivePhases().find(p => p.id === scopedPhaseId)
+    : null;
+  const scopedGroupId = scopedPhase ? scopedPhase.groupId : null;
+  const initiallyBlank = !scopedPhaseId;
+
+  const phaseGroupSelect = h("select", {});
   const phaseSelect = h("select", {});
-  const fillPhases = (preferId) => {
-    phaseSelect.innerHTML = "";
-    effectivePhases().forEach(p => {
-      const sel = (preferId || opts.phaseId) === p.id;
-      phaseSelect.appendChild(h("option",
-        sel ? { value: p.id, selected: true } : { value: p.id },
-        `${p.num} — ${p.title}`));
-    });
-  };
-  fillPhases();
-  const groupSelect = h("select", {});
-  const fillGroups = (preferId) => {
-    groupSelect.innerHTML = "";
-    const pid = phaseSelect.value;
-    const p = effectivePhases().find(x => x.id === pid);
-    if (!p) return;
-    p.groups.forEach(g => {
-      const sel = preferId
-        ? g.id === preferId
-        : (opts.groupId === g.id && opts.phaseId === pid);
-      groupSelect.appendChild(h("option",
-        sel ? { value: g.id, selected: true } : { value: g.id },
+
+  const fillPhaseGroups = (preferId) => {
+    phaseGroupSelect.innerHTML = "";
+    const wantBlank = initiallyBlank && !preferId;
+    // Placeholder option — selected when nothing is scoped.
+    phaseGroupSelect.appendChild(h("option",
+      wantBlank ? { value: "", selected: true } : { value: "" },
+      "— Select Phase Group —"));
+    effectiveGroups().forEach(g => {
+      const isInitial = preferId
+        ? preferId === g.id
+        : (scopedGroupId === g.id);
+      phaseGroupSelect.appendChild(h("option",
+        isInitial ? { value: g.id, selected: true } : { value: g.id },
         g.title));
     });
   };
-  fillGroups();
-  phaseSelect.addEventListener("change", () => fillGroups());
+  const fillPhases = (preferId) => {
+    phaseSelect.innerHTML = "";
+    const pgId = phaseGroupSelect.value;
+    if (!pgId) {
+      phaseSelect.appendChild(h("option", { value: "", disabled: true, selected: true }, "— Pick a Phase Group first —"));
+      return;
+    }
+    const phasesInGroup = effectivePhases().filter(p => p.groupId === pgId);
+    if (phasesInGroup.length === 0) {
+      phaseSelect.appendChild(h("option", { value: "", disabled: true, selected: true }, "No phases — add one →"));
+      return;
+    }
+    const wantBlank = initiallyBlank && !preferId;
+    // Placeholder option, only shown when nothing is scoped.
+    if (wantBlank) {
+      phaseSelect.appendChild(h("option", { value: "", selected: true }, "— Select Phase —"));
+    }
+    phasesInGroup.forEach(p => {
+      const isInitial = preferId
+        ? preferId === p.id
+        : (!initiallyBlank && scopedPhaseId === p.id);
+      phaseSelect.appendChild(h("option",
+        isInitial ? { value: p.id, selected: true } : { value: p.id },
+        `${p.num} — ${p.title}`));
+    });
+  };
+
+  fillPhaseGroups();
+  fillPhases();
+  phaseGroupSelect.addEventListener("change", () => fillPhases());
 
   const phaseAddBtn = h("button", {
     type: "button",
     class: "ef-add-btn",
-    title: "Create a new phase",
-    onclick: () => startInlinePhaseCreate(phaseSelect, phaseAddBtn, fillPhases, fillGroups),
-    html: ICONS.plus
-  });
-  const groupAddBtn = h("button", {
-    type: "button",
-    class: "ef-add-btn",
-    title: "Create a new group in this phase",
+    title: "Create a new phase in this Phase Group",
     onclick: () => {
-      if (!phaseSelect.value) { toast("Pick a phase first"); return; }
-      startInlineGroupCreate(groupSelect, groupAddBtn, phaseSelect.value, fillGroups);
+      const pgId = phaseGroupSelect.value;
+      startInlinePhaseCreate(phaseSelect, phaseAddBtn, () => fillPhases(), () => {}, pgId);
     },
     html: ICONS.plus
   });
 
   form.appendChild(h("div", { class: "ef-dates" }, [
     h("div", { class: "ef-row" }, [
-      h("label", { class: "ef-label" }, "Phase"),
-      h("div", { class: "ef-select-with-add" }, [phaseSelect, phaseAddBtn])
+      h("label", { class: "ef-label" }, "Phase Group"),
+      phaseGroupSelect
     ]),
     h("div", { class: "ef-row" }, [
-      h("label", { class: "ef-label" }, "Group"),
-      h("div", { class: "ef-select-with-add" }, [groupSelect, groupAddBtn])
+      h("label", { class: "ef-label" }, "Phase"),
+      h("div", { class: "ef-select-with-add" }, [phaseSelect, phaseAddBtn])
     ])
   ]));
 
@@ -10089,9 +10207,13 @@ function openNewTaskEditor(opts) {
     onclick: async () => {
       const title = titleIn.value.trim();
       if (!title) { toast("Title required"); return; }
-      const id = "ct-" + (Date.now().toString(36)) + "-" + Math.floor(Math.random() * 10000).toString(36);
       const phaseId = phaseSelect.value;
-      const groupId = groupSelect.value;
+      if (!phaseId) { toast("Pick a phase (or add one)", "warn"); return; }
+      // Auto-pick the first inner task-bucket of the chosen phase. Internal
+      // detail — the user never sees this level.
+      const phase = effectivePhases().find(p => p.id === phaseId);
+      const groupId = (phase && phase.groups && phase.groups[0] && phase.groups[0].id) || "g-default";
+      const id = "ct-" + (Date.now().toString(36)) + "-" + Math.floor(Math.random() * 10000).toString(36);
       STATE.__customTasks = STATE.__customTasks || [];
       STATE.__customTasks.push({ id, phaseId, groupId, title, desc: descIn.value.trim() });
       rebuildTaskIndex();
@@ -10129,11 +10251,11 @@ function openNewTaskEditor(opts) {
 function openPhaseContextMenu(x, y, phaseId) {
   hideEventTooltip();
   const p = effectivePhases().find(x => x.id === phaseId);
-  const isHardcoded = PHASES.some(x => x.id === phaseId);
   const groups = effectiveGroups();
   const currentGroupId = p?.groupId || groups[0]?.id;
   const items = [];
-  if (isHardcoded) items.push({ label: "Edit phase…", onClick: () => openPhaseEditor(phaseId) });
+  // Both hardcoded and custom phases can be edited (openPhaseEditor handles both).
+  items.push({ label: "Edit phase…", onClick: () => openPhaseEditor(phaseId) });
   items.push({ label: "Add task…", onClick: () => {
     const firstGroup = p && p.groups[0];
     openNewTaskEditor({ phaseId, groupId: firstGroup?.id });
@@ -11539,47 +11661,62 @@ function showScheduleModal(dateStr) {
     refreshRepeatLabels();
     startNew.addEventListener("change", refreshRepeatLabels);
 
-    // Phase + group pickers (default to the first phase / first group).
+    // Phase Group → Phase pickers. Auto-fill from UI.phaseFilter if the user
+    // is scoped to a phase; otherwise leave both blank so they have to pick.
+    const scopedPhase = UI.phaseFilter
+      ? effectivePhases().find(p => p.id === UI.phaseFilter)
+      : null;
+    const scopedGroupId = scopedPhase ? scopedPhase.groupId : null;
+    const initiallyBlank = !UI.phaseFilter;
+
+    const phaseGroupSel = h("select", { class: "sched-group-sel" });
     const phaseSel = h("select", { class: "sched-phase-sel" });
-    const fillPhases = (preferId) => {
-      phaseSel.innerHTML = "";
-      effectivePhases().forEach((p, i) => {
-        const sel = preferId ? p.id === preferId : i === 0;
-        phaseSel.appendChild(h("option",
-          sel ? { value: p.id, selected: true } : { value: p.id },
-          `${p.num} — ${p.title}`));
-      });
-    };
-    fillPhases();
-    const groupSel = h("select", { class: "sched-group-sel" });
-    const fillGroups = (preferId) => {
-      groupSel.innerHTML = "";
-      const p = effectivePhases().find(x => x.id === phaseSel.value);
-      if (!p) return;
-      p.groups.forEach((g, i) => {
-        const sel = preferId ? g.id === preferId : i === 0;
-        groupSel.appendChild(h("option",
-          sel ? { value: g.id, selected: true } : { value: g.id },
+    const fillPhaseGroups = () => {
+      phaseGroupSel.innerHTML = "";
+      phaseGroupSel.appendChild(h("option",
+        initiallyBlank ? { value: "", selected: true } : { value: "" },
+        "— Select Phase Group —"));
+      effectiveGroups().forEach(g => {
+        const isInitial = scopedGroupId === g.id;
+        phaseGroupSel.appendChild(h("option",
+          isInitial ? { value: g.id, selected: true } : { value: g.id },
           g.title));
       });
     };
-    fillGroups();
-    phaseSel.addEventListener("change", () => fillGroups());
+    const fillPhases = (preferId) => {
+      phaseSel.innerHTML = "";
+      const pgId = phaseGroupSel.value;
+      if (!pgId) {
+        phaseSel.appendChild(h("option", { value: "", disabled: true, selected: true }, "— Pick a Phase Group first —"));
+        return;
+      }
+      const list = effectivePhases().filter(p => p.groupId === pgId);
+      if (list.length === 0) {
+        phaseSel.appendChild(h("option", { value: "", disabled: true, selected: true }, "No phases — add one →"));
+        return;
+      }
+      const wantBlank = initiallyBlank && !preferId;
+      if (wantBlank) phaseSel.appendChild(h("option", { value: "", selected: true }, "— Select Phase —"));
+      list.forEach(p => {
+        const isInitial = preferId
+          ? preferId === p.id
+          : (!initiallyBlank && UI.phaseFilter === p.id);
+        phaseSel.appendChild(h("option",
+          isInitial ? { value: p.id, selected: true } : { value: p.id },
+          `${p.num} — ${p.title}`));
+      });
+    };
+    fillPhaseGroups();
+    fillPhases();
+    phaseGroupSel.addEventListener("change", () => fillPhases());
 
     const phaseAddBtn = h("button", {
       type: "button",
       class: "ef-add-btn",
-      title: "Create a new phase",
-      onclick: () => startInlinePhaseCreate(phaseSel, phaseAddBtn, fillPhases, fillGroups),
-      html: ICONS.plus
-    });
-    const groupAddBtn = h("button", {
-      type: "button",
-      class: "ef-add-btn",
-      title: "Create a new group in this phase",
+      title: "Create a new phase in this Phase Group",
       onclick: () => {
-        if (!phaseSel.value) { toast("Pick a phase first"); return; }
-        startInlineGroupCreate(groupSel, groupAddBtn, phaseSel.value, fillGroups);
+        const pgId = phaseGroupSel.value;
+        startInlinePhaseCreate(phaseSel, phaseAddBtn, () => fillPhases(), () => {}, pgId);
       },
       html: ICONS.plus
     });
@@ -11605,7 +11742,10 @@ function showScheduleModal(dateStr) {
         ed = d.toISOString().slice(0, 10);
       }
       const phaseId = phaseSel.value;
-      const groupId = groupSel.value;
+      if (!phaseId) { toast("Pick a phase (or add one)", "warn"); return; }
+      // Auto-pick the first inner task-bucket of the chosen phase.
+      const phase = effectivePhases().find(p => p.id === phaseId);
+      const groupId = (phase && phase.groups && phase.groups[0] && phase.groups[0].id) || "g-default";
       const id = "ct-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 10000).toString(36);
       STATE.__customTasks = STATE.__customTasks || [];
       STATE.__customTasks.push({ id, phaseId, groupId, title, desc: "" });
@@ -11681,15 +11821,15 @@ function showScheduleModal(dateStr) {
           makeTimePair(startTimeNew, endTimeNew, { hideLabel: true })
         ])
       ]),
-      // Phase + group + create button
+      // Phase group + Phase + create button
       h("div", { class: "sched-new-card-meta" }, [
+        h("div", { class: "sched-new-card-field" }, [
+          h("label", { class: "sched-field-label" }, "Phase Group"),
+          phaseGroupSel
+        ]),
         h("div", { class: "sched-new-card-field" }, [
           h("label", { class: "sched-field-label" }, "Phase"),
           h("div", { class: "ef-select-with-add" }, [phaseSel, phaseAddBtn])
-        ]),
-        h("div", { class: "sched-new-card-field" }, [
-          h("label", { class: "sched-field-label" }, "Group"),
-          h("div", { class: "ef-select-with-add" }, [groupSel, groupAddBtn])
         ]),
         h("button", {
           class: "btn btn-primary sched-create-btn",
@@ -16780,8 +16920,74 @@ async function boot() {
   }, 60000);
 }
 
+/* Sidebar resize — drag the handle on the seam between sidebar and main to
+   set a new width. Width persists via UI.sidebarWidth → saveUI(). Disabled
+   on viewports ≤1280px (where the sidebar collapses to a thin strip). */
+const SIDEBAR_MIN_PX = 220;
+const SIDEBAR_MAX_PX = 520;
+
+function applySidebarWidth() {
+  const w = Math.max(SIDEBAR_MIN_PX, Math.min(SIDEBAR_MAX_PX, (UI && UI.sidebarWidth) || 280));
+  document.documentElement.style.setProperty("--sidebar-w", w + "px");
+}
+
+function installSidebarResizer() {
+  if (document.querySelector(".sidebar-resizer")) return;
+  const handle = document.createElement("div");
+  handle.className = "sidebar-resizer";
+  handle.title = "Drag to resize sidebar — double-click to reset";
+  document.body.appendChild(handle);
+
+  let dragging = false;
+  let startX = 0;
+  let startW = 0;
+
+  const onMove = (e) => {
+    if (!dragging) return;
+    const next = Math.max(SIDEBAR_MIN_PX, Math.min(SIDEBAR_MAX_PX, startW + (e.clientX - startX)));
+    document.documentElement.style.setProperty("--sidebar-w", next + "px");
+  };
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove("is-dragging");
+    document.body.classList.remove("is-resizing-sidebar");
+    document.removeEventListener("pointermove", onMove);
+    document.removeEventListener("pointerup", onUp);
+    document.removeEventListener("pointercancel", onUp);
+    // Read the final width back from the CSS variable and persist it.
+    const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sidebar-w"), 10);
+    if (!isNaN(cur)) {
+      UI.sidebarWidth = cur;
+      saveUI();
+    }
+  };
+
+  handle.addEventListener("pointerdown", (e) => {
+    if (window.innerWidth <= 1280) return; // collapsed-sidebar mode
+    e.preventDefault();
+    dragging = true;
+    startX = e.clientX;
+    startW = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sidebar-w"), 10) || 280;
+    handle.classList.add("is-dragging");
+    document.body.classList.add("is-resizing-sidebar");
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
+  });
+
+  // Double-click resets to the default 280px.
+  handle.addEventListener("dblclick", () => {
+    UI.sidebarWidth = 280;
+    saveUI();
+    applySidebarWidth();
+  });
+}
+
 async function init() {
   UI = loadUI();
+  installSidebarResizer();
+  applySidebarWidth();
   const lockCfg = getLockConfig();
   if (lockCfg.enabled) {
     showLockScreen();
