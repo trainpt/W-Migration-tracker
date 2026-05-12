@@ -7,45 +7,80 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 /* ==========================================================
-   Design tokens — warm, editorial, Wonderful-inspired
+   Design tokens — PickTrace brand
    ========================================================== */
 :root {
-  --bg: #F7F3EC;
-  --bg-2: #FBF8F3;
-  --bg-3: #F1ECE2;
-  --surface: #FFFFFF;
-  --ink: #1A1D23;
-  --ink-2: #3D4148;
-  --ink-3: #6B6860;
-  --muted: #9A948A;
-  --line: #E9E3D6;
-  --line-2: #D6CFC2;
-  --citrus: #E8763A;
-  --citrus-deep: #C95D26;
-  --citrus-soft: #FBE8D8;
-  --citrus-glow: rgba(232,118,58,0.14);
-  --leaf: #4A7C59;
-  --leaf-soft: #E1EBE3;
-  --sun: #D97706;
-  --sun-soft: #FCEBD3;
-  --danger: #B23A48;
-  --danger-soft: #F8DFE2;
-  --blocked: #735785;
-  --blocked-soft: #EADFF0;
-  --info: #3E6F9A;
-  --info-soft: #E5EEF5;
+  /* === Surfaces === */
+  --bg:        #FFFFFF;
+  --bg-2:      #F5F7FA;
+  --bg-3:      #EBEFF5;
+  --surface:   #FFFFFF;
+
+  /* === Ink (text) === */
+  --ink:       #0F1B2D;
+  --ink-2:     #2C3A4F;
+  --ink-3:     #5A6675;
+  --muted:     #8A95A5;
+
+  /* === Lines === */
+  --line:      #E1E6EE;
+  --line-2:    #C9D2DD;
+
+  /* === PickTrace brand === */
+  --pt-navy:       #1F2A3D;
+  --pt-navy-deep:  #14202F;
+  --pt-navy-soft:  #E5E9F0;
+
+  --pt-orange:       var(--pt-navy);
+  --pt-orange-deep:  var(--pt-navy-deep);
+  --pt-orange-soft:  var(--pt-navy-soft);
+  --pt-orange-glow:  rgba(15,27,45,0.18);
+
+  /* === Semantic === */
+  --success:       #10B981;
+  --success-soft:  #D1FAE5;
+  --danger:        #DC2626;
+  --danger-soft:   #FEE2E2;
+  --warn:          var(--danger);
+  --warn-soft:     var(--danger-soft);
+  --blocked:       #6366F1;
+  --blocked-soft:  #E0E7FF;
+  --info:          #2563EB;
+  --info-soft:     #DBEAFE;
+
+  /* === Accent aliases (back-compat with --citrus-* / --leaf-* references throughout the file).
+     --citrus* now resolves to navy so most chrome reads navy; orange is reserved
+     for primary CTA, urgency, and "today" indicators (applied directly via --pt-orange). === */
+  --citrus:       var(--pt-navy);
+  --citrus-deep:  var(--pt-navy-deep);
+  --citrus-soft:  var(--pt-navy-soft);
+  --citrus-glow:  rgba(15,27,45,0.10);
+  --leaf:         var(--success);
+  --leaf-soft:    var(--success-soft);
+  --sun:          var(--warn);
+  --sun-soft:     var(--warn-soft);
+
+  /* === Typography === */
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-body: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --radius: 12px;
-  --radius-sm: 8px;
+
+  /* === Geometry === */
+  --radius:      10px;
+  --radius-sm:   6px;
   --radius-pill: 999px;
-  --shadow-sm: 0 1px 2px rgba(26,29,35,0.04);
-  --shadow-md: 0 4px 14px rgba(26,29,35,0.07);
-  --shadow-lg: 0 16px 40px rgba(26,29,35,0.10);
-  --ring: 0 0 0 3px rgba(232,118,58,0.22);
+
+  /* === Shadows (cooler tint to match navy) === */
+  --shadow-sm: 0 1px 2px rgba(15,27,45,0.06);
+  --shadow-md: 0 4px 14px rgba(15,27,45,0.10);
+  --shadow-lg: 0 16px 40px rgba(15,27,45,0.14);
+
+  --ring: 0 0 0 3px rgba(15,27,45,0.28);
 }
 
 * { box-sizing: border-box; }
@@ -84,8 +119,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 /* ---------- Topbar ---------- */
 .topbar {
   grid-area: topbar;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  background: var(--pt-navy);
+  color: #FFFFFF;
+  border-bottom: 1px solid var(--pt-navy-deep);
   display: flex;
   align-items: center;
   gap: 18px;
@@ -95,13 +131,15 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   z-index: 50;
   will-change: transform;
 }
+.topbar .brand-text { color: #FFFFFF; }
+.topbar .brand-sub { color: rgba(255,255,255,0.62); }
 .brand { display: flex; align-items: center; gap: 11px; }
 .brand-mark {
   display: inline-block;
   height: 80px;
   width: auto;
   margin: -8px 0;
-  color: var(--citrus-deep);
+  color: #FFFFFF;
   flex-shrink: 0;
   line-height: 0;
   /* Mouse-tracked tilt. Transform is set dynamically in JS; the
@@ -143,17 +181,33 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border-radius: 0;
   font-size: 13px;
   display: inline-flex; align-items: center; gap: 7px;
+  color: rgba(255,255,255,0.72);
 }
+.topbar-tabs .view-tab:hover { color: #FFFFFF; }
+.topbar-tabs .view-tab.is-active { color: #FFFFFF; }
 .topbar-tabs .view-tab.is-active::after {
   bottom: 0;
   left: 12px;
   right: 12px;
+  background: var(--pt-orange);
+}
+.topbar-tabs .view-tab .count {
+  background: rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.80);
+}
+.topbar-tabs .view-tab.is-active .count {
+  background: #FFFFFF;
+  color: var(--pt-navy);
 }
 .countdown {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: var(--radius-pill);
-  background: var(--citrus-soft); color: var(--citrus-deep);
+  background: var(--pt-orange); color: #FFFFFF;
   font-size: 12px; font-weight: 500;
+}
+.mobile-menu .countdown {
+  background: var(--pt-orange-soft);
+  color: var(--pt-orange-deep);
 }
 .countdown b {
   font-family: var(--font-display); font-weight: 600;
@@ -161,24 +215,39 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .topbar-actions { display: flex; gap: 6px; align-items: center; }
 
+/* Topbar button overrides — navy background context */
+.topbar .btn-ghost { color: rgba(255,255,255,0.78); }
+.topbar .btn-ghost:hover { color: #FFFFFF; background: rgba(255,255,255,0.10); }
+.topbar .btn-outline {
+  background: transparent;
+  border-color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.92);
+}
+.topbar .btn-outline:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.55);
+  color: #FFFFFF;
+}
+.topbar .btn-primary { color: #FFFFFF; }
+
 /* ---------- Mobile hamburger + slide-down menu ---------- */
 .topbar-hamburger {
   display: none;
   align-items: center; justify-content: center;
   width: 44px; height: 44px;
   border-radius: var(--radius-sm);
-  color: var(--ink);
+  color: #FFFFFF;
   background: transparent;
-  border: 1px solid var(--line-2);
+  border: 1px solid rgba(255,255,255,0.28);
   flex-shrink: 0;
   margin-left: auto;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .topbar-hamburger:hover,
 .topbar-hamburger.is-open {
-  background: var(--citrus-soft);
-  color: var(--citrus-deep);
-  border-color: var(--citrus);
+  background: var(--pt-navy-deep);
+  color: var(--pt-orange);
+  border-color: var(--pt-orange);
 }
 .topbar-hamburger svg { display: block; }
 .mobile-menu {
@@ -223,8 +292,8 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .mobile-menu .view-tab.is-active::after { display: none; }
 .mobile-menu .view-tab.is-active {
-  background: var(--citrus-soft);
-  color: var(--citrus-deep);
+  background: var(--pt-navy-soft);
+  color: var(--pt-navy);
   font-weight: 600;
 }
 .mobile-menu .countdown {
@@ -245,15 +314,15 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   background: var(--surface);
   color: var(--ink-2);
 }
-.btn-outline:hover { border-color: var(--citrus); color: var(--citrus-deep); background: var(--citrus-soft); }
-.btn-ghost { color: var(--ink-3); }
-.btn-ghost:hover { color: var(--citrus-deep); background: var(--citrus-soft); }
+.btn-outline:hover { border-color: var(--pt-navy); color: var(--pt-navy); background: var(--pt-navy-soft); }
+.btn-ghost { color: var(--ink-2); }
+.btn-ghost:hover { color: var(--ink); background: var(--bg-2); }
 .btn-primary {
-  background: var(--ink);
-  color: white;
+  background: var(--pt-orange);
+  color: #FFFFFF;
   padding: 8px 14px;
 }
-.btn-primary:hover { background: var(--citrus-deep); }
+.btn-primary:hover { background: var(--pt-orange-deep); }
 .btn-danger {
   background: var(--danger-soft);
   color: var(--danger);
@@ -384,21 +453,21 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .nav-link.is-complete .nav-progress { color: var(--leaf); opacity: 0.85; }
 .nav-link.is-complete:hover { background: var(--leaf-soft); filter: brightness(0.97); }
 .nav-link.is-active {
-  background: var(--citrus-soft);
-  color: var(--citrus-deep);
+  background: var(--pt-navy-soft);
+  color: var(--pt-navy);
   font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--citrus);
+  box-shadow: inset 3px 0 0 var(--pt-navy);
 }
-.nav-link.is-active.is-complete { background: var(--citrus-soft); color: var(--citrus-deep); }
+.nav-link.is-active.is-complete { background: var(--pt-navy-soft); color: var(--pt-navy); }
 .nav-link.is-active.is-complete .nav-num,
-.nav-link.is-active.is-complete .nav-progress { color: var(--citrus); opacity: 1; }
+.nav-link.is-active.is-complete .nav-progress { color: var(--pt-navy); opacity: 1; }
 .nav-num {
   font-family: var(--font-mono);
   font-size: 10px; font-weight: 500;
   color: var(--muted);
   min-width: 22px;
 }
-.nav-link.is-active .nav-num { color: var(--citrus); }
+.nav-link.is-active .nav-num { color: var(--pt-navy); }
 .nav-progress {
   margin-left: auto;
   font-size: 10px; color: var(--muted);
@@ -461,9 +530,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   display: inline-block;
   font-size: 10px; font-weight: 600;
   letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--citrus-deep);
+  color: var(--pt-navy);
   padding: 4px 10px; border-radius: var(--radius-pill);
-  background: var(--citrus-soft);
+  background: var(--pt-navy-soft);
   margin-bottom: 16px;
 }
 .hero-title {
@@ -474,7 +543,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   color: var(--ink);
 }
 .hero-title em {
-  color: var(--citrus-deep);
+  color: var(--pt-navy);
   font-style: italic; font-weight: 400;
 }
 .hero-subtitle {
@@ -529,14 +598,14 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .view-tab:hover { color: var(--ink); }
 .view-tab.is-active {
-  color: var(--citrus-deep);
+  color: var(--pt-navy);
 }
 .view-tab.is-active::after {
   content: "";
   position: absolute;
   bottom: -1px; left: 16px; right: 16px;
   height: 2px;
-  background: var(--citrus);
+  background: var(--pt-orange);
   border-radius: 2px 2px 0 0;
 }
 .view-tab .count {
@@ -547,7 +616,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   font-size: 10px; font-weight: 600;
   color: var(--ink-3);
 }
-.view-tab.is-active .count { background: var(--citrus-soft); color: var(--citrus-deep); }
+.view-tab.is-active .count { background: var(--pt-navy-soft); color: var(--pt-navy); }
 .view-panel { display: none; }
 .view-panel.is-active { display: block; }
 
@@ -602,7 +671,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 /* ---------- Attention panel ---------- */
 .attention {
   background: linear-gradient(135deg, #fff 0%, var(--citrus-soft) 100%);
-  border: 1px solid rgba(232,118,58,0.2);
+  border: 1px solid rgba(15,27,45,0.2);
   border-radius: var(--radius);
   padding: 18px 20px;
   margin-bottom: 24px;
@@ -629,7 +698,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px; border-radius: var(--radius-sm);
   background: var(--surface);
-  border: 1px solid rgba(232,118,58,0.15);
+  border: 1px solid rgba(15,27,45,0.15);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.12s ease;
@@ -769,7 +838,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 .task.is-complete { opacity: 0.72; }
 .task.is-expanded {
   border-color: var(--citrus);
-  box-shadow: 0 2px 8px rgba(232,118,58,0.08);
+  box-shadow: 0 2px 8px rgba(15,27,45,0.08);
   grid-column: 1 / -1;
 }
 
@@ -802,9 +871,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border-top: 4px solid currentColor;
   margin-left: 2px; opacity: 0.6;
 }
-.status-not_started { background: var(--bg-3); color: var(--ink-3); }
+.status-not_started { background: var(--bg-2); color: var(--ink-3); }
 .status-in_progress { background: var(--info-soft); color: var(--info); }
-.status-complete { background: var(--leaf-soft); color: var(--leaf); }
+.status-complete { background: var(--success-soft); color: var(--success); }
 .status-blocked { background: var(--blocked-soft); color: var(--blocked); }
 
 .task-status-menu {
@@ -1153,7 +1222,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .bug-input:focus {
   outline: none; border-color: var(--citrus);
-  box-shadow: 0 0 0 2px rgba(232,118,58,0.15);
+  box-shadow: 0 0 0 2px rgba(15,27,45,0.15);
 }
 .bug-textarea {
   width: 100%; min-height: 45px;
@@ -1168,7 +1237,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .bug-textarea:focus {
   outline: none; border-color: var(--citrus);
-  box-shadow: 0 0 0 2px rgba(232,118,58,0.15);
+  box-shadow: 0 0 0 2px rgba(15,27,45,0.15);
 }
 .bug-link-row {
   display: flex; gap: 6px; margin-top: 6px;
@@ -1271,12 +1340,12 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   transition: background 0.12s ease;
   overflow: hidden;
 }
-.cal-day:hover { background: #FEF8F5; }
+.cal-day:hover { background: var(--bg-2); }
 .cal-day.is-other-month { background: var(--bg-3); color: var(--muted); }
 .cal-day.is-today .cal-daynum {
   color: white;
   font-weight: 700;
-  background: var(--citrus);
+  background: var(--pt-orange);
   border-radius: 50%;
   width: 22px;
   height: 22px;
@@ -1285,8 +1354,8 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   justify-content: center;
   line-height: 1;
 }
-.cal-day.is-weekend { background: #FAF7F0; }
-.cal-day.is-weekend.is-other-month { background: #EDE7D9; }
+.cal-day.is-weekend { background: var(--bg-2); }
+.cal-day.is-weekend.is-other-month { background: var(--bg-3); }
 .cal-daynum {
   font-size: 12px; font-weight: 500;
   color: var(--ink-2);
@@ -1407,9 +1476,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   background: var(--bg-3); color: var(--ink-3);
   letter-spacing: 0.02em;
 }
-.cal-tooltip .tt-pill.status-not_started { background: var(--bg-3); color: var(--ink-3); }
+.cal-tooltip .tt-pill.status-not_started { background: var(--bg-2); color: var(--ink-3); }
 .cal-tooltip .tt-pill.status-in_progress { background: var(--info-soft); color: var(--info); }
-.cal-tooltip .tt-pill.status-complete { background: var(--leaf-soft); color: var(--leaf); }
+.cal-tooltip .tt-pill.status-complete { background: var(--success-soft); color: var(--success); }
 .cal-tooltip .tt-pill.status-blocked { background: var(--blocked-soft); color: var(--blocked); }
 .cal-tooltip .tt-pill.is-urgent { background: var(--danger-soft); color: var(--danger); }
 .cal-tooltip .tt-pill.is-priority { background: var(--sun-soft); color: var(--sun); }
@@ -2081,7 +2150,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 /* ---------- Modal ---------- */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(26,29,35,0.55);
+  background: rgba(15,27,45,0.55);
   backdrop-filter: blur(4px);
   z-index: 200;
   display: none;
@@ -2134,7 +2203,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   display: flex; gap: 10px;
   padding: 12px 14px;
   background: var(--sun-soft);
-  border: 1px solid rgba(217,119,6,0.2);
+  border: 1px solid rgba(220,38,38,0.2);
   border-radius: 7px;
   font-size: 12px; line-height: 1.5;
   color: var(--ink-2);
@@ -2148,7 +2217,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   margin: 0 8px 12px;
   padding: 11px 13px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--citrus) 0%, var(--citrus-deep) 100%);
+  background: linear-gradient(135deg, var(--pt-navy) 0%, var(--pt-navy-deep) 100%);
   color: white;
   font-size: 13px; font-weight: 600;
   letter-spacing: -0.005em;
@@ -2176,7 +2245,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 
 .dash-overlay {
   position: fixed; inset: 0;
-  background: rgba(26,29,35,0.68);
+  background: rgba(15,27,45,0.68);
   backdrop-filter: blur(6px);
   z-index: 220;
   display: none;
@@ -2256,7 +2325,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   align-items: center;
   padding: 3px;
   gap: 1px;
-  background: rgba(26,29,35,0.05);
+  background: rgba(15,27,45,0.05);
   border: none;
   border-radius: 8px;
   height: 30px;
@@ -2294,13 +2363,13 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .dash-chip:hover {
   color: var(--ink);
-  background: rgba(26,29,35,0.04);
+  background: rgba(15,27,45,0.04);
 }
 .dash-chip.is-active {
   background: var(--surface);
   color: var(--ink);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(26,29,35,0.08), 0 0 0 0.5px rgba(26,29,35,0.06);
+  box-shadow: 0 1px 2px rgba(15,27,45,0.08), 0 0 0 0.5px rgba(15,27,45,0.06);
 }
 .dash-chip.is-active:hover {
   background: var(--surface);
@@ -2308,35 +2377,35 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .dash-chip.is-active.is-phase {
   background: var(--surface);
-  color: var(--citrus-deep);
-  box-shadow: 0 1px 2px rgba(232,118,58,0.18), 0 0 0 0.5px rgba(232,118,58,0.22);
+  color: var(--pt-navy);
+  box-shadow: 0 1px 2px rgba(15,27,45,0.14), 0 0 0 0.5px rgba(15,27,45,0.18);
 }
 .dash-chip.is-active.is-status-complete {
   background: var(--surface);
-  color: var(--leaf);
-  box-shadow: 0 1px 2px rgba(74,124,89,0.18), 0 0 0 0.5px rgba(74,124,89,0.22);
+  color: var(--success);
+  box-shadow: 0 1px 2px rgba(16,185,129,0.18), 0 0 0 0.5px rgba(16,185,129,0.22);
 }
 .dash-chip.is-active.is-status-in_progress {
   background: var(--surface);
-  color: var(--citrus-deep);
-  box-shadow: 0 1px 2px rgba(232,118,58,0.18), 0 0 0 0.5px rgba(232,118,58,0.22);
+  color: var(--info);
+  box-shadow: 0 1px 2px rgba(37,99,235,0.18), 0 0 0 0.5px rgba(37,99,235,0.22);
 }
 .dash-chip.is-active.is-status-blocked {
   background: var(--surface);
   color: var(--blocked);
-  box-shadow: 0 1px 2px rgba(115,87,133,0.18), 0 0 0 0.5px rgba(115,87,133,0.22);
+  box-shadow: 0 1px 2px rgba(99,102,241,0.18), 0 0 0 0.5px rgba(99,102,241,0.22);
 }
 .dash-chip.is-active.is-status-not_started {
   background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 1px 2px rgba(26,29,35,0.08), 0 0 0 0.5px rgba(26,29,35,0.06);
+  box-shadow: 0 1px 2px rgba(15,27,45,0.08), 0 0 0 0.5px rgba(15,27,45,0.06);
 }
 
 .dash-custom-range {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 0 12px;
   height: 30px;
-  background: rgba(26,29,35,0.05);
+  background: rgba(15,27,45,0.05);
   border: none;
   border-radius: 8px;
 }
@@ -2541,7 +2610,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 }
 .dash-phase-seg { height: 100%; transition: flex-basis 0.25s ease; }
 .dash-phase-seg.is-complete { background: var(--leaf); }
-.dash-phase-seg.is-in_progress { background: var(--citrus); }
+.dash-phase-seg.is-in_progress { background: var(--info); }
 .dash-phase-seg.is-blocked { background: var(--danger); }
 .dash-phase-seg.is-not_started { background: var(--line-2); }
 
@@ -2606,10 +2675,10 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   border: 1px solid var(--line);
   cursor: default;
 }
-.dash-heatmap-cell.l1 { background: rgba(232,118,58,0.20); border-color: rgba(232,118,58,0.30); }
-.dash-heatmap-cell.l2 { background: rgba(232,118,58,0.42); border-color: rgba(232,118,58,0.50); }
-.dash-heatmap-cell.l3 { background: rgba(232,118,58,0.68); border-color: rgba(232,118,58,0.70); }
-.dash-heatmap-cell.l4 { background: var(--citrus); border-color: var(--citrus-deep); }
+.dash-heatmap-cell.l1 { background: rgba(15,27,45,0.20); border-color: rgba(15,27,45,0.30); }
+.dash-heatmap-cell.l2 { background: rgba(15,27,45,0.42); border-color: rgba(15,27,45,0.50); }
+.dash-heatmap-cell.l3 { background: rgba(15,27,45,0.68); border-color: rgba(15,27,45,0.70); }
+.dash-heatmap-cell.l4 { background: var(--pt-orange); border-color: var(--pt-orange-deep); }
 .dash-heatmap-cell.is-today { box-shadow: 0 0 0 1.5px var(--ink); }
 .dash-heatmap-scale {
   display: flex; align-items: center; gap: 6px;
@@ -2637,7 +2706,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   flex-shrink: 0;
 }
 .dash-item-dot.is-not_started { background: var(--muted); }
-.dash-item-dot.is-in_progress { background: var(--citrus); }
+.dash-item-dot.is-in_progress { background: var(--info); }
 .dash-item-dot.is-complete { background: var(--leaf); }
 .dash-item-dot.is-blocked { background: var(--danger); }
 .dash-item-title {
@@ -2810,9 +2879,9 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   animation: dash-flash 1.4s ease-out;
 }
 @keyframes dash-flash {
-  0%   { box-shadow: 0 0 0 0 rgba(232,118,58,0.55); background: var(--citrus-soft); }
-  60%  { box-shadow: 0 0 0 6px rgba(232,118,58,0); background: var(--citrus-soft); }
-  100% { box-shadow: 0 0 0 0 rgba(232,118,58,0); background: transparent; }
+  0%   { box-shadow: 0 0 0 0 rgba(15,27,45,0.55); background: var(--citrus-soft); }
+  60%  { box-shadow: 0 0 0 6px rgba(15,27,45,0); background: var(--citrus-soft); }
+  100% { box-shadow: 0 0 0 0 rgba(15,27,45,0); background: transparent; }
 }
 
 @media (max-width: 1100px) {
@@ -2880,7 +2949,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
 /* ---------- Lock screen ---------- */
 .lock-screen {
   position: fixed; inset: 0;
-  background: var(--bg);
+  background: var(--bg-2);
   z-index: 500;
   display: none;
   align-items: center;
@@ -2904,7 +2973,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   background: linear-gradient(135deg, var(--citrus), var(--citrus-deep));
   border-radius: 14px;
   color: white;
-  box-shadow: 0 8px 20px rgba(232,118,58,0.25);
+  box-shadow: 0 8px 20px rgba(15,27,45,0.25);
 }
 .lock-title {
   font-family: var(--font-display);
@@ -2951,7 +3020,7 @@ a:hover { color: var(--citrus); text-decoration: underline; }
   transition: all 0.15s ease;
 }
 .fab.is-visible { display: inline-flex; }
-.fab:hover { background: var(--citrus-deep); transform: translateY(-2px); }
+.fab:hover { background: var(--pt-orange); transform: translateY(-2px); }
 
 kbd {
   display: inline-flex; align-items: center; justify-content: center;
@@ -3230,7 +3299,7 @@ kbd {
 .risk-row:hover { border-color: var(--line-2); }
 .risk-row.is-open {
   border-color: var(--citrus);
-  box-shadow: 0 2px 8px rgba(232,118,58,0.08);
+  box-shadow: 0 2px 8px rgba(15,27,45,0.08);
 }
 .risk-row.is-urgent { border-left: 3px solid var(--danger); }
 
@@ -3934,11 +4003,11 @@ kbd {
 }
 .calendar-card .cal-day.has-ooo.is-weekend,
 .cal-day.has-ooo.is-weekend {
-  background: #D9E7DC;
+  background: #A7F3D0;
 }
 .calendar-card .cal-day:hover,
 .calendar-card .cal-day.is-weekend:hover,
-.calendar-card .cal-day.is-other-month:hover { background: #FEF8F5; }
+.calendar-card .cal-day.is-other-month:hover { background: var(--bg-2); }
 .calendar-card .cal-daynum {
   font-family: var(--font-display);
   font-weight: 500;
@@ -4233,13 +4302,13 @@ kbd {
   display: flex; flex-direction: column;
   min-width: 0;
 }
-.timed-col.is-today { background: rgba(232,118,58,0.03); }
+.timed-col.is-today { background: rgba(15,27,45,0.03); }
 .timed-col.has-ooo {
   background: var(--leaf-soft);
   /* Small white inset on both sides so adjacent OOO columns visually separate */
   box-shadow: inset 3px 0 0 var(--surface), inset -3px 0 0 var(--surface);
 }
-.timed-col.has-ooo.is-today { background: #DEE9DA; }
+.timed-col.has-ooo.is-today { background: #A7F3D0; }
 .timed-col.has-ooo .timed-slot { background: transparent; }
 .timed-allday {
   /* Fixed height so every column's grid starts at the same Y, which keeps
@@ -4263,7 +4332,7 @@ kbd {
   border-bottom: 1px dashed var(--line);
   cursor: pointer;
 }
-.timed-slot:hover { background: rgba(232,118,58,0.05); }
+.timed-slot:hover { background: rgba(15,27,45,0.05); }
 .timed-pill {
   background: var(--citrus-soft);
   color: var(--citrus-deep);
@@ -4505,7 +4574,7 @@ kbd {
   border: 1px solid;
   border-radius: 10px;
 }
-.cal-up-row:hover { border-color: var(--citrus); box-shadow: 0 2px 8px rgba(232,118,58,0.08); }
+.cal-up-row:hover { border-color: var(--citrus); box-shadow: 0 2px 8px rgba(15,27,45,0.08); }
 .cal-up-row.is-complete { opacity: 0.6; }
 .cal-up-dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -4581,7 +4650,7 @@ kbd {
     border: 1px solid var(--line);
     border-left: none;
     border-radius: 0 12px 12px 0;
-    box-shadow: 2px 2px 8px rgba(26,29,35,0.06);
+    box-shadow: 2px 2px 8px rgba(15,27,45,0.06);
     font-size: 16px; font-weight: 700;
     pointer-events: none;
     animation: sidebar-breathe 1.8s ease-in-out infinite;
@@ -5246,26 +5315,26 @@ const STORAGE_KEY = "wonderful-pt3-tracker-v4";
    so it can be injected into the topbar via innerHTML. fill colors are
    swapped to currentColor so CSS can tint it to the site's citrus palette. */
 const LOGO_SVG = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 544" xml:space="preserve" aria-hidden="true">
-<path fill="#000000" opacity="1" stroke="none" d="M488.141968,316.296692 C486.502533,329.325989 487.667389,341.998169 487.308075,354.639679 C487.213776,357.958740 487.554565,361.280975 486.746979,364.586853 C482.833038,380.608673 469.014313,390.127838 452.282379,388.245392 C437.717072,386.606720 425.935547,373.308838 425.869019,357.708801 C425.709198,320.213074 425.812683,282.716217 425.811462,245.219833 C425.811188,236.220779 425.740967,227.220840 425.847229,218.223007 C425.914978,212.487854 426.064850,206.805939 421.025085,202.649429 C426.877747,199.274368 440.761841,200.634842 444.922729,204.716446 C448.046967,207.781174 448.396210,211.702606 448.393585,215.808792 C448.370056,252.805252 448.398743,289.801758 448.412476,326.798248 C448.415771,335.630737 448.373444,344.463654 448.457855,353.295349 C448.478333,355.438416 448.734070,357.619080 449.205750,359.709259 C450.038513,363.399261 452.563446,365.431427 456.292664,365.639160 C459.932465,365.841919 462.766388,364.296844 464.397186,360.921082 C465.433563,358.775787 465.660767,356.470398 465.653168,354.104675 C465.621643,344.272400 465.590302,334.439667 465.649597,324.607666 C465.792145,300.972229 482.827057,283.892456 506.361603,283.774445 C516.860413,283.721771 527.360046,283.809082 537.858459,283.725433 C560.382019,283.546021 579.879517,265.719513 581.658264,243.756851 C583.607544,219.688721 568.335571,198.720306 545.679749,194.425644 C541.752747,193.681229 537.790344,193.325027 533.764282,193.330078 C488.768616,193.386597 443.772827,193.374359 398.777069,193.372406 C391.958740,193.372116 392.075470,193.358109 392.380463,186.746414 C392.541016,183.265854 392.302856,179.756683 392.077484,176.271240 C391.813904,172.194763 393.527496,170.740051 397.644958,170.764542 C420.808594,170.902359 443.973511,170.831741 467.137970,170.825745 C489.802521,170.819870 512.467163,170.757401 535.131592,170.807663 C567.494324,170.879440 593.506897,190.209625 602.023071,221.413300 C609.842346,250.063354 598.159607,283.560669 569.430969,296.497070 C562.349243,299.685944 554.928467,301.346710 547.147400,301.347473 C533.815308,301.348785 520.482910,301.298279 507.151306,301.384552 C497.107300,301.449524 490.924591,306.270111 488.141968,316.296692 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M507.116760,137.283020 C509.704529,134.663666 508.492737,131.686417 508.669952,128.962082 C508.935333,124.881233 510.003754,121.369576 514.772888,121.481041 C519.160828,121.583611 521.046265,124.624641 521.282593,128.852249 C521.773193,137.625809 521.850952,137.075592 530.621338,137.841675 C537.306580,138.425659 543.075684,135.721390 549.283630,134.685425 C552.079529,134.218872 550.949463,130.430801 553.467285,129.360474 C556.189331,130.223740 555.805481,132.698120 555.859680,134.673843 C555.943237,137.722229 557.361206,138.984360 560.257019,139.671600 C602.967346,149.807983 629.041260,176.511093 636.536926,219.632675 C646.767639,278.487915 601.402649,330.360779 545.134399,330.367340 C529.639099,330.369141 514.141235,330.220123 498.650146,330.479431 C493.948883,330.558136 492.624664,328.896820 492.709808,324.410126 C492.934723,312.554169 497.583649,307.875336 509.348114,307.700592 C523.993530,307.483032 538.699646,308.840057 553.276611,306.933929 C584.500732,302.851013 609.275513,278.604614 614.531311,247.433701 C619.911987,215.522125 604.606689,184.248276 576.039978,168.944534 C564.757080,162.900055 552.602722,160.803513 539.880554,160.838348 C494.906158,160.961517 449.931274,160.912262 404.956573,160.927338 C403.123810,160.927963 401.290863,160.932327 399.458313,160.910599 C392.291809,160.825668 392.120453,160.652664 392.090729,153.656235 C392.084381,152.156723 392.075317,150.657211 392.062683,149.157745 C391.974640,138.710983 391.985870,138.810471 402.446411,137.586426 C405.501099,137.228973 408.373199,136.172012 411.630341,136.606018 C414.302948,136.962128 415.698395,134.810242 415.951538,132.126755 C416.067261,130.900146 415.608765,129.513275 416.632172,128.488403 C417.922241,128.808884 417.805664,129.756851 417.897247,130.530533 C418.741119,137.659500 418.733978,137.663940 425.718048,137.680130 C429.050323,137.687866 432.386322,137.581497 435.713867,137.706757 C438.669800,137.818008 440.056824,136.631302 439.919037,133.616531 C439.827881,131.622528 439.814423,129.611298 439.965393,127.622894 C440.239349,124.014748 441.983704,121.511978 445.860321,121.531090 C449.750519,121.550262 451.957916,123.636436 452.301880,127.667381 C453.155029,137.665359 453.191315,137.662262 463.524078,137.676956 C463.690704,137.677200 463.857300,137.677551 464.023926,137.677765 C473.994965,137.689911 474.058014,137.693802 474.669464,127.815552 C474.882111,124.380257 476.153778,121.868813 479.734650,121.493073 C483.408661,121.107567 485.683746,123.128502 486.627441,126.650238 C486.799042,127.290565 486.925079,127.950226 486.996704,128.609161 C487.976776,137.628342 487.973480,137.649094 497.245880,137.653793 C500.406891,137.655380 503.567932,137.526047 507.116760,137.283020 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M496.257141,429.313049 C496.238220,432.758942 496.203278,435.754639 496.210236,438.750244 C496.215942,441.224548 495.061005,442.338684 492.545868,442.348999 C490.052826,442.359222 488.828400,441.317902 488.832611,438.814056 C488.847137,430.159576 488.841644,421.505127 488.860931,412.850647 C488.864441,411.275146 489.143311,409.846893 491.045593,409.438019 C493.107574,408.994873 495.038239,409.006744 496.500397,410.829895 C499.519592,414.594452 502.515625,418.377533 505.540405,422.137573 C506.990540,423.940155 508.484406,425.707581 510.356873,427.972931 C512.488281,423.279816 511.351318,418.811310 511.655396,414.519775 C511.827423,412.091980 511.117035,409.246796 515.044678,409.197113 C518.972534,409.147400 519.073975,411.791962 519.059021,414.629150 C519.019653,422.118622 519.056824,429.608765 518.966614,437.097443 C518.943970,438.977142 519.577515,441.397064 516.958435,442.140656 C514.569092,442.818909 512.418518,442.280609 510.751343,440.132904 C506.374908,434.494873 501.904968,428.929474 497.186432,422.974335 C495.791779,425.071747 496.478058,427.052551 496.257141,429.313049 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M531.590576,420.031494 C531.597107,417.873169 531.483704,416.197784 531.642151,414.548584 C531.818359,412.714874 530.786316,410.305176 533.487976,409.443207 C536.223633,408.570404 538.235352,409.631256 539.940552,411.894592 C543.242310,416.277222 546.696411,420.546051 550.128784,424.828796 C550.943970,425.845886 551.922791,426.731873 553.338623,428.214783 C554.480835,423.266296 553.765869,418.837952 554.025879,414.486847 C554.175781,411.979431 553.989685,409.259125 557.742859,409.277527 C561.519714,409.296051 561.306213,411.961395 561.307617,414.508820 C561.311829,421.996094 561.372070,429.484222 561.270874,436.970093 C561.246094,438.803436 562.135376,441.280457 559.497192,442.112610 C556.830322,442.953888 554.741516,441.883270 553.007446,439.653351 C548.633362,434.028442 544.121033,428.511017 539.247681,422.431000 C537.754272,427.854126 538.665466,432.778381 538.426086,437.617798 C538.307739,440.011566 538.489807,442.376709 534.925537,442.336273 C531.295593,442.295105 531.633850,439.825562 531.622803,437.497162 C531.596069,431.840179 531.599365,426.183075 531.590576,420.031494 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M627.291138,409.241455 C633.127991,409.958832 637.145569,412.384827 638.651367,417.949310 C640.227905,423.775146 637.434753,427.826843 632.662231,431.376892 C634.923462,434.744781 637.093628,437.977051 639.520935,441.592285 C634.625916,443.088654 631.007324,442.889465 628.540100,438.353058 C627.597473,436.619934 626.290710,435.060791 625.006592,433.543671 C623.490295,431.752167 621.366577,432.096680 619.434753,432.483002 C617.259888,432.917969 617.499268,434.866119 617.396484,436.498810 C617.344360,437.326874 617.325195,438.159393 617.341736,438.988892 C617.387512,441.277222 616.288635,442.252167 614.001038,442.266327 C611.695007,442.280579 610.661682,441.286163 610.662781,439.003662 C610.667053,430.202362 610.656677,421.400970 610.606384,412.599854 C610.591309,409.957825 612.145874,409.117706 614.414856,409.106964 C618.563965,409.087311 622.713318,409.144562 627.291138,409.241455 M628.464172,416.491241 C626.151062,416.361145 623.833252,416.285706 621.525879,416.088562 C617.681091,415.760010 617.283875,418.070801 617.291992,421.108887 C617.299866,424.038727 617.880066,426.027252 621.398254,425.701630 C623.045288,425.549225 624.728210,425.741760 626.366089,425.542236 C628.632629,425.266113 630.509216,424.210022 631.285095,421.906586 C632.038574,419.669525 630.965820,418.074524 628.464172,416.491241 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M597.997437,426.939331 C596.537415,430.229309 593.784851,428.614838 591.760132,429.311005 C588.296448,430.502045 581.661072,426.114532 581.666260,432.361145 C581.671692,438.884674 588.427002,434.541504 592.012634,435.647339 C593.382141,436.069733 594.985474,435.750427 596.482056,435.740479 C598.701416,435.725769 599.873291,436.780762 599.981140,439.025116 C600.093018,441.355713 598.937500,442.348541 596.684692,442.343872 C590.198181,442.330444 583.711487,442.317413 577.225342,442.365326 C574.654053,442.384308 573.688354,441.102417 573.697388,438.666718 C573.729431,430.017883 573.748596,421.368591 573.682251,412.720123 C573.662476,410.141327 574.917908,409.079834 577.305603,409.091919 C583.624268,409.123932 589.943176,409.166382 596.261047,409.264313 C598.371643,409.297028 599.732117,410.286865 599.742798,412.598541 C599.754333,415.086884 598.491211,416.208038 596.030762,416.187775 C592.371948,416.157593 588.712341,416.228729 585.053589,416.196777 C582.762512,416.176758 581.188110,416.759125 581.161072,419.498077 C581.132080,422.438751 582.962280,422.637390 585.146545,422.538391 C588.134399,422.402924 591.122437,422.216888 594.111816,422.185699 C596.946960,422.156128 598.507263,423.462952 597.997437,426.939331 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M375.027802,430.967957 C375.025513,424.808258 375.054840,419.143463 375.014648,413.479218 C374.992676,410.382874 376.361145,408.850891 379.540436,408.962402 C384.190399,409.125519 388.871094,408.501221 393.485626,409.553131 C399.978333,411.033203 403.341278,415.134644 403.296021,421.542206 C403.253143,427.615540 399.396545,431.967926 392.934570,433.065613 C391.305206,433.342377 389.598999,433.434418 387.954010,433.298309 C384.040924,432.974487 381.867188,434.220764 382.343689,438.569824 C382.600525,440.914215 381.675537,442.298004 378.984314,442.350677 C376.149658,442.406128 375.053253,441.087921 375.053436,438.460480 C375.053589,436.128021 375.038696,433.795593 375.027802,430.967957 M389.213104,416.047852 C386.439758,416.479584 382.520752,414.568787 382.329041,419.946564 C382.106659,426.185120 382.938446,427.137115 389.369049,426.643372 C392.610229,426.394501 395.410553,425.402130 395.646759,421.616150 C395.882355,417.840546 393.537750,416.305542 389.213104,416.047852 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M451.865753,423.945770 C453.778076,419.647552 455.427032,415.640656 457.339447,411.763733 C459.077026,408.241302 464.689270,407.517670 466.258087,410.820679 C471.016235,420.838715 475.323059,431.071136 479.944733,441.534912 C475.650543,442.837891 472.442657,443.267059 470.849762,438.746918 C470.202789,436.911011 468.793488,436.283508 466.943665,436.299713 C463.614929,436.328857 460.285461,436.331573 456.956879,436.295349 C455.097443,436.275146 453.665924,436.964996 452.995331,438.722656 C451.425537,442.837128 448.460785,442.949799 444.106201,441.577850 C446.702454,435.681854 449.209778,429.987762 451.865753,423.945770 M462.626862,419.859100 C458.762268,421.864380 459.116333,425.804474 457.346741,429.657745 C460.869781,429.422241 463.449615,430.202698 466.035858,428.885742 C465.573883,425.657471 464.039734,423.088501 462.626862,419.859100 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M420.310913,432.500916 C420.441315,435.522827 422.253479,435.687683 424.203278,435.688538 C427.368042,435.689911 430.534332,435.777863 433.697083,435.704102 C436.445587,435.639984 437.679321,436.921417 437.626923,439.604950 C437.576263,442.196930 435.820129,442.398407 433.838287,442.396545 C428.008331,442.391113 422.177307,442.362335 416.348877,442.465179 C413.780670,442.510468 412.764587,441.424500 412.781464,438.899506 C412.839417,430.238281 412.832458,421.576233 412.787018,412.914856 C412.774139,410.457397 413.763397,409.175842 416.300446,409.165131 C418.952759,409.153961 420.284698,410.301910 420.264862,413.069885 C420.219513,419.399048 420.277496,425.729004 420.310913,432.500916 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M488.037842,239.997681 C487.527039,238.705414 487.126617,237.742279 487.129761,236.780487 C487.182739,220.704453 485.343384,223.300308 500.764313,223.033051 C501.259918,223.024460 501.821625,222.940720 502.243134,223.132492 C508.065186,225.781204 504.378296,230.934570 505.146210,234.882370 C505.595947,237.194519 506.243622,240.728577 502.120667,240.919571 C497.528137,241.132309 492.870911,241.835617 488.037842,239.997681 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M491.353546,250.918945 C492.149628,250.895584 492.482880,250.887756 492.816162,250.886154 C506.026642,250.822372 507.399170,252.503784 505.246796,265.804199 C504.968994,267.520721 504.343689,268.765259 502.577362,268.818207 C498.419159,268.942780 494.255524,268.903107 490.094269,268.887848 C489.618317,268.886108 488.961212,268.768616 488.695557,268.449127 C485.289673,264.353210 487.605347,259.521271 487.087982,255.045670 C486.792877,252.493011 488.144470,250.939606 491.353546,250.918945 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M416.891541,266.445190 C414.351532,268.806580 402.437500,269.813324 400.329193,268.259827 C399.126709,267.373810 399.071869,266.037018 398.957367,264.699677 C397.820099,251.419693 400.051453,249.329163 413.415863,250.861649 C415.875336,251.143677 417.031433,252.202164 417.032227,254.592346 C417.033508,258.396362 417.001434,262.200378 416.891541,266.445190 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M414.397339,223.339478 C416.992798,225.692429 418.106537,237.607880 416.336456,239.757782 C415.528473,240.739182 414.342712,240.834351 413.179962,240.992966 C400.149475,242.770477 398.324036,240.988693 399.046844,227.675385 C399.214203,224.593506 400.299561,223.034042 403.494690,223.126297 C406.981812,223.227036 410.472260,223.212708 414.397339,223.339478 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M533.200317,223.962479 C535.011414,228.766296 534.095276,233.433304 534.220154,238.048859 C534.269470,239.875778 533.065247,240.701279 531.387634,240.905594 C530.564758,241.005814 529.730103,241.018173 528.899963,241.048279 C515.880188,241.520386 513.320923,238.214859 516.593811,225.387268 C517.091736,223.435806 518.382812,223.091934 519.908264,223.128326 C524.214172,223.231125 528.558105,222.601044 533.200317,223.962479 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M563.296631,264.757812 C563.020691,266.160095 563.025635,267.349915 562.434021,267.976440 C561.073486,269.417328 547.811279,269.477539 546.344543,268.242737 C545.501038,267.532532 545.291077,266.557556 545.313721,265.546265 C545.343506,264.215668 545.410217,262.877686 545.588867,261.560181 C546.048279,258.171875 543.816650,253.294464 546.743347,251.674194 C550.834839,249.409073 556.176575,250.794403 560.981506,250.998688 C562.879272,251.079376 563.256470,252.675674 563.267151,254.290787 C563.289246,257.623657 563.294434,260.956635 563.296631,264.757812 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M516.609985,257.369904 C515.867065,252.498932 517.481018,250.679138 522.227112,250.775055 C536.769897,251.068970 534.072998,249.444153 534.325562,262.515747 C534.449463,268.930939 534.273254,269.009735 528.033386,269.023682 C516.626160,269.049164 516.626160,269.049164 516.609985,257.369904 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M459.171204,252.523712 C464.102631,249.796677 469.649658,249.745255 473.846375,251.376129 C479.155579,253.439346 475.451874,259.551788 476.228790,263.809906 C476.590240,265.790955 476.860748,268.500702 473.768738,268.871735 C469.825409,269.344879 465.839905,269.338898 461.895203,268.678284 C459.453522,268.269379 458.718231,266.527405 458.742279,264.332275 C458.783905,260.531342 458.884644,256.731049 459.171204,252.523712 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M476.320251,231.078247 C476.308197,241.634354 476.312195,241.513596 465.632446,241.161102 C460.970673,241.007233 458.793396,239.336548 458.722656,234.362579 C458.570801,223.690750 463.366760,220.070755 473.827698,223.439621 C477.835938,224.730438 475.734802,228.128235 476.320251,231.078247 z"/>
-<path fill="#000000" opacity="1" stroke="none" d="M563.272522,236.765778 C563.323181,239.349487 562.555054,240.877136 560.228882,240.942627 C556.406738,241.050232 552.580383,241.084534 548.757080,241.039581 C546.797668,241.016571 545.613708,239.902084 545.697083,237.890244 C545.887756,233.288879 543.654114,227.411346 546.671997,224.430679 C549.687195,221.452667 555.527405,223.921188 560.122742,223.700653 C562.485291,223.587280 563.230042,225.226059 563.243408,227.314194 C563.262512,230.308182 563.269104,233.302231 563.272522,236.765778 z"/>
-</svg>`.replace(/fill="#000000"/g, 'fill="currentColor"');
+<path fill="currentColor" opacity="1" stroke="none" d="M488.141968,316.296692 C486.502533,329.325989 487.667389,341.998169 487.308075,354.639679 C487.213776,357.958740 487.554565,361.280975 486.746979,364.586853 C482.833038,380.608673 469.014313,390.127838 452.282379,388.245392 C437.717072,386.606720 425.935547,373.308838 425.869019,357.708801 C425.709198,320.213074 425.812683,282.716217 425.811462,245.219833 C425.811188,236.220779 425.740967,227.220840 425.847229,218.223007 C425.914978,212.487854 426.064850,206.805939 421.025085,202.649429 C426.877747,199.274368 440.761841,200.634842 444.922729,204.716446 C448.046967,207.781174 448.396210,211.702606 448.393585,215.808792 C448.370056,252.805252 448.398743,289.801758 448.412476,326.798248 C448.415771,335.630737 448.373444,344.463654 448.457855,353.295349 C448.478333,355.438416 448.734070,357.619080 449.205750,359.709259 C450.038513,363.399261 452.563446,365.431427 456.292664,365.639160 C459.932465,365.841919 462.766388,364.296844 464.397186,360.921082 C465.433563,358.775787 465.660767,356.470398 465.653168,354.104675 C465.621643,344.272400 465.590302,334.439667 465.649597,324.607666 C465.792145,300.972229 482.827057,283.892456 506.361603,283.774445 C516.860413,283.721771 527.360046,283.809082 537.858459,283.725433 C560.382019,283.546021 579.879517,265.719513 581.658264,243.756851 C583.607544,219.688721 568.335571,198.720306 545.679749,194.425644 C541.752747,193.681229 537.790344,193.325027 533.764282,193.330078 C488.768616,193.386597 443.772827,193.374359 398.777069,193.372406 C391.958740,193.372116 392.075470,193.358109 392.380463,186.746414 C392.541016,183.265854 392.302856,179.756683 392.077484,176.271240 C391.813904,172.194763 393.527496,170.740051 397.644958,170.764542 C420.808594,170.902359 443.973511,170.831741 467.137970,170.825745 C489.802521,170.819870 512.467163,170.757401 535.131592,170.807663 C567.494324,170.879440 593.506897,190.209625 602.023071,221.413300 C609.842346,250.063354 598.159607,283.560669 569.430969,296.497070 C562.349243,299.685944 554.928467,301.346710 547.147400,301.347473 C533.815308,301.348785 520.482910,301.298279 507.151306,301.384552 C497.107300,301.449524 490.924591,306.270111 488.141968,316.296692 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M507.116760,137.283020 C509.704529,134.663666 508.492737,131.686417 508.669952,128.962082 C508.935333,124.881233 510.003754,121.369576 514.772888,121.481041 C519.160828,121.583611 521.046265,124.624641 521.282593,128.852249 C521.773193,137.625809 521.850952,137.075592 530.621338,137.841675 C537.306580,138.425659 543.075684,135.721390 549.283630,134.685425 C552.079529,134.218872 550.949463,130.430801 553.467285,129.360474 C556.189331,130.223740 555.805481,132.698120 555.859680,134.673843 C555.943237,137.722229 557.361206,138.984360 560.257019,139.671600 C602.967346,149.807983 629.041260,176.511093 636.536926,219.632675 C646.767639,278.487915 601.402649,330.360779 545.134399,330.367340 C529.639099,330.369141 514.141235,330.220123 498.650146,330.479431 C493.948883,330.558136 492.624664,328.896820 492.709808,324.410126 C492.934723,312.554169 497.583649,307.875336 509.348114,307.700592 C523.993530,307.483032 538.699646,308.840057 553.276611,306.933929 C584.500732,302.851013 609.275513,278.604614 614.531311,247.433701 C619.911987,215.522125 604.606689,184.248276 576.039978,168.944534 C564.757080,162.900055 552.602722,160.803513 539.880554,160.838348 C494.906158,160.961517 449.931274,160.912262 404.956573,160.927338 C403.123810,160.927963 401.290863,160.932327 399.458313,160.910599 C392.291809,160.825668 392.120453,160.652664 392.090729,153.656235 C392.084381,152.156723 392.075317,150.657211 392.062683,149.157745 C391.974640,138.710983 391.985870,138.810471 402.446411,137.586426 C405.501099,137.228973 408.373199,136.172012 411.630341,136.606018 C414.302948,136.962128 415.698395,134.810242 415.951538,132.126755 C416.067261,130.900146 415.608765,129.513275 416.632172,128.488403 C417.922241,128.808884 417.805664,129.756851 417.897247,130.530533 C418.741119,137.659500 418.733978,137.663940 425.718048,137.680130 C429.050323,137.687866 432.386322,137.581497 435.713867,137.706757 C438.669800,137.818008 440.056824,136.631302 439.919037,133.616531 C439.827881,131.622528 439.814423,129.611298 439.965393,127.622894 C440.239349,124.014748 441.983704,121.511978 445.860321,121.531090 C449.750519,121.550262 451.957916,123.636436 452.301880,127.667381 C453.155029,137.665359 453.191315,137.662262 463.524078,137.676956 C463.690704,137.677200 463.857300,137.677551 464.023926,137.677765 C473.994965,137.689911 474.058014,137.693802 474.669464,127.815552 C474.882111,124.380257 476.153778,121.868813 479.734650,121.493073 C483.408661,121.107567 485.683746,123.128502 486.627441,126.650238 C486.799042,127.290565 486.925079,127.950226 486.996704,128.609161 C487.976776,137.628342 487.973480,137.649094 497.245880,137.653793 C500.406891,137.655380 503.567932,137.526047 507.116760,137.283020 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M496.257141,429.313049 C496.238220,432.758942 496.203278,435.754639 496.210236,438.750244 C496.215942,441.224548 495.061005,442.338684 492.545868,442.348999 C490.052826,442.359222 488.828400,441.317902 488.832611,438.814056 C488.847137,430.159576 488.841644,421.505127 488.860931,412.850647 C488.864441,411.275146 489.143311,409.846893 491.045593,409.438019 C493.107574,408.994873 495.038239,409.006744 496.500397,410.829895 C499.519592,414.594452 502.515625,418.377533 505.540405,422.137573 C506.990540,423.940155 508.484406,425.707581 510.356873,427.972931 C512.488281,423.279816 511.351318,418.811310 511.655396,414.519775 C511.827423,412.091980 511.117035,409.246796 515.044678,409.197113 C518.972534,409.147400 519.073975,411.791962 519.059021,414.629150 C519.019653,422.118622 519.056824,429.608765 518.966614,437.097443 C518.943970,438.977142 519.577515,441.397064 516.958435,442.140656 C514.569092,442.818909 512.418518,442.280609 510.751343,440.132904 C506.374908,434.494873 501.904968,428.929474 497.186432,422.974335 C495.791779,425.071747 496.478058,427.052551 496.257141,429.313049 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M531.590576,420.031494 C531.597107,417.873169 531.483704,416.197784 531.642151,414.548584 C531.818359,412.714874 530.786316,410.305176 533.487976,409.443207 C536.223633,408.570404 538.235352,409.631256 539.940552,411.894592 C543.242310,416.277222 546.696411,420.546051 550.128784,424.828796 C550.943970,425.845886 551.922791,426.731873 553.338623,428.214783 C554.480835,423.266296 553.765869,418.837952 554.025879,414.486847 C554.175781,411.979431 553.989685,409.259125 557.742859,409.277527 C561.519714,409.296051 561.306213,411.961395 561.307617,414.508820 C561.311829,421.996094 561.372070,429.484222 561.270874,436.970093 C561.246094,438.803436 562.135376,441.280457 559.497192,442.112610 C556.830322,442.953888 554.741516,441.883270 553.007446,439.653351 C548.633362,434.028442 544.121033,428.511017 539.247681,422.431000 C537.754272,427.854126 538.665466,432.778381 538.426086,437.617798 C538.307739,440.011566 538.489807,442.376709 534.925537,442.336273 C531.295593,442.295105 531.633850,439.825562 531.622803,437.497162 C531.596069,431.840179 531.599365,426.183075 531.590576,420.031494 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M627.291138,409.241455 C633.127991,409.958832 637.145569,412.384827 638.651367,417.949310 C640.227905,423.775146 637.434753,427.826843 632.662231,431.376892 C634.923462,434.744781 637.093628,437.977051 639.520935,441.592285 C634.625916,443.088654 631.007324,442.889465 628.540100,438.353058 C627.597473,436.619934 626.290710,435.060791 625.006592,433.543671 C623.490295,431.752167 621.366577,432.096680 619.434753,432.483002 C617.259888,432.917969 617.499268,434.866119 617.396484,436.498810 C617.344360,437.326874 617.325195,438.159393 617.341736,438.988892 C617.387512,441.277222 616.288635,442.252167 614.001038,442.266327 C611.695007,442.280579 610.661682,441.286163 610.662781,439.003662 C610.667053,430.202362 610.656677,421.400970 610.606384,412.599854 C610.591309,409.957825 612.145874,409.117706 614.414856,409.106964 C618.563965,409.087311 622.713318,409.144562 627.291138,409.241455 M628.464172,416.491241 C626.151062,416.361145 623.833252,416.285706 621.525879,416.088562 C617.681091,415.760010 617.283875,418.070801 617.291992,421.108887 C617.299866,424.038727 617.880066,426.027252 621.398254,425.701630 C623.045288,425.549225 624.728210,425.741760 626.366089,425.542236 C628.632629,425.266113 630.509216,424.210022 631.285095,421.906586 C632.038574,419.669525 630.965820,418.074524 628.464172,416.491241 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M597.997437,426.939331 C596.537415,430.229309 593.784851,428.614838 591.760132,429.311005 C588.296448,430.502045 581.661072,426.114532 581.666260,432.361145 C581.671692,438.884674 588.427002,434.541504 592.012634,435.647339 C593.382141,436.069733 594.985474,435.750427 596.482056,435.740479 C598.701416,435.725769 599.873291,436.780762 599.981140,439.025116 C600.093018,441.355713 598.937500,442.348541 596.684692,442.343872 C590.198181,442.330444 583.711487,442.317413 577.225342,442.365326 C574.654053,442.384308 573.688354,441.102417 573.697388,438.666718 C573.729431,430.017883 573.748596,421.368591 573.682251,412.720123 C573.662476,410.141327 574.917908,409.079834 577.305603,409.091919 C583.624268,409.123932 589.943176,409.166382 596.261047,409.264313 C598.371643,409.297028 599.732117,410.286865 599.742798,412.598541 C599.754333,415.086884 598.491211,416.208038 596.030762,416.187775 C592.371948,416.157593 588.712341,416.228729 585.053589,416.196777 C582.762512,416.176758 581.188110,416.759125 581.161072,419.498077 C581.132080,422.438751 582.962280,422.637390 585.146545,422.538391 C588.134399,422.402924 591.122437,422.216888 594.111816,422.185699 C596.946960,422.156128 598.507263,423.462952 597.997437,426.939331 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M375.027802,430.967957 C375.025513,424.808258 375.054840,419.143463 375.014648,413.479218 C374.992676,410.382874 376.361145,408.850891 379.540436,408.962402 C384.190399,409.125519 388.871094,408.501221 393.485626,409.553131 C399.978333,411.033203 403.341278,415.134644 403.296021,421.542206 C403.253143,427.615540 399.396545,431.967926 392.934570,433.065613 C391.305206,433.342377 389.598999,433.434418 387.954010,433.298309 C384.040924,432.974487 381.867188,434.220764 382.343689,438.569824 C382.600525,440.914215 381.675537,442.298004 378.984314,442.350677 C376.149658,442.406128 375.053253,441.087921 375.053436,438.460480 C375.053589,436.128021 375.038696,433.795593 375.027802,430.967957 M389.213104,416.047852 C386.439758,416.479584 382.520752,414.568787 382.329041,419.946564 C382.106659,426.185120 382.938446,427.137115 389.369049,426.643372 C392.610229,426.394501 395.410553,425.402130 395.646759,421.616150 C395.882355,417.840546 393.537750,416.305542 389.213104,416.047852 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M451.865753,423.945770 C453.778076,419.647552 455.427032,415.640656 457.339447,411.763733 C459.077026,408.241302 464.689270,407.517670 466.258087,410.820679 C471.016235,420.838715 475.323059,431.071136 479.944733,441.534912 C475.650543,442.837891 472.442657,443.267059 470.849762,438.746918 C470.202789,436.911011 468.793488,436.283508 466.943665,436.299713 C463.614929,436.328857 460.285461,436.331573 456.956879,436.295349 C455.097443,436.275146 453.665924,436.964996 452.995331,438.722656 C451.425537,442.837128 448.460785,442.949799 444.106201,441.577850 C446.702454,435.681854 449.209778,429.987762 451.865753,423.945770 M462.626862,419.859100 C458.762268,421.864380 459.116333,425.804474 457.346741,429.657745 C460.869781,429.422241 463.449615,430.202698 466.035858,428.885742 C465.573883,425.657471 464.039734,423.088501 462.626862,419.859100 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M420.310913,432.500916 C420.441315,435.522827 422.253479,435.687683 424.203278,435.688538 C427.368042,435.689911 430.534332,435.777863 433.697083,435.704102 C436.445587,435.639984 437.679321,436.921417 437.626923,439.604950 C437.576263,442.196930 435.820129,442.398407 433.838287,442.396545 C428.008331,442.391113 422.177307,442.362335 416.348877,442.465179 C413.780670,442.510468 412.764587,441.424500 412.781464,438.899506 C412.839417,430.238281 412.832458,421.576233 412.787018,412.914856 C412.774139,410.457397 413.763397,409.175842 416.300446,409.165131 C418.952759,409.153961 420.284698,410.301910 420.264862,413.069885 C420.219513,419.399048 420.277496,425.729004 420.310913,432.500916 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M488.037842,239.997681 C487.527039,238.705414 487.126617,237.742279 487.129761,236.780487 C487.182739,220.704453 485.343384,223.300308 500.764313,223.033051 C501.259918,223.024460 501.821625,222.940720 502.243134,223.132492 C508.065186,225.781204 504.378296,230.934570 505.146210,234.882370 C505.595947,237.194519 506.243622,240.728577 502.120667,240.919571 C497.528137,241.132309 492.870911,241.835617 488.037842,239.997681 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M491.353546,250.918945 C492.149628,250.895584 492.482880,250.887756 492.816162,250.886154 C506.026642,250.822372 507.399170,252.503784 505.246796,265.804199 C504.968994,267.520721 504.343689,268.765259 502.577362,268.818207 C498.419159,268.942780 494.255524,268.903107 490.094269,268.887848 C489.618317,268.886108 488.961212,268.768616 488.695557,268.449127 C485.289673,264.353210 487.605347,259.521271 487.087982,255.045670 C486.792877,252.493011 488.144470,250.939606 491.353546,250.918945 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M416.891541,266.445190 C414.351532,268.806580 402.437500,269.813324 400.329193,268.259827 C399.126709,267.373810 399.071869,266.037018 398.957367,264.699677 C397.820099,251.419693 400.051453,249.329163 413.415863,250.861649 C415.875336,251.143677 417.031433,252.202164 417.032227,254.592346 C417.033508,258.396362 417.001434,262.200378 416.891541,266.445190 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M414.397339,223.339478 C416.992798,225.692429 418.106537,237.607880 416.336456,239.757782 C415.528473,240.739182 414.342712,240.834351 413.179962,240.992966 C400.149475,242.770477 398.324036,240.988693 399.046844,227.675385 C399.214203,224.593506 400.299561,223.034042 403.494690,223.126297 C406.981812,223.227036 410.472260,223.212708 414.397339,223.339478 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M533.200317,223.962479 C535.011414,228.766296 534.095276,233.433304 534.220154,238.048859 C534.269470,239.875778 533.065247,240.701279 531.387634,240.905594 C530.564758,241.005814 529.730103,241.018173 528.899963,241.048279 C515.880188,241.520386 513.320923,238.214859 516.593811,225.387268 C517.091736,223.435806 518.382812,223.091934 519.908264,223.128326 C524.214172,223.231125 528.558105,222.601044 533.200317,223.962479 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M563.296631,264.757812 C563.020691,266.160095 563.025635,267.349915 562.434021,267.976440 C561.073486,269.417328 547.811279,269.477539 546.344543,268.242737 C545.501038,267.532532 545.291077,266.557556 545.313721,265.546265 C545.343506,264.215668 545.410217,262.877686 545.588867,261.560181 C546.048279,258.171875 543.816650,253.294464 546.743347,251.674194 C550.834839,249.409073 556.176575,250.794403 560.981506,250.998688 C562.879272,251.079376 563.256470,252.675674 563.267151,254.290787 C563.289246,257.623657 563.294434,260.956635 563.296631,264.757812 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M516.609985,257.369904 C515.867065,252.498932 517.481018,250.679138 522.227112,250.775055 C536.769897,251.068970 534.072998,249.444153 534.325562,262.515747 C534.449463,268.930939 534.273254,269.009735 528.033386,269.023682 C516.626160,269.049164 516.626160,269.049164 516.609985,257.369904 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M459.171204,252.523712 C464.102631,249.796677 469.649658,249.745255 473.846375,251.376129 C479.155579,253.439346 475.451874,259.551788 476.228790,263.809906 C476.590240,265.790955 476.860748,268.500702 473.768738,268.871735 C469.825409,269.344879 465.839905,269.338898 461.895203,268.678284 C459.453522,268.269379 458.718231,266.527405 458.742279,264.332275 C458.783905,260.531342 458.884644,256.731049 459.171204,252.523712 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M476.320251,231.078247 C476.308197,241.634354 476.312195,241.513596 465.632446,241.161102 C460.970673,241.007233 458.793396,239.336548 458.722656,234.362579 C458.570801,223.690750 463.366760,220.070755 473.827698,223.439621 C477.835938,224.730438 475.734802,228.128235 476.320251,231.078247 z"/>
+<path fill="currentColor" opacity="1" stroke="none" d="M563.272522,236.765778 C563.323181,239.349487 562.555054,240.877136 560.228882,240.942627 C556.406738,241.050232 552.580383,241.084534 548.757080,241.039581 C546.797668,241.016571 545.613708,239.902084 545.697083,237.890244 C545.887756,233.288879 543.654114,227.411346 546.671997,224.430679 C549.687195,221.452667 555.527405,223.921188 560.122742,223.700653 C562.485291,223.587280 563.230042,225.226059 563.243408,227.314194 C563.262512,230.308182 563.269104,233.302231 563.272522,236.765778 z"/>
+</svg>`.replace(/fill="currentColor"/g, 'fill="currentColor"');
 const UI_KEY = "wonderful-pt3-ui-v4";
 const LOCK_KEY = "wonderful-pt3-lock-v4";
 const BACKUP_KEY = "wonderful-pt3-last-backup-v4";
@@ -5541,7 +5610,11 @@ function defaultTaskState(t) {
     archived: false,
     hidden: false,            // legacy alias — treated equivalent to archived
     updated: null,
-    bugs: []
+    bugs: [],
+    // Google Calendar push round-trip fields. Empty until pushed.
+    googleEventId: "",
+    googleCalendarId: "",
+    googlePushedAt: ""
   };
 }
 
@@ -5616,12 +5689,19 @@ function hydrateState(raw) {
   if (!out.__occurrenceTimes || typeof out.__occurrenceTimes !== "object") {
     out.__occurrenceTimes = {};
   }
-  // Backfill status/notes/time on milestones.
+  // Backfill status/notes/time on milestones, plus a stable localId for matching
+  // round-trip imports (Excel re-import, Google Calendar push).
   out.__milestones.forEach(m => {
     if (m.status == null) m.status = "scheduled";
     if (m.notes == null) m.notes = "";
     if (m.time == null) m.time = "";        // HH:MM, "" = all-day
     if (m.endTime == null) m.endTime = "";  // optional end time
+    if (!m.localId) m.localId = "ms-" + Math.random().toString(36).slice(2, 10);
+    // Google Calendar push round-trip fields. Empty until the user pushes the
+    // milestone to a Google calendar via the API integration.
+    if (m.googleEventId == null)    m.googleEventId = "";
+    if (m.googleCalendarId == null) m.googleCalendarId = "";
+    if (m.googlePushedAt == null)   m.googlePushedAt = "";
   });
   // Migrate legacy recurring entries → custom tasks with repeat: "weekly".
   // Per-occurrence notes/status get re-keyed under "task:{taskId}:{date}".
@@ -7175,7 +7255,7 @@ function ownerInitials(owner) {
 const RISK_META = {
   low:      { label: "Low",      color: "var(--leaf)",       order: 0 },
   med:      { label: "Medium",   color: "var(--sun)",        order: 1 },
-  high:     { label: "High",     color: "var(--citrus)",     order: 2 },
+  high:     { label: "High",     color: "var(--pt-orange)",  order: 2 },
   critical: { label: "Critical", color: "var(--danger)",     order: 3 }
 };
 const RISK_CYCLE = ["low", "med", "high", "critical"];
@@ -7616,7 +7696,7 @@ function renderRiskList(rows) {
   const order = ["critical", "high", "med", "low", "done"];
   const meta = {
     critical: { label: "Critical — blocks July 13", color: "var(--danger)" },
-    high:     { label: "High risk",                color: "var(--citrus-deep)" },
+    high:     { label: "High risk",                color: "var(--pt-orange-deep)" },
     med:      { label: "Medium",                   color: "var(--sun)" },
     low:      { label: "Low",                      color: "var(--leaf)" },
     done:     { label: "Shipped",                  color: "var(--leaf)" }
@@ -7728,7 +7808,7 @@ function renderRiskRow(r) {
   const statusColor = ({
     not_started: "var(--ink-3)",
     in_progress: "var(--info)",
-    complete:    "var(--leaf)",
+    complete:    "var(--success)",
     blocked:     "var(--blocked)"
   })[s.status] || "var(--ink-3)";
   const statusLabel = (STATUS_LABELS[s.status] || s.status).toUpperCase();
@@ -7820,10 +7900,15 @@ function renderRiskRow(r) {
     class: "risk-phase-tag-corner",
     title: phaseTitle
   }, phaseNum));
+  // Description hover callout — only when the row is collapsed. When expanded
+  // the user is interacting with the inline form (notes, bug form), so the
+  // floating tooltip would overlap the controls.
   const _rdesc = getDesc(t, s);
-  if (_rdesc) {
+  if (_rdesc && !isExpanded) {
     row.addEventListener("mouseenter", () => showDescCallout(_rdesc, row));
     row.addEventListener("mouseleave", hideDescCallout);
+  } else if (_descCalloutEl) {
+    hideDescCallout();
   }
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -7837,7 +7922,7 @@ function renderRiskRow(r) {
       onblur: (e) => appendTaskNote(t.id, e.target.value)
     }, s.notes || "");
     const sevColor = (sev) => sev === "critical" ? "var(--danger)"
-      : sev === "high" ? "var(--citrus-deep)" : "var(--sun)";
+      : sev === "high" ? "var(--pt-orange-deep)" : "var(--sun)";
 
     // Bug form — hidden until the toggle button is clicked
     const bugTitleInput   = h("input",    { class: "risk-bug-form-title", type: "text", placeholder: "Bug title — describe the issue" });
@@ -8045,12 +8130,12 @@ function renderMatrixChip(r) {
   const statusColor = ({
     not_started: "var(--ink-3)",
     in_progress: "var(--info)",
-    complete:    "var(--leaf)",
+    complete:    "var(--success)",
     blocked:     "var(--blocked)"
   })[s.status] || "var(--ink-3)";
-  const bg = sel ? "var(--citrus-soft)"
-    : isComplete ? "#EFF5E8"
-    : isBlocked ? "#EADFF0"
+  const bg = sel ? "var(--pt-orange-soft)"
+    : isComplete ? "var(--success-soft)"
+    : isBlocked ? "var(--blocked-soft)"
     : "var(--surface)";
   const chip = h("div", {
     class: "matrix-chip" + (sel ? " is-selected" : "") + (isComplete ? " is-complete" : ""),
@@ -9690,7 +9775,7 @@ function openDeletePhaseGroupDialog(groupId) {
     const cancel = h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel");
     const del = h("button", {
       class: "btn btn-primary",
-      style: "background: #c0392b; border-color: #c0392b;",
+      style: "background: var(--danger); border-color: var(--danger);",
       onclick: async () => {
         await deletePhaseGroup(groupId, "move");
         closeModal();
@@ -9716,7 +9801,7 @@ function openDeletePhaseGroupDialog(groupId) {
     }, moveLabel);
     const wipeBtn = h("button", {
       class: "btn btn-primary",
-      style: "background: #c0392b; border-color: #c0392b;",
+      style: "background: var(--danger); border-color: var(--danger);",
       onclick: async () => {
         if (!confirm(`Delete the group AND its ${phaseCount} phase${phaseCount === 1 ? "" : "s"}? This cannot be undone.`)) return;
         await deletePhaseGroup(groupId, "delete-phases");
@@ -10106,8 +10191,17 @@ function openTaskContextMenu(x, y, taskId) {
       ? { label: "Open in Tasks", onClick: () => jumpToTask(taskId) }
       : { label: "Open on calendar", onClick: () => {
             const r = taskRange(STATE[taskId]);
-            if (r) { setView("calendar"); UI.calMonth = r.start.slice(0, 7); saveUI(); renderMain(); }
-            else { toast("Not scheduled"); }
+            if (r) {
+              setView("calendar");
+              UI.calMonth = r.start.slice(0, 7);
+              saveUI();
+              renderMain();
+            } else {
+              // Not scheduled yet — open the editor so the user can set
+              // Start / Due dates instead of just hitting a dead-end toast.
+              toast("Set a start or due date to schedule this task", "warn");
+              openTaskEditor(taskId);
+            }
           }
         },
     { sep: true },
@@ -11877,7 +11971,7 @@ function jumpToTask(taskId) {
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       el.style.transition = "box-shadow 0.3s";
-      el.style.boxShadow = "0 0 0 3px rgba(232,118,58,0.25)";
+      el.style.boxShadow = "0 0 0 3px rgba(15,27,45,0.25)";
       setTimeout(() => el.style.boxShadow = "", 1500);
     }
   }, 100);
@@ -11996,6 +12090,2093 @@ function exportICS() {
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   downloadBlob(blob, `wonderful-picktrace-calendar-${ymd(new Date())}.ics`);
   toast("Calendar exported", "success");
+}
+
+/* ---- Excel (.xlsx) export — mirrors the Zirkle Master Project Planner
+   template shape: Project Dashboard / Project Planner / Milestones / Pivot /
+   Product Feedback Tracker / External / IconsCharts. Uses xlsx-js-style
+   (drop-in SheetJS fork) for header/banner cell styling. */
+function exportXLSX() {
+  if (typeof XLSX === "undefined") {
+    toast("Excel library still loading — try again in a moment", "warn");
+    return;
+  }
+
+  const CLIENT_NAME = "Wonderful Citrus";
+  const DATE_FMT = "m/d/yyyy";
+  const PCT_FMT = "0%";
+
+  // ---- Style presets (xlsx-js-style cell.s shape) ----
+  const PT_NAVY = "1F2A3D";
+  const PT_NAVY_DEEP = "14202F";
+  const PT_NAVY_SOFT = "E5E9F0";
+  const PT_ACCENT = "F39C12";
+  const COLOR_INK = "0F1B2D";
+  const COLOR_INK_2 = "2C3A4F";
+  const COLOR_GRAY = "5A6675";
+  const COLOR_LINE = "C9D2DD";
+  const COLOR_GREEN = "10B981";
+  const COLOR_AMBER = "F59E0B";
+  const COLOR_RED = "DC2626";
+  const COLOR_INFO = "2563EB";
+
+  const COLOR_STRIPE = "FAFBFD";
+  const tThin = { style: "thin", color: { rgb: COLOR_LINE } };
+  const tThinNavy = { style: "thin", color: { rgb: PT_NAVY } };
+  const tThick = { style: "medium", color: { rgb: PT_NAVY } };
+  const tHeavy = { style: "thick", color: { rgb: PT_NAVY_DEEP } };
+  const allBorders = { top: tThin, bottom: tThin, left: tThin, right: tThin };
+  const navyBorders = { top: tThick, bottom: tThick, left: tThick, right: tThick };
+
+  const STYLE = {
+    bannerMain: { font: { name: "Calibri", sz: 32, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, fill: { fgColor: { rgb: PT_NAVY } } },
+    bannerSub:  { font: { name: "Calibri", sz: 12, italic: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, fill: { fgColor: { rgb: PT_NAVY_DEEP } } },
+    accentStripe: { fill: { fgColor: { rgb: PT_ACCENT } } },
+
+    sectionBand: { font: { name: "Calibri", sz: 12, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, fill: { fgColor: { rgb: PT_NAVY } }, border: { top: tThick, bottom: tThick, left: tThick, right: tThick } },
+    sectionTitle: { font: { name: "Calibri", sz: 14, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "left", vertical: "center", indent: 0 } },
+
+    dateLabel:  { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: PT_NAVY } } },
+    dateValue:  { font: { name: "Calibri", sz: 28, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: { top: tThin, bottom: tThick, left: tThick, right: tThick } },
+
+    kpiLabel:   { font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: PT_NAVY } }, border: { top: tThinNavy, bottom: tThinNavy, left: tThinNavy, right: tThinNavy } },
+    kpiValue:   { font: { name: "Calibri", sz: 26, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: { top: tThinNavy, bottom: tThick, left: tThinNavy, right: tThinNavy } },
+    kpiValueAlert: { font: { name: "Calibri", sz: 26, bold: true, color: { rgb: COLOR_RED } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: { top: tThinNavy, bottom: tThick, left: tThinNavy, right: tThinNavy } },
+
+    colHeader:  { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, fill: { fgColor: { rgb: PT_NAVY } }, border: allBorders },
+    colHeaderL: { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "left", vertical: "center", indent: 1, wrapText: true }, fill: { fgColor: { rgb: PT_NAVY } }, border: allBorders },
+
+    phaseRow:    { font: { name: "Calibri", sz: 12, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "left", vertical: "center", indent: 1, wrapText: true }, fill: { fgColor: { rgb: PT_NAVY_SOFT } }, border: allBorders },
+    groupRow:    { font: { name: "Calibri", sz: 11, italic: true, color: { rgb: COLOR_INK_2 } }, alignment: { horizontal: "left", vertical: "center", indent: 2 }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+    taskRowOdd:  { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK } }, alignment: { horizontal: "left", vertical: "center", indent: 2, wrapText: true }, fill: { fgColor: { rgb: "FFFFFF" } }, border: allBorders },
+    taskRowEven: { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK } }, alignment: { horizontal: "left", vertical: "center", indent: 2, wrapText: true }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+    cellNum:     { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: allBorders },
+    cellNumStripe: { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+    cellPctBig:  { font: { name: "Calibri", sz: 14, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: allBorders },
+    cellPctBigStripe: { font: { name: "Calibri", sz: 14, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+    cellAlert:    { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: COLOR_RED } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: "FFFFFF" } }, border: allBorders },
+    cellAlertStripe: { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: COLOR_RED } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+
+    statusComplete: { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_GREEN } }, border: allBorders },
+    statusOnTrack:  { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_INFO } }, border: allBorders },
+    statusBehind:   { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_RED } }, border: allBorders },
+    statusNotStart: { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_GRAY } }, border: allBorders },
+    overdueLabel:   { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_RED } }, border: allBorders },
+    urgentLabel:    { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_AMBER } }, border: allBorders },
+    blockedLabel:   { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_RED } }, border: allBorders },
+
+    sevCritical:    { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_RED } }, border: allBorders },
+    sevHigh:        { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_AMBER } }, border: allBorders },
+    sevMedium:      { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: COLOR_INK } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: PT_NAVY_SOFT } }, border: allBorders },
+    sevLow:         { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK_2 } }, alignment: { horizontal: "center", vertical: "center" }, fill: { fgColor: { rgb: COLOR_STRIPE } }, border: allBorders },
+
+    emptyNote:      { font: { name: "Calibri", sz: 11, italic: true, color: { rgb: COLOR_GRAY } }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, border: allBorders },
+    title:          { font: { name: "Calibri", sz: 22, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { vertical: "center" } },
+    headerBand:     { font: { name: "Calibri", sz: 11, bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, fill: { fgColor: { rgb: PT_NAVY } }, border: allBorders },
+    taskRow:        { font: { name: "Calibri", sz: 11, color: { rgb: COLOR_INK } }, alignment: { vertical: "center", wrapText: true }, border: allBorders }
+  };
+
+  function stripeStyle(idx, base, baseStripe) { return idx % 2 === 0 ? base : baseStripe; }
+  function severityStyle(sev) {
+    if (sev === "critical") return STYLE.sevCritical;
+    if (sev === "high") return STYLE.sevHigh;
+    if (sev === "medium") return STYLE.sevMedium;
+    return STYLE.sevLow;
+  }
+
+  // Deep-clone helper — xlsx-js-style propagates shared style refs across cells,
+  // so every cell needs its own independent style object to prevent format bleed.
+  function cloneStyle(s) { return JSON.parse(JSON.stringify(s)); }
+
+  // Ensure a cell exists in the worksheet (creating an empty string cell if not),
+  // expanding the !ref range as needed. Required for styling cells inside a merge
+  // that aoa_to_sheet didn't materialize.
+  function ensureCell(ws, addr) {
+    if (ws[addr]) return ws[addr];
+    const cell = { t: "s", v: "" };
+    ws[addr] = cell;
+    const at = XLSX.utils.decode_cell(addr);
+    const range = ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]) : { s: { r: at.r, c: at.c }, e: { r: at.r, c: at.c } };
+    if (at.r < range.s.r) range.s.r = at.r;
+    if (at.c < range.s.c) range.s.c = at.c;
+    if (at.r > range.e.r) range.e.r = at.r;
+    if (at.c > range.e.c) range.e.c = at.c;
+    ws["!ref"] = XLSX.utils.encode_range(range);
+    return cell;
+  }
+
+  // Apply a style to a cell. Optionally override numFmt — sets BOTH cell.z and
+  // cell.s.numFmt to defeat xlsx-js-style's column-level format inheritance.
+  function applyStyle(ws, addr, style, numFmt) {
+    const cell = ensureCell(ws, addr);
+    const s = cloneStyle(style);
+    if (numFmt !== undefined) s.numFmt = numFmt;
+    cell.s = s;
+    cell.z = numFmt !== undefined ? numFmt : "General";
+  }
+
+  // Paint a style across every cell inside a rectangular range (inclusive).
+  // Use this for merged regions so borders close around the full span.
+  function paintRange(ws, startCol, startRow, endCol, endRow, style, numFmt) {
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startCol; c <= endCol; c++) {
+        applyStyle(ws, XLSX.utils.encode_cell({ c, r }), style, numFmt);
+      }
+    }
+  }
+
+  // Excel date serial (1899-12-30 epoch handles the Lotus 1900 leap-year bug).
+  function toSerial(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr + "T12:00:00");
+    if (isNaN(d.getTime())) return null;
+    const utc = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+    return Math.floor((utc - Date.UTC(1899, 11, 30)) / 86400000);
+  }
+  function statusText(s) {
+    if (!s) return "Not Started";
+    if (s.status === "complete") return "Complete";
+    if (s.status === "in_progress") return "On Track";
+    if (s.status === "blocked") return "Behind Schedule";
+    return "Not Started";
+  }
+  function statusStyle(text) {
+    if (text === "Complete") return STYLE.statusComplete;
+    if (text === "On Track") return STYLE.statusOnTrack;
+    if (text === "Behind Schedule") return STYLE.statusBehind;
+    return STYLE.statusNotStart;
+  }
+  function pctValue(s) {
+    if (!s) return 0;
+    if (s.status === "complete") return 1;
+    if (s.status === "in_progress") return 0.5;
+    if (s.status === "blocked") return 0;
+    return 0;
+  }
+  function phaseStatusLabel(st) {
+    if (st.total > 0 && st.complete === st.total) return "Complete";
+    if (st.blocked > 0) return "Behind Schedule";
+    if (st.inProgress > 0) return "On Track";
+    return "Not Started";
+  }
+
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const todaySerial = toSerial(todayISO);
+
+  // Active task list (respects archive filter) keyed by phase → group → tasks.
+  const phaseBlocks = PHASES.map(p => {
+    const pm = phaseMeta(p);
+    const groupBlocks = p.groups.map(g => {
+      const gm = groupMeta(p.id, g);
+      const tasks = g.tasks
+        .map(t => ({ t, s: STATE[t.id] }))
+        .filter(({ s }) => s && passesArchiveFilter(s));
+      return { groupTitle: gm.title, tasks };
+    }).filter(b => b.tasks.length > 0);
+    return { phase: p, phaseTitle: pm.title, phaseNum: pm.num, phaseWindow: pm.window || "", groupBlocks };
+  }).filter(b => b.groupBlocks.length > 0);
+
+  const overallStats = globalStats();
+  const overallPct = overallStats.total > 0 ? overallStats.complete / overallStats.total : 0;
+
+  // ===== Sheet: Project Dashboard =====
+  // Grid: cols A (margin) + B..L = 11 data cols of equal-ish width. KPI strip
+  // and section headers use cell merges to span the full data area.
+  // Column letter map for the Phase Status table:
+  //   B-C  Phase Name (merged)
+  //   D    Tasks
+  //   E    Complete
+  //   F    % Complete
+  //   G    Urgent
+  //   H    Blocked
+  //   I    Open Bugs
+  //   J-K  Status pill (merged)
+  //   L    (notes — used by Next Steps)
+  const C0 = 1;   // col B (0-indexed)
+  const CN = 11;  // col L (last data col, 0-indexed)
+  const merges = [];
+  const dashAOA = [];
+  function ensureRow(r) {
+    while (dashAOA.length <= r) dashAOA.push(new Array(CN + 1).fill(""));
+  }
+
+  let r = 0;
+  ensureRow(0);                                              // row 1 spacer
+  r = 1;  ensureRow(r); dashAOA[r][C0] = CLIENT_NAME;        // row 2 banner
+  r = 2;  ensureRow(r); dashAOA[r][C0] = "PickTrace 3.0 Migration · Master Project Planner"; // row 3
+  r = 3;  ensureRow(r);                                      // row 4 spacer
+  r = 4;  ensureRow(r); dashAOA[r][C0] = "IMPLEMENTATION COMPLETION DATE";  // row 5 label band
+  r = 5;  ensureRow(r); dashAOA[r][C0] = toSerial(GO_LIVE);  // row 6 big date
+  r = 6;  ensureRow(r);                                      // row 7 spacer
+
+  // KPI strip (row 8 labels, row 9 values). 4 KPIs across the data area.
+  // Merge groups: B-D (3 cols), E-F (2), G-H (2), I-K (3) = 10 cols + L spacer
+  const kpiSpans = [
+    { startCol: 1, endCol: 3, label: "OVERALL PROGRESS",  value: overallPct,                 numFmt: PCT_FMT, alert: false },
+    { startCol: 4, endCol: 5, label: "DAYS TO GO-LIVE",   value: Math.max(0, daysUntil(GO_LIVE) || 0), numFmt: "0",     alert: false },
+    { startCol: 6, endCol: 7, label: "URGENT TASKS",      value: overallStats.urgent,        numFmt: "0",     alert: overallStats.urgent > 0 },
+    { startCol: 8, endCol: 10, label: "OPEN BUGS",        value: overallStats.bugsOpen,      numFmt: "0",     alert: overallStats.bugsOpen > 0 },
+  ];
+  r = 7; ensureRow(r);
+  kpiSpans.forEach(k => { dashAOA[r][k.startCol] = k.label; });
+  r = 8; ensureRow(r);
+  kpiSpans.forEach(k => { dashAOA[r][k.startCol] = k.value; });
+  r = 9; ensureRow(r);  // spacer
+
+  // PHASE PROGRESS section: header band (row 11) + col headers (row 12) + phase rows
+  r = 10; ensureRow(r); dashAOA[r][C0] = "PHASE PROGRESS";   // row 11 section band
+  r = 11; ensureRow(r);
+  dashAOA[r][1] = "Phase";
+  dashAOA[r][3] = "Tasks";
+  dashAOA[r][4] = "Complete";
+  dashAOA[r][5] = "% Complete";
+  dashAOA[r][6] = "Urgent";
+  dashAOA[r][7] = "Blocked";
+  dashAOA[r][8] = "Open Bugs";
+  dashAOA[r][9] = "Status";
+
+  let phaseRowStart = 12;
+  phaseBlocks.forEach((b, i) => {
+    const st = phaseStats(b.phase);
+    const pct = st.total > 0 ? st.complete / st.total : 0;
+    const row = phaseRowStart + i;
+    ensureRow(row);
+    dashAOA[row][1] = b.phaseTitle;
+    dashAOA[row][3] = st.total;
+    dashAOA[row][4] = st.complete;
+    dashAOA[row][5] = pct;
+    dashAOA[row][6] = st.urgent;
+    dashAOA[row][7] = st.blocked;
+    dashAOA[row][8] = st.bugs;
+    dashAOA[row][9] = phaseStatusLabel(st);
+  });
+
+  let nextStepsHeaderRow = phaseRowStart + phaseBlocks.length + 1;
+  ensureRow(nextStepsHeaderRow + 1);
+  dashAOA[nextStepsHeaderRow][C0] = "NEXT STEPS";
+  // Next Steps column headers
+  // B-C Phase | D-F Task | G Owner | H Priority | I Due | J-K Status | L Notes
+  const nsHdrRow = nextStepsHeaderRow + 1;
+  dashAOA[nsHdrRow][1] = "Phase";
+  dashAOA[nsHdrRow][3] = "Task";
+  dashAOA[nsHdrRow][6] = "Owner";
+  dashAOA[nsHdrRow][7] = "Priority";
+  dashAOA[nsHdrRow][8] = "Due";
+  dashAOA[nsHdrRow][9] = "Status";
+  dashAOA[nsHdrRow][11] = "Notes";
+
+  const nextStepRows = [];
+  let nextStepCursor = nsHdrRow + 1;
+  phaseBlocks.forEach(b => b.groupBlocks.forEach(({ tasks }) => tasks.forEach(({ t, s }) => {
+    if (nextStepRows.length >= 20) return;
+    const dueSerial = toSerial(s.dueDate);
+    const overdue = dueSerial != null && todaySerial != null && dueSerial < todaySerial && s.status !== "complete";
+    if (!s.urgent && s.status !== "blocked" && !overdue) return;
+    const statusLabel = overdue ? `${todaySerial - dueSerial} Days Overdue`
+      : (s.status === "blocked" ? "Blocked"
+      : (s.urgent ? "Urgent" : ""));
+    ensureRow(nextStepCursor);
+    const row = dashAOA[nextStepCursor];
+    row[1] = b.phaseTitle;
+    row[3] = getTitle(t, s);
+    row[6] = s.owner || "";
+    row[7] = s.priority || "";
+    row[8] = dueSerial != null ? dueSerial : "";
+    row[9] = statusLabel;
+    row[11] = (s.notes || "").slice(0, 160);
+    nextStepRows.push({ rowIdx: nextStepCursor, dueSerial, statusLabel });
+    nextStepCursor++;
+  })));
+  if (nextStepRows.length === 0) {
+    ensureRow(nextStepCursor);
+    dashAOA[nextStepCursor][C0] = "(no urgent / blocked / overdue tasks)";
+    nextStepCursor++;
+  }
+
+  let risksHeaderRow = nextStepCursor + 1;
+  ensureRow(risksHeaderRow + 1);
+  dashAOA[risksHeaderRow][C0] = "RISKS AND CONCERNS";
+  const rkHdrRow = risksHeaderRow + 1;
+  // B No. | C-G Risk | H-I Source Phase | J Risk Level | K Status | L (gap)
+  dashAOA[rkHdrRow][1] = "No.";
+  dashAOA[rkHdrRow][2] = "Risk / Concern";
+  dashAOA[rkHdrRow][7] = "Source Phase";
+  dashAOA[rkHdrRow][9] = "Risk Level";
+  dashAOA[rkHdrRow][10] = "Status";
+
+  const riskRows = [];
+  let riskCursor = rkHdrRow + 1;
+  let rNo = 0;
+  phaseBlocks.forEach(b => b.groupBlocks.forEach(({ tasks }) => tasks.forEach(({ t, s }) => {
+    if (s.status === "blocked" && riskRows.length < 15) {
+      rNo++;
+      ensureRow(riskCursor);
+      dashAOA[riskCursor][1] = rNo;
+      dashAOA[riskCursor][2] = getTitle(t, s);
+      dashAOA[riskCursor][7] = b.phaseTitle;
+      dashAOA[riskCursor][9] = (s.risk || "high").charAt(0).toUpperCase() + (s.risk || "high").slice(1);
+      dashAOA[riskCursor][10] = "Blocked";
+      riskRows.push({ rowIdx: riskCursor, severity: s.risk || "high", status: "blocked" });
+      riskCursor++;
+    }
+    (s.bugs || []).forEach(bug => {
+      if ((bug.severity === "critical" || bug.severity === "high") &&
+          (bug.status === "open" || bug.status === "in_progress") && riskRows.length < 20) {
+        rNo++;
+        ensureRow(riskCursor);
+        dashAOA[riskCursor][1] = rNo;
+        dashAOA[riskCursor][2] = `Bug: ${bug.title || ""} (${getTitle(t, s)})`;
+        dashAOA[riskCursor][7] = b.phaseTitle;
+        dashAOA[riskCursor][9] = bug.severity.charAt(0).toUpperCase() + bug.severity.slice(1);
+        dashAOA[riskCursor][10] = bug.status.charAt(0).toUpperCase() + bug.status.slice(1);
+        riskRows.push({ rowIdx: riskCursor, severity: bug.severity, status: "open" });
+        riskCursor++;
+      }
+    });
+  })));
+  if (riskRows.length === 0) {
+    ensureRow(riskCursor);
+    dashAOA[riskCursor][C0] = "(no blocked tasks or critical/high bugs logged)";
+  }
+
+  // Build worksheet
+  const dashWS = XLSX.utils.aoa_to_sheet(dashAOA);
+
+  // Banner / tagline / date / KPI strip
+  applyStyle(dashWS, "B2", STYLE.bannerMain);
+  applyStyle(dashWS, "B3", STYLE.bannerSub);
+  applyStyle(dashWS, "B5", STYLE.dateLabel);
+  applyStyle(dashWS, "B6", STYLE.dateValue, DATE_FMT);
+
+  kpiSpans.forEach(k => {
+    paintRange(dashWS, k.startCol, 7, k.endCol, 7, STYLE.kpiLabel);
+    paintRange(dashWS, k.startCol, 8, k.endCol, 8, k.alert ? STYLE.kpiValueAlert : STYLE.kpiValue, k.numFmt);
+    merges.push({ s: { r: 7, c: k.startCol }, e: { r: 7, c: k.endCol } });
+    merges.push({ s: { r: 8, c: k.startCol }, e: { r: 8, c: k.endCol } });
+  });
+
+  // PHASE PROGRESS section band — paint across full width so border closes.
+  paintRange(dashWS, 1, 10, CN, 10, STYLE.sectionBand);
+  merges.push({ s: { r: 10, c: 1 }, e: { r: 10, c: CN } });
+
+  // Phase status header row (row 12)
+  // Phase: merge B-C; Status: merge J-K
+  applyStyle(dashWS, "B12", STYLE.colHeaderL);
+  applyStyle(dashWS, "C12", STYLE.colHeaderL);
+  ["D12","E12","F12","G12","H12","I12"].forEach(addr => applyStyle(dashWS, addr, STYLE.colHeader));
+  applyStyle(dashWS, "J12", STYLE.colHeader);
+  applyStyle(dashWS, "K12", STYLE.colHeader);
+  applyStyle(dashWS, "L12", STYLE.colHeader);
+  merges.push({ s: { r: 11, c: 1 }, e: { r: 11, c: 2 } });
+  merges.push({ s: { r: 11, c: 9 }, e: { r: 11, c: 10 } });
+
+  // Phase rows: alternating stripes; numeric cells centered; status pill colored.
+  phaseBlocks.forEach((b, i) => {
+    const row = phaseRowStart + i;
+    const stripe = i % 2 === 1;
+    const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+    const pctStyle = stripe ? STYLE.cellPctBigStripe : STYLE.cellPctBig;
+    // Phase name spans B-C
+    applyStyle(dashWS, `B${row + 1}`, STYLE.phaseRow);
+    applyStyle(dashWS, `C${row + 1}`, STYLE.phaseRow);
+    merges.push({ s: { r: row, c: 1 }, e: { r: row, c: 2 } });
+    applyStyle(dashWS, `D${row + 1}`, numStyle, "0");
+    applyStyle(dashWS, `E${row + 1}`, numStyle, "0");
+    applyStyle(dashWS, `F${row + 1}`, pctStyle, PCT_FMT);
+    applyStyle(dashWS, `G${row + 1}`, dashAOA[row][6] > 0 ? (stripe ? STYLE.cellAlertStripe : STYLE.cellAlert) : numStyle, "0");
+    applyStyle(dashWS, `H${row + 1}`, dashAOA[row][7] > 0 ? (stripe ? STYLE.cellAlertStripe : STYLE.cellAlert) : numStyle, "0");
+    applyStyle(dashWS, `I${row + 1}`, dashAOA[row][8] > 0 ? (stripe ? STYLE.cellAlertStripe : STYLE.cellAlert) : numStyle, "0");
+    // Status pill spans J-K
+    applyStyle(dashWS, `J${row + 1}`, statusStyle(dashAOA[row][9]));
+    applyStyle(dashWS, `K${row + 1}`, statusStyle(dashAOA[row][9]));
+    merges.push({ s: { r: row, c: 9 }, e: { r: row, c: 10 } });
+    // L gets a blank styled cell so the table edge looks contained
+    applyStyle(dashWS, `L${row + 1}`, stripe ? STYLE.cellNumStripe : STYLE.cellNum);
+  });
+
+  // NEXT STEPS section band — paint full width.
+  paintRange(dashWS, 1, nextStepsHeaderRow, CN, nextStepsHeaderRow, STYLE.sectionBand);
+  merges.push({ s: { r: nextStepsHeaderRow, c: 1 }, e: { r: nextStepsHeaderRow, c: CN } });
+
+  // Header row: B-C Phase | D-F Task | G Owner | H Priority | I Due | J-K Status | L Notes
+  ["B","C"].forEach(c => applyStyle(dashWS, `${c}${nsHdrRow + 1}`, STYLE.colHeaderL));
+  ["D","E","F"].forEach(c => applyStyle(dashWS, `${c}${nsHdrRow + 1}`, STYLE.colHeaderL));
+  ["G","H","I"].forEach(c => applyStyle(dashWS, `${c}${nsHdrRow + 1}`, STYLE.colHeader));
+  ["J","K"].forEach(c => applyStyle(dashWS, `${c}${nsHdrRow + 1}`, STYLE.colHeader));
+  applyStyle(dashWS, `L${nsHdrRow + 1}`, STYLE.colHeaderL);
+  merges.push({ s: { r: nsHdrRow, c: 1 }, e: { r: nsHdrRow, c: 2 } });
+  merges.push({ s: { r: nsHdrRow, c: 3 }, e: { r: nsHdrRow, c: 5 } });
+  merges.push({ s: { r: nsHdrRow, c: 9 }, e: { r: nsHdrRow, c: 10 } });
+
+  if (nextStepRows.length === 0) {
+    // Single empty-note row spans the full width.
+    const row = nsHdrRow + 1;
+    applyStyle(dashWS, `B${row + 1}`, STYLE.emptyNote);
+    merges.push({ s: { r: row, c: 1 }, e: { r: row, c: CN } });
+  } else {
+    nextStepRows.forEach(({ rowIdx, dueSerial, statusLabel }, i) => {
+      const stripe = i % 2 === 1;
+      const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+      const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+      const row = rowIdx;
+      // Phase B-C
+      applyStyle(dashWS, `B${row + 1}`, baseRow);
+      applyStyle(dashWS, `C${row + 1}`, baseRow);
+      merges.push({ s: { r: row, c: 1 }, e: { r: row, c: 2 } });
+      // Task D-F
+      applyStyle(dashWS, `D${row + 1}`, baseRow);
+      applyStyle(dashWS, `E${row + 1}`, baseRow);
+      applyStyle(dashWS, `F${row + 1}`, baseRow);
+      merges.push({ s: { r: row, c: 3 }, e: { r: row, c: 5 } });
+      // Owner G
+      applyStyle(dashWS, `G${row + 1}`, baseRow);
+      // Priority H
+      applyStyle(dashWS, `H${row + 1}`, numStyle);
+      // Due I
+      applyStyle(dashWS, `I${row + 1}`, numStyle, dueSerial != null ? DATE_FMT : undefined);
+      // Status pill J-K
+      const lbl = statusLabel || "";
+      const labelStyle = lbl.includes("Overdue") ? STYLE.overdueLabel
+        : lbl === "Blocked" ? STYLE.blockedLabel
+        : lbl === "Urgent" ? STYLE.urgentLabel
+        : baseRow;
+      applyStyle(dashWS, `J${row + 1}`, labelStyle);
+      applyStyle(dashWS, `K${row + 1}`, labelStyle);
+      merges.push({ s: { r: row, c: 9 }, e: { r: row, c: 10 } });
+      // Notes L
+      applyStyle(dashWS, `L${row + 1}`, baseRow);
+    });
+  }
+
+  // RISKS AND CONCERNS section band — paint full width.
+  paintRange(dashWS, 1, risksHeaderRow, CN, risksHeaderRow, STYLE.sectionBand);
+  merges.push({ s: { r: risksHeaderRow, c: 1 }, e: { r: risksHeaderRow, c: CN } });
+
+  // Header row: B No. | C-G Risk | H-I Source Phase | J Risk Level | K Status
+  applyStyle(dashWS, `B${rkHdrRow + 1}`, STYLE.colHeader);
+  ["C","D","E","F","G"].forEach(c => applyStyle(dashWS, `${c}${rkHdrRow + 1}`, STYLE.colHeaderL));
+  ["H","I"].forEach(c => applyStyle(dashWS, `${c}${rkHdrRow + 1}`, STYLE.colHeaderL));
+  applyStyle(dashWS, `J${rkHdrRow + 1}`, STYLE.colHeader);
+  applyStyle(dashWS, `K${rkHdrRow + 1}`, STYLE.colHeader);
+  applyStyle(dashWS, `L${rkHdrRow + 1}`, STYLE.colHeader);
+  merges.push({ s: { r: rkHdrRow, c: 2 }, e: { r: rkHdrRow, c: 6 } });
+  merges.push({ s: { r: rkHdrRow, c: 7 }, e: { r: rkHdrRow, c: 8 } });
+
+  if (riskRows.length === 0) {
+    const row = rkHdrRow + 1;
+    applyStyle(dashWS, `B${row + 1}`, STYLE.emptyNote);
+    merges.push({ s: { r: row, c: 1 }, e: { r: row, c: CN } });
+  } else {
+    riskRows.forEach(({ rowIdx, severity }, i) => {
+      const stripe = i % 2 === 1;
+      const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+      const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+      const row = rowIdx;
+      applyStyle(dashWS, `B${row + 1}`, numStyle, "0");
+      ["C","D","E","F","G"].forEach(c => applyStyle(dashWS, `${c}${row + 1}`, baseRow));
+      merges.push({ s: { r: row, c: 2 }, e: { r: row, c: 6 } });
+      ["H","I"].forEach(c => applyStyle(dashWS, `${c}${row + 1}`, baseRow));
+      merges.push({ s: { r: row, c: 7 }, e: { r: row, c: 8 } });
+      applyStyle(dashWS, `J${row + 1}`, severityStyle(severity));
+      applyStyle(dashWS, `K${row + 1}`, baseRow);
+      applyStyle(dashWS, `L${row + 1}`, baseRow);
+    });
+  }
+
+  // Column widths — uniform 12 across data area, big notes col at L
+  dashWS["!cols"] = [
+    { wch: 3 },                                                                                  // A margin
+    { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 10 },   // B–H
+    { wch: 12 }, { wch: 12 }, { wch: 12 },                                                       // I–K
+    { wch: 36 }                                                                                  // L
+  ];
+  // Row heights — generous so the dashboard breathes
+  dashWS["!rows"] = [];
+  dashWS["!rows"][0] = { hpx: 14 };
+  dashWS["!rows"][1] = { hpx: 56 };  // banner
+  dashWS["!rows"][2] = { hpx: 24 };  // tagline
+  dashWS["!rows"][3] = { hpx: 14 };
+  dashWS["!rows"][4] = { hpx: 22 };  // date label band
+  dashWS["!rows"][5] = { hpx: 64 };  // big date
+  dashWS["!rows"][6] = { hpx: 18 };
+  dashWS["!rows"][7] = { hpx: 22 };  // KPI labels
+  dashWS["!rows"][8] = { hpx: 56 };  // KPI values
+  dashWS["!rows"][9] = { hpx: 18 };
+  dashWS["!rows"][10] = { hpx: 30 }; // section band
+  dashWS["!rows"][11] = { hpx: 32 }; // col headers
+  // Phase rows — taller for emphasis
+  for (let i = 0; i < phaseBlocks.length; i++) {
+    dashWS["!rows"][phaseRowStart + i] = { hpx: 38 };
+  }
+  // Add empty separators
+  dashWS["!rows"][phaseRowStart + phaseBlocks.length] = { hpx: 14 };
+  dashWS["!rows"][nextStepsHeaderRow] = { hpx: 30 };
+  dashWS["!rows"][nsHdrRow] = { hpx: 28 };
+  for (let i = 0; i < Math.max(nextStepRows.length, 1); i++) {
+    dashWS["!rows"][nsHdrRow + 1 + i] = { hpx: 30 };
+  }
+  dashWS["!rows"][risksHeaderRow] = { hpx: 30 };
+  dashWS["!rows"][rkHdrRow] = { hpx: 28 };
+  for (let i = 0; i < Math.max(riskRows.length, 1); i++) {
+    dashWS["!rows"][rkHdrRow + 1 + i] = { hpx: 30 };
+  }
+
+  // Banner / tagline / date span the full width.
+  merges.push({ s: { r: 1, c: 1 }, e: { r: 1, c: CN } });    // banner
+  merges.push({ s: { r: 2, c: 1 }, e: { r: 2, c: CN } });    // tagline
+  merges.push({ s: { r: 4, c: 1 }, e: { r: 4, c: CN } });    // date label
+  merges.push({ s: { r: 5, c: 1 }, e: { r: 5, c: CN } });    // big date
+  // Apply bannerMain/sub/dateLabel/dateValue style to ALL merged cells (some
+  // Excel renderers paint only the top-left cell unless siblings share style).
+  for (let c = 2; c <= CN; c++) {
+    const a = XLSX.utils.encode_cell({ c, r: 1 }); applyStyle(dashWS, a, STYLE.bannerMain);
+    const a2 = XLSX.utils.encode_cell({ c, r: 2 }); applyStyle(dashWS, a2, STYLE.bannerSub);
+    const a3 = XLSX.utils.encode_cell({ c, r: 4 }); applyStyle(dashWS, a3, STYLE.dateLabel);
+    const a4 = XLSX.utils.encode_cell({ c, r: 5 }); applyStyle(dashWS, a4, STYLE.dateValue, DATE_FMT);
+  }
+
+  dashWS["!merges"] = merges;
+
+  // ===== Sheet: Project Planner =====
+  // Cols: A Phase | B TASKS | C % COMPLETE | D STATUS | E DURATION | F START | G END | H RESPONSIBLE | I COMMENTS | J Task ID (hidden — used by re-import)
+  const plannerAOA = [
+    [CLIENT_NAME, "", "", "", "", "", "", "", "", ""],                       // row 1 banner
+    ["PickTrace 3.0 Migration · Master Project Planner", "", "", "", "", "", "", "", "", ""], // row 2 tagline
+    ["Overall progress", overallPct, "", "", "", "", "", "", "", ""],         // row 3 overall
+    ["PHASE / TASKS", "DESCRIPTION", "% COMPLETE", "STATUS", "DURATION", "START DATE", "END DATE", "RESPONSIBLE", "COMMENTS", "Task ID"] // row 4 header band
+  ];
+  const plannerOps = []; // { addr, style, numFmt }
+  let taskRowIdx = 0;
+
+  phaseBlocks.forEach(({ phase, phaseTitle, groupBlocks }) => {
+    let phaseStart = null, phaseEnd = null, ptotal = 0, psum = 0;
+    groupBlocks.forEach(({ tasks }) => tasks.forEach(({ s }) => {
+      const start = s.startDate || s.dueDate;
+      const end = s.dueDate || s.startDate;
+      if (start) { const sn = toSerial(start); if (sn != null && (phaseStart == null || sn < phaseStart)) phaseStart = sn; }
+      if (end)   { const en = toSerial(end);   if (en != null && (phaseEnd   == null || en > phaseEnd))   phaseEnd = en; }
+      ptotal++; psum += pctValue(s);
+    }));
+    const phasePct = ptotal > 0 ? psum / ptotal : null;
+    const phaseDuration = (phaseStart != null && phaseEnd != null) ? (phaseEnd - phaseStart + 1) : null;
+    const phaseLabel = phaseStatusLabel(phaseStats(phase));
+    plannerAOA.push([phaseTitle, "", phasePct, phaseLabel, phaseDuration, phaseStart, phaseEnd, "", "", `phase:${phase.id}`]);
+    const r = plannerAOA.length;
+    plannerOps.push({ addr: `A${r}`, style: STYLE.phaseRow });
+    plannerOps.push({ addr: `B${r}`, style: STYLE.phaseRow });
+    plannerOps.push({ addr: `C${r}`, style: STYLE.phaseRow, numFmt: phasePct != null ? PCT_FMT : "General" });
+    plannerOps.push({ addr: `D${r}`, style: statusStyle(phaseLabel) });
+    plannerOps.push({ addr: `E${r}`, style: STYLE.phaseRow, numFmt: phaseDuration != null ? "0" : "General" });
+    plannerOps.push({ addr: `F${r}`, style: STYLE.phaseRow, numFmt: phaseStart != null ? DATE_FMT : "General" });
+    plannerOps.push({ addr: `G${r}`, style: STYLE.phaseRow, numFmt: phaseEnd != null ? DATE_FMT : "General" });
+    plannerOps.push({ addr: `H${r}`, style: STYLE.phaseRow });
+    plannerOps.push({ addr: `I${r}`, style: STYLE.phaseRow });
+    plannerOps.push({ addr: `J${r}`, style: STYLE.phaseRow });
+
+    groupBlocks.forEach(({ groupTitle, tasks }) => {
+      plannerAOA.push([groupTitle, "", "", "", "", "", "", "", "", `group:${phase.id}`]);
+      const gr = plannerAOA.length;
+      ["A","B","C","D","E","F","G","H","I","J"].forEach(col => plannerOps.push({ addr: `${col}${gr}`, style: STYLE.groupRow }));
+
+      tasks.forEach(({ t, s }) => {
+        const start = s.startDate || s.dueDate;
+        const end = s.dueDate || s.startDate;
+        const sn = toSerial(start);
+        const en = toSerial(end);
+        const dur = (sn != null && en != null) ? (en - sn + 1) : null;
+        const txt = statusText(s);
+        plannerAOA.push([
+          getTitle(t, s),
+          (getDesc(t, s) || "").slice(0, 200),
+          pctValue(s),
+          txt,
+          dur, sn, en,
+          s.owner || "",
+          s.notes || "",
+          t.id
+        ]);
+        const tr = plannerAOA.length;
+        const stripe = taskRowIdx % 2 === 1;
+        const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+        const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+        const pctStyle = stripe ? STYLE.cellPctBigStripe : STYLE.cellPctBig;
+        plannerOps.push({ addr: `A${tr}`, style: baseRow });
+        plannerOps.push({ addr: `B${tr}`, style: baseRow });
+        plannerOps.push({ addr: `C${tr}`, style: pctStyle, numFmt: PCT_FMT });
+        plannerOps.push({ addr: `D${tr}`, style: statusStyle(txt) });
+        plannerOps.push({ addr: `E${tr}`, style: numStyle, numFmt: dur != null ? "0" : "General" });
+        plannerOps.push({ addr: `F${tr}`, style: numStyle, numFmt: sn != null ? DATE_FMT : "General" });
+        plannerOps.push({ addr: `G${tr}`, style: numStyle, numFmt: en != null ? DATE_FMT : "General" });
+        plannerOps.push({ addr: `H${tr}`, style: baseRow });
+        plannerOps.push({ addr: `I${tr}`, style: baseRow });
+        plannerOps.push({ addr: `J${tr}`, style: baseRow });
+        taskRowIdx++;
+      });
+    });
+  });
+
+  const plannerWS = XLSX.utils.aoa_to_sheet(plannerAOA);
+  // Banner / tagline / overall — paint across cols A..J so the merge looks contained.
+  for (let c = 0; c < 10; c++) {
+    applyStyle(plannerWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+    applyStyle(plannerWS, XLSX.utils.encode_cell({ c, r: 1 }), STYLE.bannerSub);
+  }
+  applyStyle(plannerWS, "A3", { font: { name: "Calibri", sz: 12, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "right", vertical: "center", indent: 1 } });
+  applyStyle(plannerWS, "B3", { font: { name: "Calibri", sz: 18, bold: true, color: { rgb: PT_NAVY_DEEP } }, alignment: { horizontal: "left", vertical: "center", indent: 1 } }, PCT_FMT);
+  // Header band row 4 across A..J
+  ["A4","B4","C4","D4","E4","F4","G4","H4","I4","J4"].forEach(addr => applyStyle(plannerWS, addr, STYLE.colHeader));
+  plannerOps.forEach(({ addr, style, numFmt }) => applyStyle(plannerWS, addr, style, numFmt));
+  plannerWS["!cols"] = [
+    { wch: 60 }, { wch: 50 }, { wch: 14 }, { wch: 18 }, { wch: 10 },
+    { wch: 13 }, { wch: 13 }, { wch: 18 }, { wch: 60 },
+    { wch: 18, hidden: true } // J — Task ID, hidden so it doesn't clutter the view but survives a round-trip
+  ];
+  plannerWS["!freeze"] = { xSplit: 0, ySplit: 4 };
+  plannerWS["!rows"] = [];
+  plannerWS["!rows"][0] = { hpx: 48 };
+  plannerWS["!rows"][1] = { hpx: 24 };
+  plannerWS["!rows"][2] = { hpx: 32 };
+  plannerWS["!rows"][3] = { hpx: 32 };
+  plannerWS["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } }, // banner across visible cols + hidden ID col
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }, // tagline
+  ];
+
+  // ===== Sheet: Milestones =====
+  const fmtBool = (v) => v ? "Yes" : "No";
+  const milestones = (STATE.__milestones || []).slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const milestoneAOA = [
+    [`[${CLIENT_NAME}] Calendar Milestones`, "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["", "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["Date", "End date", "All day", "Start time", "End time", "Title", "Type", "Status", "Notes", "Google Event ID", "Google Calendar ID", "Pushed at", "Milestone ID"]
+  ];
+  const milestoneFmt = [];
+  milestones.forEach((m, idx) => {
+    const dateSerial = toSerial(m.date);
+    const endSerial = toSerial(m.dateEnd);
+    milestoneAOA.push([
+      dateSerial, endSerial, fmtBool(!m.time && !m.endTime),
+      m.time || "", m.endTime || "", m.title || "", m.type || "",
+      m.status || "scheduled", m.notes || "",
+      m.googleEventId || "", m.googleCalendarId || "", m.googlePushedAt || "",
+      m.localId || ""
+    ]);
+    const r = idx + 4; // header at row 3, body starts row 4
+    if (dateSerial != null) milestoneFmt.push({ addr: `A${r}`, numFmt: DATE_FMT });
+    if (endSerial != null)  milestoneFmt.push({ addr: `B${r}`, numFmt: DATE_FMT });
+  });
+  if (milestones.length === 0) milestoneAOA.push(["", "", "", "", "", "(no milestones logged yet)", "", "", "", "", "", "", ""]);
+  const milestoneWS = XLSX.utils.aoa_to_sheet(milestoneAOA);
+  // Banner
+  for (let c = 0; c < 13; c++) {
+    applyStyle(milestoneWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+  }
+  ["A3","B3","C3","D3","E3","F3","G3","H3","I3","J3","K3","L3","M3"].forEach(addr => applyStyle(milestoneWS, addr, STYLE.colHeader));
+  const dateAddrs = new Set(milestoneFmt.filter(f => f.numFmt === DATE_FMT).map(f => f.addr));
+  for (let r = 4; r <= milestoneAOA.length; r++) {
+    const stripe = (r - 4) % 2 === 1;
+    const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+    const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+    ["A","B","C","D","E","F","G","H","I","J","K","L","M"].forEach(col => {
+      const addr = `${col}${r}`;
+      const isDate = dateAddrs.has(addr);
+      const useNum = isDate || col === "C" || col === "D" || col === "E";
+      applyStyle(milestoneWS, addr, useNum ? numStyle : baseRow, isDate ? DATE_FMT : undefined);
+    });
+  }
+  milestoneWS["!cols"] = [
+    { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 11 }, { wch: 10 },
+    { wch: 60 }, { wch: 12 }, { wch: 12 }, { wch: 40 }, { wch: 28 }, { wch: 28 }, { wch: 22 },
+    { wch: 18, hidden: true }   // M — Milestone ID, hidden
+  ];
+  milestoneWS["!freeze"] = { xSplit: 0, ySplit: 3 };
+  milestoneWS["!rows"] = [];
+  milestoneWS["!rows"][0] = { hpx: 40 };
+  milestoneWS["!rows"][1] = { hpx: 12 };
+  milestoneWS["!rows"][2] = { hpx: 30 };
+  milestoneWS["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }];
+  if (milestones.length > 0) milestoneWS["!autofilter"] = { ref: `A3:M${milestones.length + 3}` };
+
+  // ===== Sheet: Pivot =====
+  const pivotAOA = [
+    ["Delayed Tasks Pivot", "", "", "", "", ""],
+    ["", "", "", "", "", ""],
+    ["Phase", "Tasks", "Responsible", "Comments", "Status", "End Date"]
+  ];
+  const pivotFmt = [];
+  let pivotAdded = 0;
+  phaseBlocks.forEach(b => b.groupBlocks.forEach(({ tasks }) => tasks.forEach(({ t, s }) => {
+    const dueSerial = toSerial(s.dueDate);
+    const overdue = dueSerial != null && todaySerial != null && dueSerial < todaySerial && s.status !== "complete";
+    if (!overdue && s.status !== "blocked" && !s.urgent) return;
+    const statusLabel = overdue ? `${todaySerial - dueSerial} Days Overdue`
+      : s.status === "blocked" ? "Blocked" : "Urgent";
+    pivotAOA.push([b.phaseTitle, getTitle(t, s), s.owner || "", s.notes || "", statusLabel, dueSerial != null ? dueSerial : ""]);
+    pivotAdded++;
+    const r = pivotAOA.length;
+    if (dueSerial != null) pivotFmt.push({ addr: `F${r}`, numFmt: DATE_FMT });
+    pivotFmt.push({ addr: `E${r}`, statusLabel });
+  })));
+  if (pivotAdded === 0) pivotAOA.push(["(none)", "", "", "", "", ""]);
+  const pivotWS = XLSX.utils.aoa_to_sheet(pivotAOA);
+  for (let c = 0; c < 6; c++) applyStyle(pivotWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+  ["A3","B3","C3","D3","E3","F3"].forEach(addr => applyStyle(pivotWS, addr, STYLE.colHeader));
+  const pivotDateAddrs = new Set(pivotFmt.filter(f => f.numFmt === DATE_FMT).map(f => f.addr));
+  const pivotStatusByAddr = new Map(pivotFmt.filter(f => f.statusLabel).map(f => [f.addr, f.statusLabel]));
+  for (let r = 4; r <= pivotAOA.length; r++) {
+    const stripe = (r - 4) % 2 === 1;
+    const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+    const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+    ["A","B","C","D","E","F"].forEach(col => {
+      const addr = `${col}${r}`;
+      const numFmt = pivotDateAddrs.has(addr) ? DATE_FMT : undefined;
+      const sl = pivotStatusByAddr.get(addr);
+      let style = baseRow;
+      if (col === "F") style = numStyle;
+      if (sl) {
+        if (sl.includes("Overdue")) style = STYLE.overdueLabel;
+        else if (sl === "Blocked") style = STYLE.blockedLabel;
+        else if (sl === "Urgent") style = STYLE.urgentLabel;
+      }
+      applyStyle(pivotWS, addr, style, numFmt);
+    });
+  }
+  pivotWS["!cols"] = [{ wch: 32 }, { wch: 56 }, { wch: 22 }, { wch: 50 }, { wch: 22 }, { wch: 14 }];
+  pivotWS["!rows"] = [];
+  pivotWS["!rows"][0] = { hpx: 40 };
+  pivotWS["!rows"][1] = { hpx: 12 };
+  pivotWS["!rows"][2] = { hpx: 30 };
+  pivotWS["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+
+  // ===== Sheet: Product Feedback Tracker =====
+  const allBugs = [];
+  PHASES.forEach(p => p.groups.forEach(g => g.tasks.forEach(t => {
+    const s = STATE[t.id];
+    if (!s || !passesArchiveFilter(s)) return;
+    (s.bugs || []).forEach(b => allBugs.push({ b, t, s, phase: phaseMeta(p).title }));
+  })));
+  const SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+  allBugs.sort((a, b) => {
+    const sa = SEV_ORDER[a.b.severity] ?? 99;
+    const sb = SEV_ORDER[b.b.severity] ?? 99;
+    if (sa !== sb) return sa - sb;
+    return (b.b.created || "").localeCompare(a.b.created || "");
+  });
+  const feedbackAOA = [
+    [`[${CLIENT_NAME}] PickTrace 3.0 Product Feedback`],
+    [],
+    ["#", "Title", "Ticket", "Product", "Priority", "User", "Description", "Client Comments", "PickTrace Comments", "Additional Notes", "Status", "Associated Accounts"]
+  ];
+  allBugs.forEach((row, idx) => {
+    const { b, t, s, phase } = row;
+    const priority = (b.severity || "").charAt(0).toUpperCase() + (b.severity || "").slice(1) || "Not Defined";
+    const statusLabel = b.status === "resolved" ? "Resolved"
+      : b.status === "wont_fix" ? "Won't fix"
+      : b.status === "in_progress" ? "In progress"
+      : b.status === "open" ? "Open" : (b.status || "");
+    feedbackAOA.push([
+      idx + 1, b.title || "", b.id || "", phase, priority, b.reporter || "",
+      b.description || "", "", "", b.notes || "", statusLabel, getTitle(t, s)
+    ]);
+  });
+  if (allBugs.length === 0) feedbackAOA.push(["", "(no bugs logged yet)", "", "", "", "", "", "", "", "", "", ""]);
+  const feedbackWS = XLSX.utils.aoa_to_sheet(feedbackAOA);
+  for (let c = 0; c < 12; c++) applyStyle(feedbackWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+  ["A3","B3","C3","D3","E3","F3","G3","H3","I3","J3","K3","L3"].forEach(addr => applyStyle(feedbackWS, addr, STYLE.colHeader));
+  for (let r = 4; r <= feedbackAOA.length; r++) {
+    const stripe = (r - 4) % 2 === 1;
+    const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+    const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+    const sevCell = (feedbackAOA[r - 1] || [])[4];
+    const statusVal = (feedbackAOA[r - 1] || [])[10];
+    ["A","B","C","D","E","F","G","H","I","J","K","L"].forEach(col => {
+      const addr = `${col}${r}`;
+      let style = baseRow;
+      if (col === "A") style = numStyle;
+      if (col === "E" && allBugs.length > 0) style = severityStyle((sevCell || "").toLowerCase());
+      if (col === "K") {
+        if (statusVal === "Open" || statusVal === "In progress") style = STYLE.statusOnTrack;
+        else if (statusVal === "Resolved") style = STYLE.statusComplete;
+        else if (statusVal === "Won't fix") style = STYLE.statusNotStart;
+      }
+      applyStyle(feedbackWS, addr, style, col === "A" ? "0" : undefined);
+    });
+  }
+  feedbackWS["!cols"] = [
+    { wch: 5 }, { wch: 32 }, { wch: 10 }, { wch: 22 }, { wch: 14 }, { wch: 18 },
+    { wch: 60 }, { wch: 28 }, { wch: 28 }, { wch: 28 }, { wch: 14 }, { wch: 30 }
+  ];
+  feedbackWS["!freeze"] = { xSplit: 0, ySplit: 3 };
+  feedbackWS["!rows"] = [];
+  feedbackWS["!rows"][0] = { hpx: 40 };
+  feedbackWS["!rows"][1] = { hpx: 12 };
+  feedbackWS["!rows"][2] = { hpx: 30 };
+  feedbackWS["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }];
+
+  // ===== Sheet: External =====
+  const externalAOA = [
+    ["EXTERNAL — High & Critical Open Items"],
+    [],
+    ["Rank Order", "Title", "Ticket (Internal to PT)", "Product", "Tab", "Priority"]
+  ];
+  let extRank = 0;
+  allBugs.forEach(({ b, phase }) => {
+    if (b.severity !== "critical" && b.severity !== "high") return;
+    if (b.status === "resolved" || b.status === "wont_fix") return;
+    extRank++;
+    const priority = (b.severity || "").charAt(0).toUpperCase() + (b.severity || "").slice(1);
+    externalAOA.push([extRank, b.title || "", b.id || "", phase, "", priority]);
+  });
+  if (extRank === 0) externalAOA.push(["", "(no high or critical open bugs)", "", "", "", ""]);
+  const externalWS = XLSX.utils.aoa_to_sheet(externalAOA);
+  for (let c = 0; c < 6; c++) applyStyle(externalWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+  ["A3","B3","C3","D3","E3","F3"].forEach(addr => applyStyle(externalWS, addr, STYLE.colHeader));
+  for (let r = 4; r <= externalAOA.length; r++) {
+    const stripe = (r - 4) % 2 === 1;
+    const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+    const numStyle = stripe ? STYLE.cellNumStripe : STYLE.cellNum;
+    const priorityVal = ((externalAOA[r - 1] || [])[5] || "").toLowerCase();
+    ["A","B","C","D","E","F"].forEach(col => {
+      const addr = `${col}${r}`;
+      let style = baseRow;
+      if (col === "A" || col === "C") style = numStyle;
+      if (col === "F") style = severityStyle(priorityVal);
+      applyStyle(externalWS, addr, style, col === "A" ? "0" : undefined);
+    });
+  }
+  externalWS["!cols"] = [
+    { wch: 12 }, { wch: 50 }, { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 14 }
+  ];
+  externalWS["!rows"] = [];
+  externalWS["!rows"][0] = { hpx: 40 };
+  externalWS["!rows"][1] = { hpx: 12 };
+  externalWS["!rows"][2] = { hpx: 30 };
+  externalWS["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+
+  // ===== Sheet: IconsCharts =====
+  const iconsAOA = [
+    ["Icons", ""],
+    ["Completed", ""],
+    ["On Track", ""],
+    ["Behind Schedule", ""],
+    ["Not Started", ""],
+    ["", ""],
+    ["Project Progress", ""],
+    ["Progress", overallPct],
+    ["Pending", 1 - overallPct],
+    ["", ""]
+  ];
+  phaseBlocks.forEach(b => {
+    const st = phaseStats(b.phase);
+    const pct = st.total > 0 ? st.complete / st.total : 0;
+    iconsAOA.push([b.phaseTitle, ""]);
+    iconsAOA.push(["Progress", pct]);
+    iconsAOA.push(["Pending", 1 - pct]);
+    iconsAOA.push(["", ""]);
+  });
+  const iconsWS = XLSX.utils.aoa_to_sheet(iconsAOA);
+  iconsAOA.forEach((row, idx) => {
+    if (typeof row[1] === "number") {
+      const cell = iconsWS[`B${idx + 1}`];
+      if (cell) cell.z = PCT_FMT;
+    }
+  });
+  iconsWS["!cols"] = [{ wch: 32 }, { wch: 14 }];
+
+  // ===== Build workbook =====
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, dashWS,     "Project Dashboard");
+  XLSX.utils.book_append_sheet(wb, plannerWS,  "Project Planner");
+  XLSX.utils.book_append_sheet(wb, milestoneWS,"Milestones");
+  XLSX.utils.book_append_sheet(wb, pivotWS,    "Pivot");
+  XLSX.utils.book_append_sheet(wb, feedbackWS, "Product Feedback Tracker");
+  XLSX.utils.book_append_sheet(wb, externalWS, "External");
+
+  // ===== Sheet: Reference (allowed values for re-import) =====
+  const referenceAOA = [
+    [`[${CLIENT_NAME}] Allowed Values — Reference for Re-Import`, "", ""],
+    ["", "", ""],
+    ["Column", "Allowed values", "Notes"],
+    ["Project Planner · STATUS",        "Not Started, On Track, Complete, Behind Schedule", "Maps to internal: not_started / in_progress / complete / blocked"],
+    ["Project Planner · % COMPLETE",    "Number 0–1 (or 0%–100%)",                          "Used as display only — Status is the source of truth on import"],
+    ["Project Planner · DURATION",      "Number of days",                                    "Optional"],
+    ["Project Planner · START / END",   "Date",                                              "Excel date — formatted m/d/yyyy"],
+    ["Project Planner · Task ID (col J, hidden)", "Don't edit",                              "Match key for round-trip. Blank = new custom task"],
+    ["Product Feedback · Priority",     "Critical, High, Medium, Low",                       "Maps to internal: critical / high / medium / low"],
+    ["Product Feedback · Status",       "Open, In progress, Resolved, Won't fix",            "Maps to internal: open / in_progress / resolved / wont_fix"],
+    ["Product Feedback · Ticket (col C)", "Don't edit",                                       "Bug ID — match key for round-trip. Blank = new bug"],
+    ["Milestones · Type",               "milestone, meeting, ooo, focus, lunch, routine, critical", "Free-form OK; these are the recognised values"],
+    ["Milestones · Status",             "scheduled, cancelled",                              "Lowercase"],
+    ["Milestones · All day",            "Yes, No",                                           "Computed from Start/End time fields"],
+    ["Milestones · Milestone ID (col M, hidden)", "Don't edit",                              "Match key for round-trip. Blank = new milestone"],
+    ["", "", ""],
+    ["Tip", "To add dropdowns in Excel: select the column, Data → Data Validation → List → enter the allowed values from this sheet.", ""]
+  ];
+  const referenceWS = XLSX.utils.aoa_to_sheet(referenceAOA);
+  for (let c = 0; c < 3; c++) applyStyle(referenceWS, XLSX.utils.encode_cell({ c, r: 0 }), STYLE.bannerMain);
+  ["A3","B3","C3"].forEach(addr => applyStyle(referenceWS, addr, STYLE.colHeader));
+  for (let r = 4; r <= referenceAOA.length; r++) {
+    const stripe = (r - 4) % 2 === 1;
+    const baseRow = stripe ? STYLE.taskRowEven : STYLE.taskRowOdd;
+    ["A","B","C"].forEach(col => applyStyle(referenceWS, `${col}${r}`, baseRow));
+  }
+  referenceWS["!cols"] = [{ wch: 38 }, { wch: 60 }, { wch: 60 }];
+  referenceWS["!rows"] = [];
+  referenceWS["!rows"][0] = { hpx: 40 };
+  referenceWS["!rows"][2] = { hpx: 28 };
+  referenceWS["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
+
+  XLSX.utils.book_append_sheet(wb, referenceWS, "Reference");
+  XLSX.utils.book_append_sheet(wb, iconsWS,     "IconsCharts");
+
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/octet-stream" });
+  downloadBlob(blob, `wonderful-picktrace-tracker-${ymd(new Date())}.xlsx`);
+  toast("Excel exported", "success");
+}
+
+/* =========================================================================
+   Excel re-import — round-trip changes from a tracker .xlsx export back into
+   STATE. Reads Project Planner / Product Feedback Tracker / Milestones,
+   matches by hidden Task / Bug / Milestone ID columns, computes a diff, and
+   shows a preview modal before applying.
+   ========================================================================= */
+
+// Reverse maps from display strings → internal keys.
+const STATUS_DISPLAY_TO_INTERNAL = {
+  "Not Started": "not_started",
+  "Not started": "not_started",
+  "On Track":    "in_progress",
+  "On track":    "in_progress",
+  "In progress": "in_progress",
+  "Complete":    "complete",
+  "Behind Schedule": "blocked",
+  "Behind schedule": "blocked",
+  "Blocked":     "blocked"
+};
+const BUG_STATUS_TO_INTERNAL = {
+  "Open":        "open",
+  "In progress": "in_progress",
+  "Resolved":    "resolved",
+  "Won't fix":   "wont_fix",
+  "Wont fix":    "wont_fix"
+};
+const PRIORITY_TO_SEVERITY = {
+  "Critical": "critical",
+  "High":     "high",
+  "Medium":   "medium",
+  "Low":      "low"
+};
+
+function excelSerialToISO(n) {
+  if (n == null || n === "") return "";
+  if (typeof n !== "number" || isNaN(n)) {
+    // Maybe the cell was already an ISO string — pass through.
+    if (typeof n === "string" && /^\d{4}-\d{2}-\d{2}/.test(n)) return n.slice(0, 10);
+    return "";
+  }
+  const ms = Date.UTC(1899, 11, 30) + n * 86400000;
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return "";
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+function normaliseStr(v) { return v == null ? "" : String(v).trim(); }
+
+function importXLSX() {
+  if (typeof XLSX === "undefined") {
+    toast("Excel library still loading — try again in a moment", "warn");
+    return;
+  }
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  input.onchange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array", cellDates: false });
+      const diff = computeImportDiff(wb);
+      openImportDiffModal(diff, wb);
+    } catch (err) {
+      console.error(err);
+      toast("Couldn't read that file: " + (err.message || err), "warn");
+    }
+  };
+  input.click();
+}
+
+/* Build the proposed-changes diff by comparing the parsed workbook against
+   STATE. Returns { tasks, bugs, milestones }, each with adds/updates/removes. */
+function computeImportDiff(wb) {
+  const diff = {
+    tasks:      { adds: [], updates: [], removes: [] },
+    bugs:       { adds: [], updates: [], removes: [] },
+    milestones: { adds: [], updates: [], removes: [] },
+    warnings:   []
+  };
+
+  // ---- Project Planner ----
+  const plannerWS = wb.Sheets["Project Planner"];
+  if (plannerWS) {
+    const rows = XLSX.utils.sheet_to_json(plannerWS, { header: 1, defval: "" });
+    // Header row is row 4 (index 3) in our export. Anything above is banner/overall.
+    // Each subsequent row is one of: phase header (col J starts with "phase:"),
+    // group subheader ("group:"), or task (real ID).
+    const seenTaskIds = new Set();
+    for (let r = 4; r < rows.length; r++) {
+      const row = rows[r] || [];
+      const idCell = normaliseStr(row[9]); // col J
+      if (!idCell) continue;
+      if (idCell.startsWith("phase:") || idCell.startsWith("group:")) continue;
+      const taskId = idCell;
+      seenTaskIds.add(taskId);
+      const fields = {
+        title:    normaliseStr(row[0]),
+        desc:     normaliseStr(row[1]),
+        statusDisplay: normaliseStr(row[3]),
+        startDate: excelSerialToISO(row[5]),
+        dueDate:   excelSerialToISO(row[6]),
+        owner:    normaliseStr(row[7]),
+        notes:    normaliseStr(row[8])
+      };
+      const status = STATUS_DISPLAY_TO_INTERNAL[fields.statusDisplay] || null;
+
+      const existing = STATE[taskId];
+      const t = TASK_INDEX[taskId];
+
+      if (!existing || !t) {
+        // No matching task — treat as a new custom task.
+        diff.tasks.adds.push({
+          excelRow: r + 1,
+          title: fields.title,
+          desc: fields.desc,
+          status: status || "not_started",
+          startDate: fields.startDate,
+          dueDate: fields.dueDate,
+          owner: fields.owner,
+          notes: fields.notes,
+          intendedId: taskId
+        });
+        continue;
+      }
+
+      const changes = {};
+      const isCustom = (STATE.__customTasks || []).some(c => c.id === taskId);
+      // Title / desc only updatable on custom tasks (default tasks have
+      // titleOverride / descOverride fields)
+      if (fields.title && fields.title !== getTitle(t, existing)) {
+        changes.title = { from: getTitle(t, existing), to: fields.title, customOnly: !isCustom };
+      }
+      if (fields.desc && fields.desc !== getDesc(t, existing).slice(0, 200)) {
+        // Only flag as a change if the description meaningfully differs (export truncates to 200).
+        const cur = getDesc(t, existing);
+        if (fields.desc !== cur.slice(0, 200)) {
+          changes.desc = { from: cur.slice(0, 80), to: fields.desc.slice(0, 80), truncated: true };
+        }
+      }
+      if (status && status !== existing.status) {
+        changes.status = { from: existing.status, to: status };
+      }
+      if (fields.owner !== (existing.owner || "")) {
+        changes.owner = { from: existing.owner || "", to: fields.owner };
+      }
+      if (fields.notes !== (existing.notes || "")) {
+        changes.notes = { from: (existing.notes || "").slice(0, 60), to: fields.notes.slice(0, 60) };
+      }
+      if (fields.startDate !== (existing.startDate || "")) {
+        changes.startDate = { from: existing.startDate || "(none)", to: fields.startDate || "(none)" };
+      }
+      if (fields.dueDate !== (existing.dueDate || "")) {
+        changes.dueDate = { from: existing.dueDate || "(none)", to: fields.dueDate || "(none)" };
+      }
+      if (Object.keys(changes).length > 0) {
+        diff.tasks.updates.push({ taskId, title: getTitle(t, existing), changes });
+      }
+    }
+    // Removes — custom tasks present in STATE but missing from the Excel.
+    (STATE.__customTasks || []).forEach(ct => {
+      if (!seenTaskIds.has(ct.id)) {
+        diff.tasks.removes.push({ taskId: ct.id, title: ct.title });
+      }
+    });
+    // Default tasks missing from the import are silently kept (not reported).
+  } else {
+    diff.warnings.push("No 'Project Planner' sheet found — task changes skipped.");
+  }
+
+  // ---- Product Feedback Tracker ----
+  const fbWS = wb.Sheets["Product Feedback Tracker"];
+  if (fbWS) {
+    const rows = XLSX.utils.sheet_to_json(fbWS, { header: 1, defval: "" });
+    // Headers at row 3 (index 2). Body starts at row index 3.
+    const seenBugIds = new Set();
+    for (let r = 3; r < rows.length; r++) {
+      const row = rows[r] || [];
+      // Cols: A # | B Title | C Ticket | D Product | E Priority | F User | G Description | H Client Comments | I PT Comments | J Add'l Notes | K Status | L Assoc
+      const bugId = normaliseStr(row[2]); // col C - Ticket
+      const title = normaliseStr(row[1]);
+      if (!title || title.startsWith("(no bugs")) continue;
+
+      const fields = {
+        title,
+        description: normaliseStr(row[6]),
+        severity:    PRIORITY_TO_SEVERITY[normaliseStr(row[4])] || null,
+        status:      BUG_STATUS_TO_INTERNAL[normaliseStr(row[10])] || null,
+        reporter:    normaliseStr(row[5]),
+        notes:       normaliseStr(row[9]),
+        linkedTaskTitle: normaliseStr(row[11])
+      };
+
+      // Find existing bug across all tasks by ID
+      let foundParent = null, foundBug = null;
+      if (bugId) {
+        for (const tid of Object.keys(STATE)) {
+          const s = STATE[tid];
+          if (!s || !Array.isArray(s.bugs)) continue;
+          const b = s.bugs.find(b => b.id === bugId);
+          if (b) { foundParent = tid; foundBug = b; break; }
+        }
+      }
+
+      if (foundBug) {
+        seenBugIds.add(bugId);
+        const changes = {};
+        if (fields.title !== (foundBug.title || "")) changes.title = { from: foundBug.title || "", to: fields.title };
+        if (fields.description !== (foundBug.description || "")) changes.description = { from: (foundBug.description || "").slice(0, 60), to: fields.description.slice(0, 60) };
+        if (fields.severity && fields.severity !== foundBug.severity) changes.severity = { from: foundBug.severity, to: fields.severity };
+        if (fields.status && fields.status !== foundBug.status) changes.status = { from: foundBug.status, to: fields.status };
+        if (fields.reporter !== (foundBug.reporter || "")) changes.reporter = { from: foundBug.reporter || "", to: fields.reporter };
+        if (fields.notes !== (foundBug.notes || "")) changes.notes = { from: (foundBug.notes || "").slice(0, 60), to: fields.notes.slice(0, 60) };
+        if (Object.keys(changes).length > 0) {
+          diff.bugs.updates.push({ bugId, parentTaskId: foundParent, title: foundBug.title, changes });
+        }
+      } else {
+        // Try to attach to parent task by linkedTaskTitle
+        let parentTaskId = null;
+        Object.keys(STATE).forEach(tid => {
+          const t = TASK_INDEX[tid];
+          const s = STATE[tid];
+          if (!t || !s) return;
+          if (getTitle(t, s) === fields.linkedTaskTitle) parentTaskId = tid;
+        });
+        diff.bugs.adds.push({
+          excelRow: r + 1,
+          title: fields.title,
+          description: fields.description,
+          severity: fields.severity || "medium",
+          status: fields.status || "open",
+          reporter: fields.reporter,
+          notes: fields.notes,
+          parentTaskId
+        });
+      }
+    }
+    // Removes: bugs in STATE not seen in the Excel (only by ID — bugs without ID skipped).
+    Object.keys(STATE).forEach(tid => {
+      const s = STATE[tid];
+      if (!s || !Array.isArray(s.bugs)) return;
+      s.bugs.forEach(b => {
+        if (b.id && !seenBugIds.has(b.id)) {
+          diff.bugs.removes.push({ bugId: b.id, parentTaskId: tid, title: b.title });
+        }
+      });
+    });
+  } else {
+    diff.warnings.push("No 'Product Feedback Tracker' sheet found — bug changes skipped.");
+  }
+
+  // ---- Milestones ----
+  const msWS = wb.Sheets["Milestones"];
+  if (msWS) {
+    const rows = XLSX.utils.sheet_to_json(msWS, { header: 1, defval: "" });
+    // Headers at row 3 (index 2). Body starts at row index 3.
+    // Cols: A Date | B End | C All day | D Start time | E End time | F Title | G Type | H Status | I Notes | J GEvtId | K GCalId | L PushedAt | M Milestone ID
+    const seenMsIds = new Set();
+    for (let r = 3; r < rows.length; r++) {
+      const row = rows[r] || [];
+      const title = normaliseStr(row[5]);
+      if (!title || title.startsWith("(no milestones")) continue;
+      const msId = normaliseStr(row[12]); // col M
+      const fields = {
+        date:    excelSerialToISO(row[0]),
+        dateEnd: excelSerialToISO(row[1]),
+        time:    normaliseStr(row[3]),
+        endTime: normaliseStr(row[4]),
+        title,
+        type:    normaliseStr(row[6]),
+        status:  normaliseStr(row[7]) || "scheduled",
+        notes:   normaliseStr(row[8])
+      };
+      const existing = msId
+        ? (STATE.__milestones || []).find(m => m.localId === msId)
+        : null;
+      if (existing) {
+        seenMsIds.add(msId);
+        const changes = {};
+        ["date", "dateEnd", "time", "endTime", "title", "type", "status", "notes"].forEach(k => {
+          const cur = existing[k] || "";
+          const nxt = fields[k] || "";
+          if (cur !== nxt) changes[k] = { from: cur || "(none)", to: nxt || "(none)" };
+        });
+        if (Object.keys(changes).length > 0) {
+          diff.milestones.updates.push({ msId, title: existing.title, changes });
+        }
+      } else {
+        diff.milestones.adds.push({ excelRow: r + 1, ...fields, intendedId: msId });
+      }
+    }
+    (STATE.__milestones || []).forEach(m => {
+      if (m.localId && !seenMsIds.has(m.localId)) {
+        diff.milestones.removes.push({ msId: m.localId, title: m.title, date: m.date });
+      }
+    });
+  } else {
+    diff.warnings.push("No 'Milestones' sheet found — milestone changes skipped.");
+  }
+
+  return diff;
+}
+
+/* Apply the diff to STATE. Mutates in place; caller should saveState() after. */
+function applyImportDiff(diff) {
+  STATE.__customTasks = STATE.__customTasks || [];
+  STATE.__milestones  = STATE.__milestones || [];
+  let stamp = new Date().toISOString();
+
+  // ---- Tasks ----
+  diff.tasks.updates.forEach(({ taskId, changes }) => {
+    const s = STATE[taskId];
+    const t = TASK_INDEX[taskId];
+    if (!s || !t) return;
+    const isCustom = STATE.__customTasks.some(c => c.id === taskId);
+    if (changes.title && (isCustom || changes.title.customOnly === false)) {
+      if (isCustom) {
+        const ct = STATE.__customTasks.find(c => c.id === taskId);
+        if (ct) ct.title = changes.title.to;
+      } else {
+        s.titleOverride = changes.title.to;
+      }
+    }
+    if (changes.desc) {
+      if (isCustom) {
+        const ct = STATE.__customTasks.find(c => c.id === taskId);
+        if (ct) ct.desc = changes.desc.to;
+      } else {
+        s.descOverride = changes.desc.to;
+      }
+    }
+    if (changes.status)    s.status    = changes.status.to;
+    if (changes.owner)     s.owner     = changes.owner.to;
+    if (changes.notes)     s.notes     = changes.notes.to;
+    if (changes.startDate) s.startDate = changes.startDate.to === "(none)" ? "" : changes.startDate.to;
+    if (changes.dueDate)   s.dueDate   = changes.dueDate.to === "(none)" ? "" : changes.dueDate.to;
+    s.updated = stamp;
+  });
+
+  diff.tasks.adds.forEach(add => {
+    const id = "ct-imp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    // Bucket new imported tasks under the first phase / group as a sane default.
+    const firstPhase = PHASES[0];
+    const firstGroup = firstPhase && firstPhase.groups[0];
+    if (!firstPhase || !firstGroup) return;
+    STATE.__customTasks.push({
+      id,
+      phaseId: firstPhase.id,
+      groupId: firstGroup.id,
+      title: add.title || "Untitled (imported)",
+      desc:  add.desc || ""
+    });
+    STATE[id] = {
+      ...defaultTaskState({ id }),
+      status:    add.status || "not_started",
+      startDate: add.startDate || "",
+      dueDate:   add.dueDate || "",
+      owner:     add.owner || "",
+      notes:     add.notes || "",
+      updated:   stamp
+    };
+  });
+
+  diff.tasks.removes.forEach(({ taskId }) => {
+    STATE.__customTasks = STATE.__customTasks.filter(c => c.id !== taskId);
+    delete STATE[taskId];
+  });
+
+  // ---- Bugs ----
+  diff.bugs.updates.forEach(({ bugId, parentTaskId, changes }) => {
+    const s = STATE[parentTaskId];
+    if (!s || !Array.isArray(s.bugs)) return;
+    const b = s.bugs.find(b => b.id === bugId);
+    if (!b) return;
+    if (changes.title)       b.title       = changes.title.to;
+    if (changes.description) b.description = changes.description.to;
+    if (changes.severity)    b.severity    = changes.severity.to;
+    if (changes.status)      b.status      = changes.status.to;
+    if (changes.reporter)    b.reporter    = changes.reporter.to;
+    if (changes.notes)       b.notes       = changes.notes.to;
+    b.updated = stamp;
+  });
+
+  diff.bugs.adds.forEach(add => {
+    const parent = STATE[add.parentTaskId] || STATE[Object.keys(STATE).find(k => TASK_INDEX[k])]; // first real task as fallback
+    if (!parent) return;
+    parent.bugs = parent.bugs || [];
+    const newId = "bug-imp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    parent.bugs.push({
+      id: newId,
+      title: add.title || "Untitled bug",
+      description: add.description || "",
+      severity: add.severity || "medium",
+      status: add.status || "open",
+      reporter: add.reporter || "",
+      assignee: "",
+      notes: add.notes || "",
+      created: stamp,
+      updated: stamp
+    });
+  });
+
+  diff.bugs.removes.forEach(({ bugId, parentTaskId }) => {
+    const s = STATE[parentTaskId];
+    if (!s || !Array.isArray(s.bugs)) return;
+    s.bugs = s.bugs.filter(b => b.id !== bugId);
+  });
+
+  // ---- Milestones ----
+  diff.milestones.updates.forEach(({ msId, changes }) => {
+    const m = STATE.__milestones.find(m => m.localId === msId);
+    if (!m) return;
+    Object.entries(changes).forEach(([k, v]) => {
+      m[k] = v.to === "(none)" ? "" : v.to;
+    });
+  });
+
+  diff.milestones.adds.forEach(add => {
+    const localId = add.intendedId || ("ms-" + Math.random().toString(36).slice(2, 10));
+    STATE.__milestones.push({
+      localId,
+      date: add.date || "",
+      dateEnd: add.dateEnd || "",
+      time: add.time || "",
+      endTime: add.endTime || "",
+      title: add.title || "Untitled",
+      type: add.type || "milestone",
+      status: add.status || "scheduled",
+      notes: add.notes || ""
+    });
+  });
+
+  diff.milestones.removes.forEach(({ msId }) => {
+    STATE.__milestones = STATE.__milestones.filter(m => m.localId !== msId);
+  });
+}
+
+/* Modal: render the diff and require the user to confirm before applying. */
+function openImportDiffModal(diff, wb) {
+  const totalAdds    = diff.tasks.adds.length    + diff.bugs.adds.length    + diff.milestones.adds.length;
+  const totalUpdates = diff.tasks.updates.length + diff.bugs.updates.length + diff.milestones.updates.length;
+  const totalRemoves = diff.tasks.removes.length + diff.bugs.removes.length + diff.milestones.removes.length;
+  const totalChanges = totalAdds + totalUpdates + totalRemoves;
+
+  const sectionStyle = "margin: 16px 0 6px; font-weight:600; font-size:13px; color:var(--ink); border-bottom:1px solid var(--line); padding-bottom:4px;";
+  const itemListStyle = "margin: 0; padding: 0 0 0 18px; font-size:12px; color:var(--ink-2); max-height: 220px; overflow-y:auto;";
+
+  function changeLines(changes) {
+    return Object.entries(changes).map(([field, v]) =>
+      h("div", { style: "font-size:11px; color:var(--ink-3); margin-left:14px;" },
+        `${field}: "${v.from}" → "${v.to}"`)
+    );
+  }
+
+  const body = h("div", { style: "max-height: 60vh; overflow-y: auto; padding-right: 4px;" }, [
+    totalChanges === 0
+      ? h("div", { style: "padding: 14px; background: var(--bg-2); border-radius: var(--radius-sm); color: var(--ink-2); font-size:13px;" },
+          "No changes detected — the file matches the current tracker state.")
+      : h("div", { style: "display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;" }, [
+          h("span", { style: "padding:4px 10px; border-radius: var(--radius-pill); background: var(--success-soft); color: var(--success); font-size:11px; font-weight:600;" }, `+${totalAdds} add`),
+          h("span", { style: "padding:4px 10px; border-radius: var(--radius-pill); background: var(--info-soft); color: var(--info); font-size:11px; font-weight:600;" }, `~${totalUpdates} update`),
+          h("span", { style: "padding:4px 10px; border-radius: var(--radius-pill); background: var(--danger-soft); color: var(--danger); font-size:11px; font-weight:600;" }, `−${totalRemoves} remove`)
+        ]),
+    totalRemoves > 0
+      ? h("div", { style: "padding:10px 12px; background: var(--danger-soft); border:1px solid var(--danger); border-radius: var(--radius-sm); color: var(--danger); font-size:12px; line-height:1.5; margin-bottom:14px;" },
+          `⚠ This import will permanently DELETE ${totalRemoves} item${totalRemoves === 1 ? "" : "s"} from the tracker. Removed items can only be restored by re-creating them or restoring a JSON backup. Review carefully below.`)
+      : null,
+    diff.warnings.length
+      ? h("div", { style: "padding:8px 12px; background: var(--warn-soft); border:1px solid var(--warn); border-radius: var(--radius-sm); color: var(--warn); font-size:12px; margin-bottom:14px;" },
+          diff.warnings.join(" "))
+      : null,
+
+    // Tasks
+    diff.tasks.updates.length || diff.tasks.adds.length || diff.tasks.removes.length
+      ? h("div", {}, [
+          h("div", { style: sectionStyle }, `Tasks — +${diff.tasks.adds.length}  ~${diff.tasks.updates.length}  −${diff.tasks.removes.length}`),
+          diff.tasks.adds.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--success); font-weight:600; margin-top:6px;" }, "Adds"),
+            h("ul", { style: itemListStyle }, diff.tasks.adds.map(a => h("li", {}, `+ ${a.title}`)))
+          ]) : null,
+          diff.tasks.updates.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--info); font-weight:600; margin-top:6px;" }, "Updates"),
+            h("ul", { style: itemListStyle }, diff.tasks.updates.map(u =>
+              h("li", {}, [
+                h("div", {}, `~ ${u.title}`),
+                ...changeLines(u.changes)
+              ])
+            ))
+          ]) : null,
+          diff.tasks.removes.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--danger); font-weight:600; margin-top:6px;" }, "Removes"),
+            h("ul", { style: itemListStyle }, diff.tasks.removes.map(r => h("li", {}, `− ${r.title}`)))
+          ]) : null
+        ])
+      : null,
+
+    // Bugs
+    diff.bugs.updates.length || diff.bugs.adds.length || diff.bugs.removes.length
+      ? h("div", {}, [
+          h("div", { style: sectionStyle }, `Bugs — +${diff.bugs.adds.length}  ~${diff.bugs.updates.length}  −${diff.bugs.removes.length}`),
+          diff.bugs.adds.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--success); font-weight:600; margin-top:6px;" }, "Adds"),
+            h("ul", { style: itemListStyle }, diff.bugs.adds.map(a => h("li", {}, `+ ${a.title} (${a.severity})`)))
+          ]) : null,
+          diff.bugs.updates.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--info); font-weight:600; margin-top:6px;" }, "Updates"),
+            h("ul", { style: itemListStyle }, diff.bugs.updates.map(u =>
+              h("li", {}, [
+                h("div", {}, `~ ${u.title}`),
+                ...changeLines(u.changes)
+              ])
+            ))
+          ]) : null,
+          diff.bugs.removes.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--danger); font-weight:600; margin-top:6px;" }, "Removes"),
+            h("ul", { style: itemListStyle }, diff.bugs.removes.map(r => h("li", {}, `− ${r.title}`)))
+          ]) : null
+        ])
+      : null,
+
+    // Milestones
+    diff.milestones.updates.length || diff.milestones.adds.length || diff.milestones.removes.length
+      ? h("div", {}, [
+          h("div", { style: sectionStyle }, `Milestones — +${diff.milestones.adds.length}  ~${diff.milestones.updates.length}  −${diff.milestones.removes.length}`),
+          diff.milestones.adds.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--success); font-weight:600; margin-top:6px;" }, "Adds"),
+            h("ul", { style: itemListStyle }, diff.milestones.adds.map(a => h("li", {}, `+ ${a.date || "?"} — ${a.title}`)))
+          ]) : null,
+          diff.milestones.updates.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--info); font-weight:600; margin-top:6px;" }, "Updates"),
+            h("ul", { style: itemListStyle }, diff.milestones.updates.map(u =>
+              h("li", {}, [
+                h("div", {}, `~ ${u.title}`),
+                ...changeLines(u.changes)
+              ])
+            ))
+          ]) : null,
+          diff.milestones.removes.length ? h("div", {}, [
+            h("div", { style: "font-size:11px; color:var(--danger); font-weight:600; margin-top:6px;" }, "Removes"),
+            h("ul", { style: itemListStyle }, diff.milestones.removes.map(r => h("li", {}, `− ${r.date || "?"} — ${r.title}`)))
+          ]) : null
+        ])
+      : null
+  ].filter(Boolean));
+
+  const footer = [
+    h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel"),
+    totalChanges > 0
+      ? h("button", {
+          class: "btn btn-primary",
+          onclick: async () => {
+            applyImportDiff(diff);
+            await saveState();
+            closeModal();
+            renderShell();
+            toast(`Imported: +${totalAdds} ~${totalUpdates} −${totalRemoves}`, "success");
+          }
+        }, totalRemoves > 0 ? `Apply (deletes ${totalRemoves})` : "Apply changes")
+      : null
+  ].filter(Boolean);
+
+  openModal({
+    title: "Excel import — review changes",
+    body,
+    footer
+  });
+}
+
+/* =========================================================================
+   Google Calendar integration (browser-only OAuth via Google Identity
+   Services + gapi). The user pastes a Client ID + API Key from Google Cloud
+   Console; tokens are session-only (in memory). Two-way sync, user-controlled
+   push. Manual .ics import remains as a fallback.
+
+   ONE-TIME GOOGLE CLOUD SETUP (per project):
+   1. console.cloud.google.com → New Project → "PickTrace Tracker"
+   2. APIs & Services → Library → enable "Google Calendar API"
+   3. OAuth consent screen → External → fill name/email → Scopes:
+      .../auth/calendar.events, .../auth/calendar.readonly,
+      .../auth/userinfo.email → Test users: add the email you'll sign in with.
+   4. Credentials → OAuth client ID → Web application
+      Authorized JavaScript origins: https://trainpt.github.io
+      → copy Client ID
+   5. Credentials → API Key → restrict to Calendar API → copy the key
+   6. Paste both into Settings → Google Calendar → Connection
+   ========================================================================= */
+
+window.GCAL_STATE = {
+  tokenClient: null,
+  accessToken: null,
+  tokenExpiresAt: null,
+  email: null,
+  selectedCalendarId: "primary",
+  calendarsList: [],
+  isReady: false,
+  expiryTimer: null
+};
+
+const GCAL_SCOPES = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/calendar.readonly",
+  "https://www.googleapis.com/auth/userinfo.email"
+].join(" ");
+
+function gcalGetCredentials() {
+  try {
+    const raw = localStorage.getItem("gcal-credentials");
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+function gcalSetCredentials(clientId, apiKey) {
+  localStorage.setItem("gcal-credentials", JSON.stringify({ clientId, apiKey }));
+}
+function gcalHasCredentials() {
+  const c = gcalGetCredentials();
+  return !!(c && c.clientId && c.apiKey);
+}
+function gcalIsConnected() {
+  return !!(window.GCAL_STATE && window.GCAL_STATE.accessToken && window.GCAL_STATE.tokenExpiresAt > Date.now());
+}
+
+async function gcalInit() {
+  const creds = gcalGetCredentials();
+  if (!creds.clientId || !creds.apiKey) return false;
+  if (typeof gapi === "undefined" || typeof google === "undefined" || !google.accounts) {
+    toast("Google libraries still loading — try again in a moment", "warn");
+    return false;
+  }
+  await new Promise((res, rej) => gapi.load("client", { callback: res, onerror: rej }));
+  await gapi.client.init({
+    apiKey: creds.apiKey,
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
+  });
+  GCAL_STATE.tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: creds.clientId,
+    scope: GCAL_SCOPES,
+    callback: handleGcalTokenResponse
+  });
+  GCAL_STATE.isReady = true;
+  return true;
+}
+
+function gcalSignIn() {
+  if (!gcalHasCredentials()) {
+    toast("Add Client ID + API Key in Settings → Google Calendar first", "warn");
+    return;
+  }
+  (async () => {
+    if (!GCAL_STATE.isReady) {
+      const ok = await gcalInit();
+      if (!ok) return;
+    }
+    GCAL_STATE.tokenClient.requestAccessToken({
+      prompt: GCAL_STATE.accessToken ? "" : "consent"
+    });
+  })();
+}
+
+async function handleGcalTokenResponse(resp) {
+  if (resp.error) {
+    toast("Google sign-in failed: " + resp.error, "warn");
+    return;
+  }
+  GCAL_STATE.accessToken = resp.access_token;
+  GCAL_STATE.tokenExpiresAt = Date.now() + (resp.expires_in * 1000);
+  // Friendly nudge ~1 min before expiry.
+  if (GCAL_STATE.expiryTimer) clearTimeout(GCAL_STATE.expiryTimer);
+  GCAL_STATE.expiryTimer = setTimeout(() => {
+    toast("Google Calendar session expiring — re-sync now if you want fresh data", "warn");
+  }, Math.max(0, (resp.expires_in - 60) * 1000));
+  await gcalLoadCalendarList();
+  await gcalLoadUserEmail();
+  renderShell();
+  toast("Connected to Google Calendar", "success");
+}
+
+function gcalSignOut(silent) {
+  if (GCAL_STATE.expiryTimer) { clearTimeout(GCAL_STATE.expiryTimer); GCAL_STATE.expiryTimer = null; }
+  if (GCAL_STATE.accessToken && typeof google !== "undefined" && google.accounts && google.accounts.oauth2) {
+    try { google.accounts.oauth2.revoke(GCAL_STATE.accessToken, () => {}); } catch (e) { /* ignore */ }
+  }
+  GCAL_STATE.accessToken = null;
+  GCAL_STATE.tokenExpiresAt = null;
+  GCAL_STATE.email = null;
+  if (!silent) {
+    renderShell();
+    toast("Signed out of Google Calendar");
+  }
+}
+
+async function gcalLoadCalendarList() {
+  try {
+    const resp = await gapi.client.calendar.calendarList.list();
+    GCAL_STATE.calendarsList = (resp.result.items || []).map(c => ({
+      id: c.id,
+      summary: c.summary,
+      primary: !!c.primary,
+      backgroundColor: c.backgroundColor || null
+    }));
+    const primary = GCAL_STATE.calendarsList.find(c => c.primary);
+    if (primary && (!GCAL_STATE.selectedCalendarId || GCAL_STATE.selectedCalendarId === "primary")) {
+      GCAL_STATE.selectedCalendarId = primary.id;
+    }
+  } catch (e) {
+    console.warn("gcalLoadCalendarList failed:", e);
+  }
+}
+
+async function gcalLoadUserEmail() {
+  try {
+    const r = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+      headers: { Authorization: "Bearer " + GCAL_STATE.accessToken }
+    });
+    if (r.ok) {
+      const j = await r.json();
+      GCAL_STATE.email = j.email || null;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* Wrap any gapi call so a 401 nudges the user to re-auth instead of silently
+   failing. Returns the raw result on success; rethrows non-auth errors. */
+async function gcalCall(fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    const code = (e && (e.status || (e.result && e.result.error && e.result.error.code)));
+    if (code === 401) {
+      toast("Google session expired — please sign in again", "warn");
+      gcalSignOut(true);
+      gcalSignIn();
+    }
+    throw e;
+  }
+}
+
+/* Pull (Calendar → Tracker). Reuses the existing import wizard for parity
+   with manual .ics imports — same selection / dedupe UX. */
+async function gcalPullEvents({ daysAhead = 90, daysBehind = 0 } = {}) {
+  if (!gcalIsConnected()) { toast("Sign in to Google Calendar first", "warn"); return; }
+  const timeMin = new Date(Date.now() - daysBehind * 86400000).toISOString();
+  const timeMax = new Date(Date.now() + daysAhead * 86400000).toISOString();
+
+  const events = [];
+  let pageToken;
+  try {
+    do {
+      const resp = await gcalCall(() => gapi.client.calendar.events.list({
+        calendarId: GCAL_STATE.selectedCalendarId,
+        timeMin, timeMax,
+        singleEvents: true,    // expand recurring into instances
+        orderBy: "startTime",
+        maxResults: 250,
+        pageToken
+      }));
+      events.push(...(resp.result.items || []));
+      pageToken = resp.result.nextPageToken;
+    } while (pageToken);
+  } catch (e) {
+    toast("Network error pulling events — try again", "warn");
+    return;
+  }
+
+  const ourSource = "wonderful-picktrace-tracker";
+  const rows = events
+    .filter(ev => ev.status !== "cancelled")
+    // Skip events we ourselves pushed — extendedProperties round-trip prevents dupes
+    .filter(ev => {
+      const ext = ev.extendedProperties && ev.extendedProperties.private;
+      if (!ext || ext.ptTrackerSource !== ourSource) return true;
+      // Re-importing is fine if the matching local milestone is gone
+      return !((STATE.__milestones || []).some(m => m.googleEventId === ev.id));
+    })
+    .map(googleEventToRow)
+    .filter(Boolean);
+
+  if (rows.length === 0) {
+    toast("No new events in the selected window", "warn");
+    return;
+  }
+  recomputeImportDuplicates(rows, false);
+  openImportWizard(rows, { source: "google-api", calendarId: GCAL_STATE.selectedCalendarId });
+}
+
+/* Convert a Google Calendar v3 event (JSON) into the import-wizard row shape.
+   Parallel to icsEventToRow — same output keys so the wizard works identically. */
+function googleEventToRow(ev) {
+  const start = ev.start || {};
+  const end   = ev.end   || {};
+  const allDay = !!start.date;
+  let date, dateEnd = "", time = "", endTime = "";
+
+  if (allDay) {
+    date = start.date;
+    if (end.date) {
+      // Google end is exclusive; store inclusive end (= end.date − 1 day)
+      const e = new Date(end.date + "T00:00:00");
+      e.setDate(e.getDate() - 1);
+      const inc = ymd(e);
+      if (inc > date) dateEnd = inc;
+    }
+  } else if (start.dateTime) {
+    const sd = new Date(start.dateTime);
+    date = ymd(sd);
+    time = String(sd.getHours()).padStart(2, "0") + ":" + String(sd.getMinutes()).padStart(2, "0");
+    if (end.dateTime) {
+      const ed = new Date(end.dateTime);
+      endTime = String(ed.getHours()).padStart(2, "0") + ":" + String(ed.getMinutes()).padStart(2, "0");
+      const endDateStr = ymd(ed);
+      if (endDateStr > date) dateEnd = endDateStr;
+    }
+  } else {
+    return null;
+  }
+
+  // Strip HTML tags Google JSON descriptions sometimes carry, then run our
+  // existing ICS-style cleaner so Meet boilerplate / round-trip notes get tidied.
+  let rawDesc = ev.description || "";
+  rawDesc = rawDesc.replace(/<\/?[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+  const notes = (typeof cleanIcsDescription === "function") ? cleanIcsDescription(rawDesc) : rawDesc.trim();
+
+  const title = (ev.summary || "").trim() || "Untitled Event";
+  const signals = {
+    allDay,
+    multiDay: !!dateEnd,
+    busystatus: "",
+    transp: ev.transparency || ""
+  };
+  const type = (typeof autoCategorizeType === "function") ? autoCategorizeType(title, signals) : "milestone";
+
+  return {
+    uid: ev.id || (date + "|" + title),
+    googleEventId: ev.id || "",
+    date,
+    dateEnd,
+    time,
+    endTime,
+    allDay,
+    title,
+    type,
+    notes,
+    rawNotes: rawDesc,
+    status: "scheduled",
+    selected: true,
+    isDuplicate: false,
+    showRaw: false,
+    expanded: false,
+    _deleted: false
+  };
+}
+
+function addMinutesToTime(hhmm, mins) {
+  const [h, m] = (hhmm || "09:00").split(":").map(n => parseInt(n, 10) || 0);
+  const total = h * 60 + m + mins;
+  const h2 = Math.floor((total + 24 * 60) / 60) % 24;
+  const m2 = ((total % 60) + 60) % 60;
+  return String(h2).padStart(2, "0") + ":" + String(m2).padStart(2, "0");
+}
+
+function milestoneToGoogleEvent(m) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles";
+  const isAllDay = !m.time;
+  const ev = {
+    summary: m.title || "Untitled",
+    description: m.notes || "",
+    extendedProperties: {
+      private: {
+        ptTrackerSource: "wonderful-picktrace-tracker",
+        ptTrackerType:   "milestone",
+        ptTrackerLocalId: String(m.localId || "")
+      }
+    }
+  };
+  if (isAllDay) {
+    const startStr = m.date;
+    const endInclusive = m.dateEnd || m.date;
+    const endD = new Date(endInclusive + "T00:00:00");
+    endD.setDate(endD.getDate() + 1); // Google end is exclusive
+    ev.start = { date: startStr };
+    ev.end   = { date: ymd(endD) };
+  } else {
+    const startTime = m.time;
+    const endTime = m.endTime || addMinutesToTime(startTime, 60);
+    ev.start = { dateTime: `${m.date}T${startTime}:00`, timeZone: tz };
+    ev.end   = { dateTime: `${m.date}T${endTime}:00`,   timeZone: tz };
+  }
+  return ev;
+}
+
+function taskToGoogleEvent(t, s) {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles";
+  const startDate = s.startDate || s.dueDate;
+  const endDate = s.dueDate || s.startDate;
+  if (!startDate || !endDate) return null;
+  const ev = {
+    summary: getTitle(t, s) + (s.urgent ? " [URGENT]" : ""),
+    description: [
+      getDesc(t, s),
+      s.notes ? "Notes: " + s.notes : "",
+      s.owner ? "Owner: " + s.owner : ""
+    ].filter(Boolean).join("\n\n"),
+    extendedProperties: {
+      private: {
+        ptTrackerSource: "wonderful-picktrace-tracker",
+        ptTrackerType:   "task",
+        ptTrackerLocalId: t.id
+      }
+    }
+  };
+  if (s.startTime || s.endTime) {
+    ev.start = { dateTime: `${startDate}T${s.startTime || "09:00"}:00`, timeZone: tz };
+    ev.end   = { dateTime: `${endDate}T${s.endTime || addMinutesToTime(s.startTime || "09:00", 60)}:00`, timeZone: tz };
+  } else {
+    const endD = new Date(endDate + "T00:00:00");
+    endD.setDate(endD.getDate() + 1); // exclusive
+    ev.start = { date: startDate };
+    ev.end   = { date: ymd(endD) };
+  }
+  return ev;
+}
+
+async function gcalPushMilestone(milestone) {
+  if (!gcalIsConnected()) { toast("Sign in to Google Calendar first", "warn"); return; }
+  const body = milestoneToGoogleEvent(milestone);
+  try {
+    let resp;
+    if (milestone.googleEventId) {
+      resp = await gcalCall(() => gapi.client.calendar.events.update({
+        calendarId: milestone.googleCalendarId || GCAL_STATE.selectedCalendarId,
+        eventId:    milestone.googleEventId,
+        resource:   body
+      }));
+    } else {
+      resp = await gcalCall(() => gapi.client.calendar.events.insert({
+        calendarId: GCAL_STATE.selectedCalendarId,
+        resource:   body
+      }));
+      milestone.googleEventId    = resp.result.id;
+      milestone.googleCalendarId = GCAL_STATE.selectedCalendarId;
+    }
+    milestone.googlePushedAt = new Date().toISOString();
+    await saveState();
+    renderShell();
+    toast("Pushed to Google Calendar", "success");
+  } catch (e) {
+    console.error(e);
+    toast("Push failed: " + ((e.result && e.result.error && e.result.error.message) || e.message || e), "warn");
+  }
+}
+
+async function gcalDetachMilestone(milestone) {
+  if (!milestone.googleEventId) return;
+  if (!confirm("Delete this event from Google Calendar? The local entry will stay.")) return;
+  try {
+    await gcalCall(() => gapi.client.calendar.events.delete({
+      calendarId: milestone.googleCalendarId || GCAL_STATE.selectedCalendarId,
+      eventId:    milestone.googleEventId
+    }));
+  } catch (e) {
+    // 404/410 — already gone server-side, treat as success
+    const code = (e && (e.status || (e.result && e.result.error && e.result.error.code)));
+    if (code !== 404 && code !== 410) {
+      toast("Could not delete remote event", "warn");
+      return;
+    }
+  }
+  milestone.googleEventId    = "";
+  milestone.googleCalendarId = "";
+  milestone.googlePushedAt   = "";
+  await saveState();
+  renderShell();
+  toast("Removed from Google Calendar");
+}
+
+async function gcalPushTask(t, s) {
+  if (!gcalIsConnected()) { toast("Sign in to Google Calendar first", "warn"); return; }
+  const body = taskToGoogleEvent(t, s);
+  if (!body) { toast("Task has no start/due date — skipped", "warn"); return; }
+  try {
+    let resp;
+    if (s.googleEventId) {
+      resp = await gcalCall(() => gapi.client.calendar.events.update({
+        calendarId: s.googleCalendarId || GCAL_STATE.selectedCalendarId,
+        eventId:    s.googleEventId,
+        resource:   body
+      }));
+    } else {
+      resp = await gcalCall(() => gapi.client.calendar.events.insert({
+        calendarId: GCAL_STATE.selectedCalendarId,
+        resource:   body
+      }));
+      s.googleEventId    = resp.result.id;
+      s.googleCalendarId = GCAL_STATE.selectedCalendarId;
+    }
+    s.googlePushedAt = new Date().toISOString();
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+/* Bulk push picker — modal listing milestones + tasks. User checks items, hits
+   "Push N items". Sequential push (per-second rate limit forgives sequential
+   calls; parallel triggers Google's quota guards). */
+function openGCalPushPicker() {
+  if (!gcalIsConnected()) { toast("Sign in to Google Calendar first", "warn"); return; }
+
+  const milestones = (STATE.__milestones || []).slice().sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const taskRows = [];
+  PHASES.forEach(p => p.groups.forEach(g => g.tasks.forEach(t => {
+    const s = STATE[t.id];
+    if (!s || !passesArchiveFilter(s)) return;
+    if (!s.dueDate && !s.startDate) return;
+    taskRows.push({ t, s });
+  })));
+  // Pre-select milestones that have never been pushed; pre-select tasks that are urgent or high priority
+  const msSelected = new Set(milestones.filter(m => !m.googlePushedAt).map(m => m.localId));
+  const taskSelected = new Set(taskRows.filter(({ s }) => s.urgent || s.priority === "priority").map(({ t }) => t.id));
+
+  let activeTab = "milestones";
+
+  function renderTab(tab) {
+    activeTab = tab;
+    $("#gcal-pp-ms").style.display = tab === "milestones" ? "block" : "none";
+    $("#gcal-pp-tasks").style.display = tab === "tasks" ? "block" : "none";
+    $("#gcal-pp-tab-ms").classList.toggle("is-active", tab === "milestones");
+    $("#gcal-pp-tab-tasks").classList.toggle("is-active", tab === "tasks");
+    updateFooter();
+  }
+  function updateFooter() {
+    const n = msSelected.size + taskSelected.size;
+    const btn = $("#gcal-pp-apply");
+    if (btn) btn.textContent = n > 0 ? `Push ${n} item${n === 1 ? "" : "s"}` : "Push";
+    if (btn) btn.disabled = n === 0;
+  }
+
+  // Group milestones by month for skim-ability
+  const byMonth = {};
+  milestones.forEach(m => {
+    const key = (m.date || "").slice(0, 7) || "(undated)";
+    (byMonth[key] = byMonth[key] || []).push(m);
+  });
+  const monthKeys = Object.keys(byMonth).sort();
+
+  const msList = h("div", { id: "gcal-pp-ms", style: "display:block; max-height:50vh; overflow-y:auto;" }, monthKeys.map(mk => {
+    const items = byMonth[mk];
+    return h("div", { style: "margin-bottom:14px;" }, [
+      h("div", { style: "font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;" },
+        mk === "(undated)" ? "Undated" : new Date(mk + "-01T00:00:00").toLocaleString("en", { month: "long", year: "numeric" })),
+      ...items.map(m => {
+        const id = `gcal-pp-ms-${m.localId}`;
+        const wasPushed = !!m.googlePushedAt;
+        return h("label", { class: "gcal-pp-row", style: "display:flex; align-items:center; gap:10px; padding:6px 4px; cursor:pointer; border-radius:var(--radius-sm);" }, [
+          h("input", { type: "checkbox", id, checked: msSelected.has(m.localId), onchange: (e) => {
+            if (e.target.checked) msSelected.add(m.localId); else msSelected.delete(m.localId);
+            updateFooter();
+          } }),
+          h("span", { style: "font-size:12px; color:var(--ink-3); min-width:78px; font-variant-numeric: tabular-nums;" }, m.date || "?"),
+          h("span", { style: "flex:1; font-size:13px; color:var(--ink);" }, m.title || "Untitled"),
+          wasPushed
+            ? h("span", { style: "font-size:10px; padding:2px 8px; border-radius:var(--radius-pill); background:var(--success-soft); color:var(--success); font-weight:600;" }, "already pushed")
+            : null
+        ].filter(Boolean));
+      })
+    ]);
+  }));
+
+  const tasksList = h("div", { id: "gcal-pp-tasks", style: "display:none; max-height:50vh; overflow-y:auto;" }, taskRows.length === 0
+    ? [h("div", { style: "padding:14px; color:var(--ink-3); font-size:12px; font-style:italic;" }, "No tasks with dates set. Add a startDate or dueDate first.")]
+    : taskRows.map(({ t, s }) => {
+        const wasPushed = !!s.googlePushedAt;
+        return h("label", { class: "gcal-pp-row", style: "display:flex; align-items:center; gap:10px; padding:6px 4px; cursor:pointer; border-radius:var(--radius-sm);" }, [
+          h("input", { type: "checkbox", checked: taskSelected.has(t.id), onchange: (e) => {
+            if (e.target.checked) taskSelected.add(t.id); else taskSelected.delete(t.id);
+            updateFooter();
+          } }),
+          h("span", { style: "font-size:12px; color:var(--ink-3); min-width:78px; font-variant-numeric: tabular-nums;" }, s.dueDate || s.startDate),
+          h("span", { style: "flex:1; font-size:13px; color:var(--ink);" }, getTitle(t, s)),
+          s.urgent ? h("span", { style: "font-size:10px; padding:2px 8px; border-radius:var(--radius-pill); background:var(--danger-soft); color:var(--danger); font-weight:600;" }, "urgent") : null,
+          wasPushed ? h("span", { style: "font-size:10px; padding:2px 8px; border-radius:var(--radius-pill); background:var(--success-soft); color:var(--success); font-weight:600;" }, "already pushed") : null
+        ].filter(Boolean));
+      })
+  );
+
+  const tabsRow = h("div", { style: "display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:14px;" }, [
+    h("button", { id: "gcal-pp-tab-ms", class: "view-tab is-active", onclick: () => renderTab("milestones") },
+      `Milestones (${milestones.length})`),
+    h("button", { id: "gcal-pp-tab-tasks", class: "view-tab", onclick: () => renderTab("tasks") },
+      `Tasks (${taskRows.length})`)
+  ]);
+
+  const calendarLabel = (GCAL_STATE.calendarsList.find(c => c.id === GCAL_STATE.selectedCalendarId) || {}).summary || GCAL_STATE.selectedCalendarId;
+  const body = h("div", {}, [
+    h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:14px;" },
+      `Pushing to: `, h("b", { style: "color:var(--ink);" }, calendarLabel)),
+    tabsRow,
+    msList,
+    tasksList
+  ]);
+
+  const footer = [
+    h("button", { class: "btn btn-outline", onclick: closeModal }, "Cancel"),
+    h("button", { id: "gcal-pp-apply", class: "btn btn-primary", onclick: async () => {
+      const msIds = Array.from(msSelected);
+      const taskIds = Array.from(taskSelected);
+      const total = msIds.length + taskIds.length;
+      if (total === 0) return;
+      let done = 0; let failed = 0;
+      const progressToast = (n) => toast(`Pushing ${n}/${total}...`, "");
+      for (const id of msIds) {
+        const m = (STATE.__milestones || []).find(m => m.localId === id);
+        if (!m) continue;
+        try { await gcalPushMilestone(m); done++; }
+        catch (e) { failed++; }
+        progressToast(done + failed);
+      }
+      for (const id of taskIds) {
+        const t = TASK_INDEX[id];
+        const s = STATE[id];
+        if (!t || !s) continue;
+        try { await gcalPushTask(t, s); done++; }
+        catch (e) { failed++; }
+        progressToast(done + failed);
+      }
+      await saveState();
+      closeModal();
+      renderShell();
+      if (failed === 0) toast(`Pushed ${done} item${done === 1 ? "" : "s"} to Google Calendar`, "success");
+      else toast(`Pushed ${done} of ${total} (${failed} failed — check the console)`, "warn");
+    } }, "Push")
+  ];
+
+  openModal({
+    title: "Push items to Google Calendar",
+    body,
+    footer
+  });
+  setTimeout(updateFooter, 0);
 }
 
 function downloadBlob(blob, filename) {
@@ -12251,32 +14432,6 @@ const MILESTONE_TYPE_META = [
   { key: "routine",   label: "Routine",       cls: "is-routine" }
 ];
 const MILESTONE_TYPE_CLS = Object.fromEntries(MILESTONE_TYPE_META.map(m => [m.key, m.cls]));
-
-/* ---- Settings utility: re-run autoCategorizeType on every stored milestone
-   based on its current title. Useful to retroactively tag imports that
-   predated auto-categorization with their correct type (ooo/focus/lunch/etc). */
-async function recategorizeMilestones() {
-  const list = STATE.__milestones || [];
-  let changed = 0;
-  const before = {};
-  for (const m of list) {
-    const newType = autoCategorizeType(m.title, {
-      allDay: !m.time && !m.endTime,
-      multiDay: !!m.dateEnd,
-      busystatus: "",
-      transp: ""
-    });
-    if (newType !== m.type) {
-      before[m.type || "(none)"] = (before[m.type || "(none)"] || 0) + 1;
-      m.type = newType;
-      changed++;
-    }
-  }
-  if (!changed) { toast("All milestones already categorized", "warn"); return; }
-  await saveState();
-  renderShell();
-  toast(`Re-categorized ${changed} milestone${changed === 1 ? "" : "s"}`, "success");
-}
 
 /* ---- Settings utility: delete any existing milestones whose title matches
    the routine patterns. Confirms first, reports count. */
@@ -13815,7 +15970,7 @@ function renderDashboardBody(host, m, filter) {
     })(),
     h("div", { class: "dash-chart-legend" }, [
       h("span", {}, [h("i", { style: "background:var(--leaf)" }), "Complete"]),
-      h("span", {}, [h("i", { style: "background:var(--citrus)" }), "In progress"]),
+      h("span", {}, [h("i", { style: "background:var(--info)" }), "In progress"]),
       h("span", {}, [h("i", { style: "background:var(--danger)" }), "Blocked"]),
       h("span", {}, [h("i", { style: "background:var(--line-2)" }), "Not started"])
     ])
@@ -14220,6 +16375,113 @@ function closeModal() {
   overlay.innerHTML = "";
 }
 
+/* The Google Calendar settings panel — credentials inputs, connection status,
+   calendar selector, pull/push action buttons. Re-renders by re-opening Settings. */
+function renderGCalSettingsSection() {
+  const creds = gcalGetCredentials();
+  const hasCreds = !!(creds.clientId && creds.apiKey);
+  const connected = gcalIsConnected();
+  const minutesLeft = connected ? Math.max(0, Math.round((GCAL_STATE.tokenExpiresAt - Date.now()) / 60000)) : 0;
+  const calendars = GCAL_STATE.calendarsList || [];
+
+  const setupHelp = h("details", { style: "margin-bottom:12px;" }, [
+    h("summary", { style: "cursor:pointer; font-size:11px; color:var(--muted); user-select:none;" },
+      "One-time Google Cloud setup — click for steps"),
+    h("ol", { style: "font-size:12px; color:var(--ink-3); line-height:1.55; padding-left:18px; margin:8px 0 0;" }, [
+      h("li", {}, "Open ", h("a", { href: "https://console.cloud.google.com", target: "_blank", rel: "noopener" }, "console.cloud.google.com"), " → New Project (e.g. \"PickTrace Tracker\")."),
+      h("li", {}, "APIs & Services → Library → enable ", h("b", {}, "Google Calendar API"), "."),
+      h("li", {}, "OAuth consent screen → User Type ", h("b", {}, "External"), " → fill in app name + support email + developer email. Scopes: add ", h("code", {}, ".../auth/calendar.events"), ", ", h("code", {}, ".../auth/calendar.readonly"), ", ", h("code", {}, ".../auth/userinfo.email"), ". Test users: add the email you'll sign in with."),
+      h("li", {}, "Credentials → Create Credentials → OAuth client ID → Application type ", h("b", {}, "Web application"), ". Authorized JavaScript origins: ", h("code", {}, "https://trainpt.github.io"), " (or your local-dev URL). Copy the ", h("b", {}, "Client ID"), "."),
+      h("li", {}, "Credentials → Create Credentials → API Key. Restrict it to Calendar API. Copy the ", h("b", {}, "API Key"), "."),
+      h("li", {}, "Paste both below and click Save.")
+    ])
+  ]);
+
+  const credsBlock = h("div", { style: "padding:10px 12px; background:var(--bg-2); border-radius:var(--radius-sm); margin-bottom:14px;" }, [
+    h("div", { style: "font-size:11px; font-weight:600; color:var(--ink-2); margin-bottom:8px;" }, "Credentials"),
+    h("div", { style: "font-size:11px; color:var(--ink-3); margin-bottom:10px;" },
+      "Stored only on this browser. Anyone using this device with the tracker can use them."),
+    h("label", { class: "field-label", style: "font-size:11px;" }, "Client ID"),
+    h("input", { class: "field-input", id: "gcal-client-id", type: "text", value: creds.clientId || "", placeholder: "xxxxxxxx.apps.googleusercontent.com", style: "width:100%; margin-bottom:8px;" }),
+    h("label", { class: "field-label", style: "font-size:11px;" }, "API Key"),
+    h("input", { class: "field-input", id: "gcal-api-key", type: "text", value: creds.apiKey || "", placeholder: "AIza...", style: "width:100%; margin-bottom:10px;" }),
+    h("button", { class: "btn btn-primary", onclick: () => {
+      const cid = ($("#gcal-client-id") && $("#gcal-client-id").value || "").trim();
+      const key = ($("#gcal-api-key")   && $("#gcal-api-key").value   || "").trim();
+      if (!cid || !key) { toast("Both Client ID and API Key are required", "warn"); return; }
+      gcalSetCredentials(cid, key);
+      // Force re-init on next sign-in so the new creds take effect
+      GCAL_STATE.isReady = false;
+      GCAL_STATE.tokenClient = null;
+      toast("Saved", "success");
+      closeModal();
+      openSettings();
+    } }, "Save credentials"),
+    h("button", { class: "btn btn-outline", style: "margin-left:8px;", onclick: () => {
+      localStorage.removeItem("gcal-credentials");
+      gcalSignOut(true);
+      toast("Credentials cleared");
+      closeModal();
+      openSettings();
+    } }, "Clear")
+  ]);
+
+  const statusBlock = h("div", { style: "padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:14px; " + (connected ? "background:var(--success-soft);" : "background:var(--bg-2);") }, [
+    h("div", { style: "display:flex; align-items:center; gap:8px; flex-wrap:wrap;" }, [
+      h("span", { style: "font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:" + (connected ? "var(--success)" : "var(--ink-3)") + ";" },
+        connected ? "Connected" : "Not connected"),
+      connected
+        ? h("span", { style: "font-size:11px; color:var(--ink-3);" }, GCAL_STATE.email || "(signed in)")
+        : null,
+      connected
+        ? h("span", { style: "font-size:11px; color:var(--muted); margin-left:auto;" }, "Session expires in " + minutesLeft + " min")
+        : null
+    ]),
+    !connected
+      ? h("div", { style: "margin-top:10px;" }, [
+          h("button", {
+            class: "btn btn-primary",
+            disabled: !hasCreds,
+            title: hasCreds ? "Sign in to your Google account" : "Add Client ID + API Key in settings first",
+            style: hasCreds ? "" : "opacity:0.5; cursor:not-allowed;",
+            onclick: () => { if (hasCreds) gcalSignIn(); }
+          }, "Connect Google Calendar")
+        ])
+      : null
+  ]);
+
+  let connectedActions = null;
+  if (connected) {
+    const calendarSelect = h("select", {
+      class: "field-input",
+      style: "max-width:340px;",
+      onchange: (e) => { GCAL_STATE.selectedCalendarId = e.target.value; }
+    }, calendars.map(c => h("option", {
+      value: c.id,
+      selected: c.id === GCAL_STATE.selectedCalendarId
+    }, (c.primary ? "Primary — " : "") + c.summary)));
+
+    connectedActions = h("div", { style: "padding:10px 12px; background:var(--bg-2); border-radius:var(--radius-sm); margin-bottom:14px;" }, [
+      h("div", { style: "font-size:11px; font-weight:600; color:var(--ink-2); margin-bottom:8px;" }, "Calendar"),
+      calendarSelect,
+      h("div", { style: "display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;" }, [
+        h("button", { class: "btn btn-primary", onclick: () => gcalPullEvents({ daysAhead: 90 }), html: ICONS.download + "<span>Pull events from Google</span>" }),
+        h("button", { class: "btn btn-primary", onclick: openGCalPushPicker, html: ICONS.upload + "<span>Push items to Google…</span>" }),
+        h("button", { class: "btn btn-outline", onclick: () => gcalSignOut(), html: ICONS.x + "<span>Sign out</span>" })
+      ])
+    ]);
+  }
+
+  return h("div", {}, [
+    h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" },
+      "Two-way sync with Google Calendar. Browser-only OAuth — tokens live in memory for this session and are cleared when you sign out or reload."),
+    setupHelp,
+    credsBlock,
+    statusBlock,
+    connectedActions
+  ].filter(Boolean));
+}
+
 function openSettings() {
   const lockCfg = getLockConfig();
   const archCounts = (() => {
@@ -14304,30 +16566,36 @@ function openSettings() {
       })()
     ]),
     h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
-      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Google Calendar"),
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Excel round-trip"),
       h("div", { style: "font-size:12px; color:var(--ink-3); margin-bottom:10px;" },
-        "Import events from a Google Calendar export (.ics). Events are added as calendar milestones. Recurring events and duplicates are skipped automatically."),
+        "Export the full tracker as a multi-sheet .xlsx workbook (dashboard, planner, milestones, bugs). Edit it in Excel/Sheets, then re-import to push your changes back. Hidden Task/Bug/Milestone ID columns let the importer match rows; rows you add or remove in Excel show up in a diff preview before anything is written."),
       h("div", { style: "font-size:11px; color:var(--muted); margin-bottom:10px;" },
-        "To export from Google Calendar: Settings → Import & Export → Export, then select the calendar and download the .ics file."),
-      h("button", {
-        class: "btn btn-outline",
-        onclick: () => $("#gcal-import-file").click(),
-        html: ICONS.cal + "<span>Import Google Calendar (.ics)</span>"
-      }),
-      h("button", {
-        class: "btn btn-outline",
-        style: "margin-left: 8px;",
-        onclick: removeRoutineMilestones,
-        title: "Delete existing milestones whose title matches Sprint Kick Off, All Hands, Focus time, or Lunch",
-        html: ICONS.x + "<span>Remove routine events from tracker</span>"
-      }),
-      h("button", {
-        class: "btn btn-outline",
-        style: "margin-left: 8px;",
-        onclick: recategorizeMilestones,
-        title: "Re-run the OOO / Focus / Lunch / Routine auto-categorizer on every stored milestone based on its title",
-        html: ICONS.cal + "<span>Re-categorize milestones</span>"
-      })
+        "Heads-up: removing a row in Excel will delete the matching item from the tracker on import. Always keep a JSON backup before re-importing."),
+      h("div", { style: "display:flex; gap:8px; flex-wrap: wrap;" }, [
+        h("button", { class: "btn btn-outline", onclick: exportXLSX, title: "Download a multi-sheet workbook of the entire tracker", html: ICONS.download + "<span>Export Excel (.xlsx)</span>" }),
+        h("button", { class: "btn btn-outline", onclick: importXLSX, title: "Re-import an edited Excel export — review changes before applying", html: ICONS.upload + "<span>Import Excel (.xlsx)</span>" })
+      ])
+    ]),
+    h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
+      h("div", { style: "font-weight:600; color:var(--ink); margin-bottom:6px;" }, "Google Calendar"),
+      renderGCalSettingsSection(),
+      h("div", { style: "padding-top:12px; margin-top:12px; border-top:1px dashed var(--line);" }, [
+        h("div", { style: "font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;" }, "Manual import (fallback)"),
+        h("div", { style: "font-size:11px; color:var(--ink-3); margin-bottom:10px;" },
+          "If the live integration isn't set up, you can still import events from a Google Calendar export (.ics)."),
+        h("button", {
+          class: "btn btn-outline",
+          onclick: () => $("#gcal-import-file").click(),
+          html: ICONS.cal + "<span>Import Google Calendar (.ics)</span>"
+        }),
+        h("button", {
+          class: "btn btn-outline",
+          style: "margin-left: 8px;",
+          onclick: removeRoutineMilestones,
+          title: "Delete existing milestones whose title matches Sprint Kick Off, All Hands, Focus time, or Lunch",
+          html: ICONS.x + "<span>Remove routine events from tracker</span>"
+        })
+      ])
     ]),
     h("div", { style: "padding:14px 0; border-top:1px solid var(--line);" }, [
       h("div", { style: "font-weight:600; color:var(--danger); margin-bottom:6px;" }, "Danger zone"),
@@ -14414,6 +16682,11 @@ async function resetAll() {
   localStorage.removeItem(UI_KEY);
   localStorage.removeItem(LOCK_KEY);
   localStorage.removeItem(BACKUP_KEY);
+  // Wipe Google Calendar credentials too — they're part of the per-browser footprint.
+  localStorage.removeItem("gcal-credentials");
+  if (typeof gcalSignOut === "function" && window.GCAL_STATE && window.GCAL_STATE.accessToken) {
+    try { gcalSignOut(true); } catch (e) { /* ignore */ }
+  }
   PASSPHRASE = null;
   STATE = hydrateState({});
   UI = defaultUI();

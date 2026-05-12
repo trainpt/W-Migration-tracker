@@ -1,5 +1,6 @@
-# Local-only folders — imports, exports, reference material.
+# Local-only folders — imports, exports, reference material, spec docs.
 # Not meant to live in the repo.
+_local/
 Calendar/
 Data/
 Data_old/
